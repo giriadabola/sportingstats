@@ -535,8 +535,7 @@ button.update-button:hover {
 
 
 /* Styles for Relevant/Live Games Display */
-/* Use #relevantGamesSection or #liveGamesSection depending on your HTML ID choice */
-#relevantGamesSection { /* Or #liveGamesSection */
+#relevantGamesSection {
     background-color: #f0f3f5;
     padding: 20px;
     border-radius: 8px;
@@ -544,7 +543,7 @@ button.update-button:hover {
     box-shadow: 0 3px 6px rgba(0,0,0,0.07);
 }
 
-#relevantGamesSection h3 { /* Or #liveGamesSection h3 */
+#relevantGamesSection h3 {
     margin-top: 0;
     margin-bottom: 18px;
     color: #0069d9;
@@ -555,7 +554,7 @@ button.update-button:hover {
     padding-bottom: 12px;
 }
 
-.live-game-list { /* This class name is used by relevantGamesListDisplay or liveGamesListDisplay */
+.live-game-list {
     display: flex;
     flex-direction: column;
     gap: 12px;
@@ -581,8 +580,8 @@ button.update-button:hover {
     display: flex;
     align-items: center;
     gap: 10px; 
-    flex-basis: 40%; /* Ajustado para dar espaço ao botão */
-    min-width: 0; /* Para permitir que flex-basis funcione com text-overflow */
+    flex-basis: 40%; 
+    min-width: 0; 
 }
 .live-game-item .team-info.home-team { 
     justify-content: flex-start;
@@ -599,7 +598,7 @@ button.update-button:hover {
     border-radius: 50%;
     border: 1px solid #eee;
     background-color: #f8f9fa;
-    flex-shrink: 0; /* Para não encolher o logo */
+    flex-shrink: 0; 
 }
 
 .live-game-item .team-info span {
@@ -609,25 +608,25 @@ button.update-button:hover {
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-    flex-grow: 1; /* Para ocupar espaço disponível e permitir ellipsis */
+    flex-grow: 1; 
 }
 
 .live-game-item .game-details {
     font-weight: bold;
     color: #dc3545; 
     font-size: 1em;
-    flex-basis: auto; /* Deixa o conteúdo central ditar sua largura */
-    flex-shrink: 0; /* Para não ser esmagado */
+    flex-basis: auto; 
+    flex-shrink: 0; 
     padding: 0 10px;
     text-align: center;
 }
 .live-game-item .game-details .score {
     font-size: 1.1em;
 }
-.live-game-item .game-details .live-indicator { /* Renomeado de .live-indicator para ser mais genérico */
+.live-game-item .game-details .live-indicator { 
     display: block;
     font-size: 0.8em;
-    color: #c82333; /* Pode variar a cor baseada no status se quiser */
+    color: #c82333; 
     font-weight: normal;
 }
 .live-game-item .game-details .jornada-info {
@@ -647,8 +646,8 @@ button.update-button:hover {
     border-radius: 4px;
     cursor: pointer;
     transition: background-color 0.2s ease;
-    margin-left: 10px; /* Espaço para separar do time visitante */
-    flex-shrink: 0; /* Para não ser esmagado */
+    margin-left: 10px; 
+    flex-shrink: 0; 
 }
 
 .live-game-item .edit-game-btn:hover {
@@ -664,6 +663,32 @@ button.update-button:hover {
     border: 1px dashed #ced4da;
     border-radius: 6px;
 }
+
+/* Styles for Tipo de Golo Radio Buttons */
+.radio-group-inline {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 20px; 
+    flex-wrap: wrap; 
+}
+.radio-group-inline > div {
+    display: flex;
+    align-items: center;
+}
+.radio-group-inline input[type="radio"] {
+    margin-right: 6px;
+    vertical-align: middle;
+    width: auto; 
+    height: auto; 
+}
+.radio-group-inline label {
+    margin-bottom: 0; 
+    font-weight: normal; 
+    font-size: 1em; 
+    color: #343a40; 
+}
+
     </style>
 </head>
 <body>
@@ -1025,6 +1050,25 @@ button.update-button:hover {
                     <input type="text" id="goalDetailAssistencia" autocomplete="off" placeholder="Pesquisar jogador...">
                     <div id="goalDetailAssistenciaSuggestions" class="suggestions-container" style="display: none;"></div>
                 </div>
+
+                <!-- NOVA SECÇÃO TIPO DE GOLO (CRIAR JOGO) -->
+                <div id="goalDetailTipoGoloSection" style="margin-top:15px;">
+                    <label>Tipo de Golo:</label>
+                    <div class="radio-group-inline">
+                        <div>
+                            <input type="radio" id="tipoGoloNormalCreate" name="tipoGoloCreate" value="Normal" checked>
+                            <label for="tipoGoloNormalCreate">Normal</label>
+                        </div>
+                        <div>
+                            <input type="radio" id="tipoGoloAutoCreate" name="tipoGoloCreate" value="AutoGolo">
+                            <label for="tipoGoloAutoCreate">AutoGolo</label>
+                        </div>
+                        <div>
+                            <input type="radio" id="tipoGoloPenaltyCreate" name="tipoGoloCreate" value="Penalty">
+                            <label for="tipoGoloPenaltyCreate">Penalty</label>
+                        </div>
+                    </div>
+                </div>
                 <button type="button" id="saveGoalDetailBtn" class="action-button" style="margin-top:20px;">Guardar Detalhes</button>
             </form>
         </div>
@@ -1055,6 +1099,25 @@ button.update-button:hover {
                     <label for="editGoalDetailAssistencia">Assistência (Jogador do Sporting):</label>
                     <input type="text" id="editGoalDetailAssistencia" autocomplete="off" placeholder="Pesquisar jogador...">
                     <div id="editGoalDetailAssistenciaSuggestions" class="suggestions-container" style="display: none;"></div>
+                </div>
+
+                <!-- NOVA SECÇÃO TIPO DE GOLO (EDITAR JOGO) -->
+                <div id="editGoalDetailTipoGoloSection" style="margin-top:15px;">
+                    <label>Tipo de Golo:</label>
+                    <div class="radio-group-inline">
+                        <div>
+                            <input type="radio" id="tipoGoloNormalEdit" name="tipoGoloEdit" value="Normal" checked>
+                            <label for="tipoGoloNormalEdit">Normal</label>
+                        </div>
+                        <div>
+                            <input type="radio" id="tipoGoloAutoEdit" name="tipoGoloEdit" value="AutoGolo">
+                            <label for="tipoGoloAutoEdit">AutoGolo</label>
+                        </div>
+                        <div>
+                            <input type="radio" id="tipoGoloPenaltyEdit" name="tipoGoloEdit" value="Penalty">
+                            <label for="tipoGoloPenaltyEdit">Penalty</label>
+                        </div>
+                    </div>
                 </div>
                 <button type="button" id="editSaveGoalDetailBtn" class="action-button" style="margin-top:20px;">Guardar Detalhes</button>
             </form>
@@ -1196,7 +1259,6 @@ button.update-button:hover {
         const editGoalDetailAssistenciaInput = document.getElementById('editGoalDetailAssistencia');
         const editGoalDetailAssistenciaSuggestions = document.getElementById('editGoalDetailAssistenciaSuggestions');
         const editSaveGoalDetailBtn = document.getElementById('editSaveGoalDetailBtn');
-        // Relevant Games Display (Edit Tab) - Make sure these IDs match your HTML
         const relevantGamesSection = document.getElementById('relevantGamesSection'); 
         const relevantGamesListDisplay = document.getElementById('relevantGamesListDisplay');
         
@@ -1912,12 +1974,23 @@ button.update-button:hover {
 
         function getGoalDetailStatus(details, type) { 
             if (!details || Object.keys(details).length === 0) return 'status-pending';
-            const hasScorer = !!details.jogadorNome;
+            
+            const tipoGolo = details.tipoGolo || 'Normal';
             const hasZone = !!details.zona;
+
             if (type === 'marcado') {
+                const hasScorer = !!details.jogadorNome;
+                if (tipoGolo === 'AutoGolo') {
+                    return hasZone ? 'status-complete' : 'status-incomplete';
+                }
+                if (tipoGolo === 'Penalty') {
+                    return (hasScorer && hasZone) ? 'status-complete' : 'status-incomplete';
+                }
+                // Tipo Normal
                 if (hasScorer && hasZone) return 'status-complete'; 
                 if (hasScorer || hasZone) return 'status-incomplete'; 
             } else if (type === 'sofrido') {
+                // Para golos sofridos, tipoGolo não afeta a lógica aqui, pois marcador/assistência não são relevantes
                 if (hasZone) return 'status-complete'; 
             }
             return 'status-pending'; 
@@ -1941,7 +2014,10 @@ button.update-button:hover {
                 minuteSpan.dataset.context = context; 
                 minuteSpan.addEventListener('click', openGoalDetailModalHandler); 
                 textAndScorerContainer.appendChild(minuteSpan);
-                if (type === 'marcado' && entry.details && entry.details.jogadorNome) {
+                
+                const tipoGolo = entry.details?.tipoGolo || 'Normal';
+
+                if (type === 'marcado' && entry.details && entry.details.jogadorNome && tipoGolo !== 'AutoGolo') {
                     const separatorSpan = document.createElement('span');
                     separatorSpan.classList.add('minute-list-separator');
                     separatorSpan.textContent = " | ";
@@ -1958,7 +2034,19 @@ button.update-button:hover {
                     scorerSpan.classList.add('scorer-name');
                     scorerSpan.textContent = entry.details.jogadorNome;
                     textAndScorerContainer.appendChild(scorerSpan);
+                } else if (type === 'marcado' && tipoGolo === 'AutoGolo') {
+                     const separatorSpan = document.createElement('span');
+                    separatorSpan.classList.add('minute-list-separator');
+                    separatorSpan.textContent = " | ";
+                    textAndScorerContainer.appendChild(separatorSpan);
+                    const agSpan = document.createElement('span');
+                    agSpan.classList.add('scorer-name');
+                    agSpan.textContent = "AutoGolo";
+                    agSpan.style.fontStyle = "italic";
+                    textAndScorerContainer.appendChild(agSpan);
                 }
+
+
                 const removeBtn = document.createElement('button');
                 removeBtn.classList.add('remove-minute-btn');
                 removeBtn.innerHTML = '×';
@@ -1981,7 +2069,7 @@ button.update-button:hover {
                 showStatus(statusElId, `Golo no minuto ${minute} já foi adicionado. Edite o existente se necessário.`, false);
                 return;
             }
-            minutesArray.push({ minute, details: {} });
+            minutesArray.push({ minute, details: { tipoGolo: 'Normal' } }); // Padrão tipoGolo: 'Normal'
             minutesArray.sort((a, b) => a.minute - b.minute);
             renderMinuteList(listElement, minutesArray, type, context);
             minuteInputEl.value = ''; 
@@ -2015,17 +2103,18 @@ button.update-button:hover {
         }
 
         function openGoalDetailModalHandler(event) {
-            const type = event.target.dataset.type; 
+            const type = event.target.dataset.type; // 'marcado' ou 'sofrido'
             const index = parseInt(event.target.dataset.index);
-            const context = event.target.dataset.context; 
+            const context = event.target.dataset.context; // 'create' ou 'edit'
             const minutesArray = context === 'create' 
                 ? (type === 'marcado' ? createMinutosGolosMarcados : createMinutosGolosSofridos)
                 : (type === 'marcado' ? editMinutosGolosMarcados : editMinutosGolosSofridos);
             const minuteEntry = minutesArray[index];
+
             const currentModal = context === 'create' ? goalDetailModal : editGoalDetailModal;
             const currentTitle = context === 'create' ? goalDetailModalTitle : editGoalDetailModalTitle;
             const currentForm = context === 'create' ? formGoalDetail : document.getElementById('editFormGoalDetail'); 
-            const currentTypeInput = context === 'create' ? goalDetailTypeInput : editGoalDetailTypeInput;
+            const currentTypeInput = context === 'create' ? goalDetailTypeInput : editGoalDetailTypeInput; // Para 'marcado'/'sofrido'
             const currentMinuteInput = context === 'create' ? goalDetailMinuteInput : editGoalDetailMinuteInput;
             const currentScorerSection = context === 'create' ? goalDetailScorerSection : editGoalDetailScorerSection;
             const currentJogadorInput = context === 'create' ? goalDetailJogadorInput : editGoalDetailJogadorInput;
@@ -2033,20 +2122,23 @@ button.update-button:hover {
             const currentAssistenciaInput = context === 'create' ? goalDetailAssistenciaInput : editGoalDetailAssistenciaInput;
             const currentGrid = context === 'create' ? goalZoneGridContainer : editGoalZoneGridContainer;
             const currentHiddenZone = context === 'create' ? selectedGoalZoneHidden : editSelectedGoalZoneHidden;
+            const currentTipoGoloSection = context === 'create' ? document.getElementById('goalDetailTipoGoloSection') : document.getElementById('editGoalDetailTipoGoloSection');
+
+
             currentTypeInput.value = type; 
             currentMinuteInput.value = minuteEntry.minute;
             currentTitle.textContent = `Detalhes do Golo - Minuto ${minuteEntry.minute} (${type === 'marcado' ? 'Marcado' : 'Sofrido'}) ${context === 'edit' ? '(Editar)' : ''}`;
             currentForm.reset(); 
             currentHiddenZone.value = '';
             currentGrid.querySelectorAll('.goal-zone-cell').forEach(cell => cell.classList.remove('selected'));
-            currentJogadorInput.style.backgroundImage = 'none';
-            currentJogadorInput.classList.remove('has-image-bg', 'has-clear-btn');
-            currentAssistenciaInput.style.backgroundImage = 'none';
-            currentAssistenciaInput.classList.remove('has-image-bg', 'has-clear-btn');
-            const jogadorClearBtn = currentJogadorInput.parentElement.querySelector('.player-input-clear-btn');
-            const assistClearBtn = currentAssistenciaInput.parentElement.querySelector('.player-input-clear-btn');
-            if(jogadorClearBtn) jogadorClearBtn.style.display = 'none';
-            if(assistClearBtn) assistClearBtn.style.display = 'none';
+            
+            [currentJogadorInput, currentAssistenciaInput].forEach(input => {
+                input.style.backgroundImage = 'none';
+                input.classList.remove('has-image-bg', 'has-clear-btn');
+                const clearBtn = input.parentElement.querySelector('.player-input-clear-btn');
+                if(clearBtn) clearBtn.style.display = 'none';
+            });
+
             currentJogadorInput.value = minuteEntry.details?.jogadorNome || '';
             if (minuteEntry.details?.jogadorNome && allJogadores.length > 0) {
                 const scorerDetails = allJogadores.find(j => j.nome === minuteEntry.details.jogadorNome);
@@ -2054,8 +2146,10 @@ button.update-button:hover {
                     currentJogadorInput.style.backgroundImage = `url('${scorerDetails.imagem_link}')`;
                     currentJogadorInput.classList.add('has-image-bg');
                 }
+                const jogadorClearBtn = currentJogadorInput.parentElement.querySelector('.player-input-clear-btn');
                 if(jogadorClearBtn) { jogadorClearBtn.style.display = 'block'; currentJogadorInput.classList.add('has-clear-btn'); }
             }
+
             currentAssistenciaInput.value = minuteEntry.details?.assistenciaNome || '';
             if (minuteEntry.details?.assistenciaNome && allJogadores.length > 0) {
                 const assisterDetails = allJogadores.find(j => j.nome === minuteEntry.details.assistenciaNome);
@@ -2063,15 +2157,62 @@ button.update-button:hover {
                     currentAssistenciaInput.style.backgroundImage = `url('${assisterDetails.imagem_link}')`;
                     currentAssistenciaInput.classList.add('has-image-bg');
                 }
-                 if(assistClearBtn) { assistClearBtn.style.display = 'block'; currentAssistenciaInput.classList.add('has-clear-btn');}
+                const assistClearBtn = currentAssistenciaInput.parentElement.querySelector('.player-input-clear-btn');
+                if(assistClearBtn) { assistClearBtn.style.display = 'block'; currentAssistenciaInput.classList.add('has-clear-btn');}
             }
+
             if (minuteEntry.details?.zona) {
                 currentHiddenZone.value = minuteEntry.details.zona;
                 const preSelected = currentGrid.querySelector(`.goal-zone-cell[data-zone="${minuteEntry.details.zona}"]`);
                 if (preSelected) preSelected.classList.add('selected');
             }
-            currentScorerSection.style.display = type === 'marcado' ? 'flex' : 'none'; 
-            currentAssistenciaSection.style.display = type === 'marcado' ? 'flex' : 'none';
+
+            const tipoGoloSelecionado = minuteEntry.details?.tipoGolo || 'Normal';
+            const radioGroupName = context === 'create' ? 'tipoGoloCreate' : 'tipoGoloEdit';
+            const radioButtonsTipoGolo = currentForm.querySelectorAll(`input[name="${radioGroupName}"]`);
+
+            function handleTipoGoloChangeDisplay() {
+                const modalGoalType = currentTypeInput.value; // 'marcado' ou 'sofrido'
+                const selectedTipoGoloRadio = currentForm.querySelector(`input[name="${radioGroupName}"]:checked`);
+                const tipoDeGoloEfetivo = selectedTipoGoloRadio ? selectedTipoGoloRadio.value : 'Normal';
+
+                if (modalGoalType === 'marcado') {
+                    const isAutoGolo = tipoDeGoloEfetivo === 'AutoGolo';
+                    const isPenalty = tipoDeGoloEfetivo === 'Penalty';
+
+                    currentScorerSection.style.display = isAutoGolo ? 'none' : 'flex';
+                    currentAssistenciaSection.style.display = (isAutoGolo || isPenalty) ? 'none' : 'flex';
+                    currentTipoGoloSection.style.display = 'flex';
+
+
+                    if (isAutoGolo) {
+                        currentJogadorInput.value = ''; 
+                        currentJogadorInput.style.backgroundImage = 'none';
+                        currentJogadorInput.classList.remove('has-image-bg', 'has-clear-btn');
+                        const jogadorClearBtn = currentJogadorInput.parentElement.querySelector('.player-input-clear-btn');
+                        if(jogadorClearBtn) jogadorClearBtn.style.display = 'none';
+                    }
+                    if (isAutoGolo || isPenalty) {
+                        currentAssistenciaInput.value = ''; 
+                        currentAssistenciaInput.style.backgroundImage = 'none';
+                        currentAssistenciaInput.classList.remove('has-image-bg', 'has-clear-btn');
+                        const assistClearBtn = currentAssistenciaInput.parentElement.querySelector('.player-input-clear-btn');
+                        if(assistClearBtn) assistClearBtn.style.display = 'none';
+                    }
+                } else { // Golo sofrido
+                    currentScorerSection.style.display = 'none';
+                    currentAssistenciaSection.style.display = 'none';
+                    currentTipoGoloSection.style.display = 'flex'; // Ou 'none' se não aplicável a sofridos
+                }
+            }
+            
+            radioButtonsTipoGolo.forEach(radio => {
+                radio.checked = (radio.value === tipoGoloSelecionado);
+                radio.removeEventListener('change', handleTipoGoloChangeDisplay);
+                radio.addEventListener('change', handleTipoGoloChangeDisplay);
+            });
+            
+            handleTipoGoloChangeDisplay(); 
             currentModal.style.display = 'block';
         }
         
@@ -2086,20 +2227,41 @@ button.update-button:hover {
                 : (type === 'marcado' ? editMinutosGolosMarcados : editMinutosGolosSofridos);
             const entry = targetArray.find(e => e.minute === minute);
             const statusElId = context === 'create' ? 'statusJogo' : 'statusEditarJogo';
+
             if (!entry) { showStatus(statusElId, 'Erro ao encontrar golo para guardar detalhes.', false); return; }
+
+            const currentForm = context === 'create' ? formGoalDetail : document.getElementById('editFormGoalDetail');
+            const radioGroupName = context === 'create' ? 'tipoGoloCreate' : 'tipoGoloEdit';
+            const selectedTipoGoloRadio = currentForm.querySelector(`input[name="${radioGroupName}"]:checked`);
+            const tipoGoloValue = selectedTipoGoloRadio ? selectedTipoGoloRadio.value : 'Normal';
+
             entry.details = {
                 jogadorNome: (context === 'create' ? goalDetailJogadorInput : editGoalDetailJogadorInput).value.trim() || null,
                 zona: (context === 'create' ? selectedGoalZoneHidden : editSelectedGoalZoneHidden).value || null,
                 assistenciaNome: (context === 'create' ? goalDetailAssistenciaInput : editGoalDetailAssistenciaInput).value.trim() || null,
+                tipoGolo: tipoGoloValue
             };
+
+            if (type === 'marcado') {
+                if (tipoGoloValue === 'AutoGolo') {
+                    entry.details.jogadorNome = null;
+                    entry.details.assistenciaNome = null;
+                } else if (tipoGoloValue === 'Penalty') {
+                    entry.details.assistenciaNome = null;
+                }
+            }
+
+
             if (entry.details.jogadorNome) {
                 const scorer = allJogadores.find(j => j.nome === entry.details.jogadorNome);
                 if(scorer) entry.details.jogadorId = scorer.id; else entry.details.jogadorId = null; 
             } else { entry.details.jogadorId = null; }
+
             if (entry.details.assistenciaNome) {
                 const assister = allJogadores.find(j => j.nome === entry.details.assistenciaNome);
                 if(assister) entry.details.assistenciaId = assister.id; else entry.details.assistenciaId = null;
             } else { entry.details.assistenciaId = null; }
+
             showStatus(statusElId, `Detalhes para golo aos ${minute}' guardados.`, true);
             (context === 'create' ? goalDetailModal : editGoalDetailModal).style.display = 'none';
             const listEl = context === 'create' 
@@ -2480,11 +2642,11 @@ button.update-button:hover {
                 showStatus(statusElId, `Jogo "${updatedJogoData.nomeJogo}" atualizado com sucesso!`, true);
                 const currentSelectedTemporada = editJogoTemporadaSelect.value;
                 handleEditTemporadaChange(); 
-                if (currentSelectedTemporada) { // Only re-set temporada if one was selected
+                if (currentSelectedTemporada) { 
                     editJogoTemporadaSelect.value = currentSelectedTemporada; 
                     editJogoSearchInput.disabled = false; 
-                    await displayRelevantGames(); // Re-display relevant games after update
-                } else { // If no temporada was initially selected (e.g. user cleared it)
+                    await displayRelevantGames(); 
+                } else { 
                     editJogoSearchInput.value = '';
                     editJogoSearchInput.disabled = true;
                 }

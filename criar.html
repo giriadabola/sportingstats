@@ -533,6 +533,10 @@
     position: relative;
 }
 
+
+
+
+
     </style>
 </head>
 <body>
@@ -1420,7 +1424,7 @@
                     return itemText ? itemText.toLowerCase().includes(inputText) : false;
                 });
 
-                if (filteredData.length > 0) {
+                if (filteredData.length > 0 && inputElement.matches(':focus')) { // <--- MODIFICAÇÃO AQUI
                     filteredData.slice(0, 10).forEach(item => {
                         const suggestionItemDiv = document.createElement('div');
                         suggestionItemDiv.classList.add('suggestion-item');
@@ -1470,7 +1474,7 @@
                     });
                     suggestionsContainer.style.display = 'block';
                 } else {
-                    suggestionsContainer.style.display = 'none';
+                    suggestionsContainer.style.display = 'none'; // Esta linha garante que as sugestões sejam escondidas se não houver dados ou se o campo não estiver focado
                 }
             });
              // Close suggestions when clicking outside
@@ -2067,21 +2071,21 @@
 
             resultadoFinalOut.value = `${gmCasaFinal}-${gmForaFinal}`;
             
-            if (futuroCb.checked) {
-                if (casaNomeInput && foraNomeInput) {
-                    nomeJogoOut.value = `${casaNomeInput} vs ${foraNomeInput}`;
-                } else if (casaNomeInput) {
-                    nomeJogoOut.value = `${casaNomeInput} vs ?`;
-                } else if (foraNomeInput) {
-                    nomeJogoOut.value = `? vs ${foraNomeInput}`;
-                } else {
-                    nomeJogoOut.value = "";
-                }
-            } else { // Live or Terminado
-                 nomeJogoOut.value = (casaNomeInput && foraNomeInput) 
-                    ? `${casaNomeInput} ${gmCasaFinal}-${gmForaFinal} ${foraNomeInput}` 
-                    : (casaNomeInput ? `${casaNomeInput} vs ?` : (foraNomeInput ? `? vs ${foraNomeInput}`: ""));
-            }
+            if (futuroCb.checked) { // If "Futuro" is checked
+    if (casaNomeInput && foraNomeInput) {
+        nomeJogoOut.value = `${casaNomeInput} vs ${foraNomeInput}`; // e.g., Sporting vs FC Porto
+    } else if (casaNomeInput) {
+        nomeJogoOut.value = `${casaNomeInput} vs ?`;
+    } else if (foraNomeInput) {
+        nomeJogoOut.value = `? vs ${foraNomeInput}`;
+    } else {
+        nomeJogoOut.value = "";
+    }
+} else { // If "Live" or "Terminado" is checked (because futuroCb.checked is false)
+     nomeJogoOut.value = (casaNomeInput && foraNomeInput) 
+        ? `${casaNomeInput} ${gmCasaFinal}-${gmForaFinal} ${foraNomeInput}` // e.g., Sporting 0-0 FC Porto
+        : (casaNomeInput ? `${casaNomeInput} vs ?` : (foraNomeInput ? `? vs ${foraNomeInput}`: ""));
+}
 
             marcados1POut.value = minutosMarcadosArr.filter(g => g.minute <= 45).length;
             marcados2POut.value = minutosMarcadosArr.filter(g => g.minute > 45).length;

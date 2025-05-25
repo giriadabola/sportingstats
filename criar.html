@@ -1,0 +1,761 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestão Firebase - Criar</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap');
+
+        body {
+            font-family: 'Roboto', Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f8f9fa; 
+            color: #343a40; 
+            line-height: 1.7;
+            font-size: 17px; 
+        }
+        .container {
+            width: 85%; 
+            margin: 30px auto; 
+            padding: 30px; 
+            background: #fff;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.12); 
+            border-radius: 12px; 
+        }
+        h1 {
+            color: #0056b3; 
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 2.8em; 
+            font-weight: 700;
+        }
+        h2 { 
+            color: #17a2b8; 
+            margin-top: 25px;
+            margin-bottom: 20px;
+            font-size: 2em; 
+            border-bottom: 2px solid #e9ecef;
+            padding-bottom: 10px;
+            font-weight: 500;
+        }
+
+        .tab-navigation {
+            display: flex; 
+            flex-wrap: wrap; 
+            border-bottom: 1px solid #dee2e6;
+            margin-bottom: 30px; 
+        }
+        .tab-navigation button { 
+            background-color: #e9ecef; 
+            border: none;
+            outline: none;
+            cursor: pointer;
+            padding: 14px 18px; 
+            transition: background-color 0.3s ease, color 0.3s ease;
+            font-size: 1.05em; 
+            border-radius: 8px 8px 0 0; 
+            margin-right: 5px; 
+            margin-bottom: -1px; 
+            color: #495057; 
+            font-weight: 500;
+        }
+        .tab-navigation button:hover {
+            background-color: #ced4da; 
+            color: #0056b3;
+        }
+        .tab-navigation button.active {
+            background-color: #007bff; 
+            color: white;
+            border-bottom: 1px solid #007bff; 
+            box-shadow: 0 -2px 5px rgba(0,0,0,0.1) inset;
+        }
+        .tab-content {
+            display: none; 
+            padding: 20px; 
+            border-top: none;
+            animation: fadeIn 0.5s ease-in-out;
+        }
+        @keyframes fadeIn {
+            from {opacity: 0; transform: translateY(10px);}
+            to {opacity: 1; transform: translateY(0);}
+        }
+        form { 
+            display: flex;
+            flex-direction: column;
+            gap: 25px; 
+        }
+        form div, form fieldset { 
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            gap: 8px; 
+        }
+        
+        label { 
+            margin-bottom: 0px; 
+            font-weight: 500;
+            font-size: 1.1em; 
+            color: #495057;
+        }
+        input[type="text"], input[type="url"], input[type="number"], select { 
+            padding: 12px; 
+            border: 1px solid #ced4da;
+            border-radius: 6px;
+            font-size: 1em; 
+            box-sizing: border-box;
+            transition: border-color 0.2s ease, box-shadow 0.2s ease;
+        }
+        input[type="text"]:focus, input[type="url"]:focus, input[type="number"]:focus, select:focus {
+            border-color: #007bff;
+            box-shadow: 0 0 0 0.2rem rgba(0,123,255,.25);
+            outline: none;
+        }
+        input[readonly] { 
+            background-color: #e9ecef;
+            cursor: not-allowed;
+        }
+        button[type="submit"], .action-button { 
+            background-color: #28a745;
+            color: white;
+            padding: 12px 20px; 
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 1.05em; 
+            align-self: flex-start;
+            transition: background-color 0.2s ease, transform 0.1s ease;
+            font-weight: 500;
+        }
+        button[type="submit"]:hover, .action-button:hover {
+            background-color: #218838;
+            transform: translateY(-1px);
+        }
+        .action-button.secondary { background-color: #6c757d; }
+        .action-button.secondary:hover { background-color: #5a6268; }
+        
+        .status-message {
+            margin-top: 20px; padding: 15px; border-radius: 6px; font-size: 1em; font-weight: 500;
+        }
+        .status-message.success { background-color: #d1e7dd; color: #0f5132; border: 1px solid #badbcc; }
+        .status-message.error { background-color: #f8d7da; color: #842029; border: 1px solid #f5c2c7; }
+        
+        .suggestions-container {
+            position: absolute; border: 1px solid #ced4da; border-top: none; z-index: 99;
+            top: 100%; left: 0; right: 0; background-color: white; max-height: 180px;
+            overflow-y: auto; box-shadow: 0 4px 8px rgba(0,0,0,0.1); border-radius: 0 0 6px 6px;
+        }
+        .suggestion-item { 
+            padding: 8px 12px; cursor: pointer; border-bottom: 1px solid #eee; font-size: 1em;
+            display: flex; flex-direction: row; align-items: center; 
+        }
+        .suggestion-item img {
+            width: 30px; height: 30px; object-fit: contain; margin-right: 10px;
+            border-radius: 50%; border: 1px solid #ddd; flex-shrink: 0;
+        }
+        .suggestion-item span { flex-grow: 1; line-height: 1.4; }
+        .suggestion-item:last-child { border-bottom: none; }
+        .suggestion-item:hover { background-color: #f0f8ff; color: #0056b3; }
+
+        .modal {
+            display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%;
+            overflow: auto; background-color: rgba(0,0,0,0.5);
+        }
+        .modal-content {
+            background-color: #fefefe; margin: 10% auto; padding: 25px; border: 1px solid #888;
+            width: 60%; max-width: 550px; border-radius: 8px; box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+        .modal-content h3 { margin-top: 0; color: #007bff; }
+        .modal-close-btn { color: #aaa; float: right; font-size: 28px; font-weight: bold; }
+        .modal-close-btn:hover, .modal-close-btn:focus { color: black; text-decoration: none; cursor: pointer; }
+        
+        .form-grid { display: grid; grid-template-columns: 1fr; gap: 15px; }
+         @media (min-width: 600px) {
+            .form-grid.two-cols { grid-template-columns: 1fr 1fr; }
+            .form-grid.three-cols { grid-template-columns: repeat(3, 1fr); align-items: end; }
+        }
+        
+        #tabJogo h2 { color: #007bff; border-bottom: 2px solid #007bff; padding-bottom: 15px; margin-bottom: 30px; font-size: 2.2em; }
+        #tabJogo form { gap: 30px; }
+        #tabJogo fieldset {
+            border: 1px solid #ced4da; border-radius: 10px; padding: 25px; 
+            background-color: #ffffff; box-shadow: 0 2px 8px rgba(0,0,0,0.07); 
+        }
+        #tabJogo fieldset:nth-of-type(1) { border-left: 5px solid #17a2b8; background-color: #f8f9fa; }
+        #tabJogo fieldset:nth-of-type(1) legend { color: #17a2b8; }
+        #tabJogo fieldset:nth-of-type(2) { border-left: 5px solid #28a745; }
+        #tabJogo fieldset:nth-of-type(2) legend { color: #28a745; }
+        #tabJogo fieldset#fieldsetPlacarStats { border-left: 5px solid #ffc107; background-color: #fdf8e2; }
+        #tabJogo fieldset#fieldsetPlacarStats.open { background-color: #f8f9fa; }
+        #tabJogo fieldset#fieldsetPlacarStats legend#legendPlacarStats { color: #c89400; }
+        #tabJogo fieldset:nth-of-type(4) { border-left: 5px solid #6f42c1; }
+        #tabJogo fieldset:nth-of-type(4) legend { color: #6f42c1; }
+        #tabJogo legend { font-size: 1.6em; font-weight: 600; padding: 0 15px; margin-bottom: 15px; }
+        #tabJogo label { font-size: 1.2em; color: #343a40; margin-bottom: 8px; }
+        #tabJogo input[type="text"], #tabJogo input[type="url"], #tabJogo input[type="number"], #tabJogo select {
+            font-size: 1.1em; padding: 14px; border-radius: 6px; border: 1px solid #bcc3ca; 
+        }
+        #tabJogo .player-input-grid input[type="text"].has-image-bg,
+        #goalDetailModal input[type="text"].has-image-bg {
+            background-repeat: no-repeat; background-position: 8px center;  
+            background-size: 28px 28px; padding-left: 42px !important;  
+        }
+        #tabJogo input[readonly] { background-color: #e2e6ea; color: #495057; font-weight: 500; }
+        #tabJogo .minute-input-group { display: flex; align-items: center; gap: 12px; margin-bottom: 15px; }
+        #tabJogo .minute-input-group input[type="number"] { flex-grow: 1; }
+        #tabJogo .minute-list { list-style: none; padding: 0; }
+        #tabJogo .minute-list-item {
+            padding: 10px 15px; font-size: 1em; border-radius: 4px; margin-bottom: 5px;
+            display: flex; justify-content: space-between; align-items: center; 
+            transition: background-color 0.3s ease, border-left-color 0.3s ease; 
+            border-left: 5px solid transparent; 
+        }
+        #tabJogo .minute-text-scorer-container { 
+            display: flex; align-items: center; flex-grow: 1; margin-right: 8px; flex-wrap: nowrap;     
+        }
+        #tabJogo .minute-text-scorer-container .minute-value,
+        #tabJogo .minute-text-scorer-container .scorer-name { white-space: nowrap; }
+        #tabJogo .minute-list-item .minute-value { font-weight: 500; cursor: pointer; text-decoration: underline;}
+        #tabJogo .minute-list-item .scorer-name { font-style: italic; color: #555; margin-left: 8px; font-size: 0.9em;}
+        #tabJogo .minute-list-item .remove-minute-btn {
+            background: none; border: none; color: #dc3545; cursor: pointer;
+            font-weight: bold; font-size: 1.3em; flex-shrink: 0; 
+        }
+        .minute-list-item.status-pending { background-color: #fde0e0; border-left-color: #dc3545; }
+        .minute-list-item.status-pending .minute-value { color: #721c24; }
+        .minute-list-item.status-incomplete { background-color: #fff9e0; border-left-color: #ffc107; }
+        .minute-list-item.status-incomplete .minute-value { color: #856404; }
+        .minute-list-item.status-complete { background-color: #d4edda; border-left-color: #28a745; }
+        .minute-list-item.status-complete .minute-value { color: #155724; }
+
+        #tabJogo > form > button[type="submit"] {
+            padding: 15px 30px; font-size: 1.25em; background-color: #0069d9; 
+            font-weight: 600; width: auto; align-self: center; margin-top: 20px; 
+        }
+        #tabJogo > form > button[type="submit"]:hover { background-color: #0056b3; }
+        #tabJogo .suggestions-container { border-color: #adb5bd; font-size: 1em; }
+        #tabJogo .suggestion-item { padding: 12px; }
+        #tabJogo .player-input-grid {
+            display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); 
+            gap: 18px; margin-bottom: 20px; 
+        }
+        #tabJogo .player-input-wrapper { position: relative; display: flex; align-items: center; }
+        #tabJogo .player-input-grid input[type="text"] { background-color: #fff; width: 100%; box-sizing: border-box; }
+        .player-input-clear-btn {
+            position: absolute; right: 8px; top: 50%; transform: translateY(-50%);
+            background: none; border: none; color: #888; font-size: 1.4em; 
+            font-weight: bold; cursor: pointer; padding: 0 5px; line-height: 1;
+            display: none; z-index: 2; 
+        }
+        .player-input-clear-btn:hover { color: #333; }
+
+        #tabJogo .player-input-grid input[type="text"].has-image-bg.has-clear-btn,
+        #goalDetailModal input[type="text"].has-image-bg.has-clear-btn { padding-right: 35px !important; }
+        #tabJogo .player-input-grid input[type="text"].has-clear-btn:not(.has-image-bg),
+        #goalDetailModal input[type="text"].has-clear-btn:not(.has-image-bg) { padding-right: 35px !important; }
+
+        #goalDetailModal .modal-content label { font-size: 1.15em; }
+        #goalDetailModal .modal-content input[type="text"],
+        #goalDetailModal .modal-content select,
+        #goalDetailModal #goalZoneGridContainer { font-size: 1.05em; }
+        
+        #goalZoneGridContainer {
+            display: grid; grid-template-columns: repeat(3, 1fr);
+            grid-template-rows: repeat(3, 55px); gap: 6px;
+            margin-top: 5px; border: 1px solid #ccc; padding: 5px; border-radius: 4px;
+        }
+        .goal-zone-cell {
+            display: flex; align-items: center; justify-content: center;
+            border: 1px solid #ddd; background-color: #f9f9f9; cursor: pointer;
+            font-size: 0.9em; text-align: center; transition: background-color 0.2s;
+        }
+        .goal-zone-cell:hover { background-color: #e9e9e9; }
+        .goal-zone-cell.selected { background-color: #007bff; color: white; border-color: #0056b3; }
+
+        #tabJogo .toggle-legend {
+            cursor: pointer; display: flex; justify-content: space-between; 
+            align-items: center; width: 100%; 
+            padding-left: 0; padding-right: 0; box-sizing: border-box; 
+        }
+        #tabJogo .toggle-legend .toggle-indicator { font-weight: bold; font-size: 1.2em; margin-left: 10px; }
+        
+        #tabJogo fieldset.open .toggle-content { animation: slideDown 0.3s ease-out; }
+        @keyframes slideDown {
+            from { opacity: 0; transform: translateY(-10px); max-height: 0; }
+            to { opacity: 1; transform: translateY(0); max-height: 1500px; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1>Painel de Gestão Firebase</h1>
+
+        <div class="tab-navigation" id="createTabNavigation">
+            <button class="tab-button" onclick="openTab(event, 'tabJogo')">Criar Jogo</button>
+            <button class="tab-button" onclick="openTab(event, 'tabClube')">Criar Clube</button>
+            <button class="tab-button" onclick="openTab(event, 'tabPosicao')">Criar Posição</button>
+            <button class="tab-button" onclick="openTab(event, 'tabJogador')">Criar Jogador</button>
+            <button class="tab-button" onclick="openTab(event, 'tabPais')">Criar País</button>
+        </div>
+
+        <!-- Tab Criar Jogo -->
+        <div id="tabJogo" class="tab-content">
+            <h2>Criar Novo Jogo</h2>
+            <form id="formJogo">
+                <fieldset> 
+                    <legend>Informações Gerais do Jogo</legend>
+                    <div class="form-grid two-cols">
+                        <div><label for="jogoTemporada">Temporada:</label><select id="jogoTemporada" required></select></div>
+                        <div><label for="jogoJornada">Jornada:</label><select id="jogoJornada" required></select></div>
+                        <div><label for="jogoClubeCasa">Clube Casa:</label><input type="text" id="jogoClubeCasa" autocomplete="off" placeholder="Pesquisar clube..." required><div id="clubeCasaSuggestions" class="suggestions-container" style="display: none;"></div></div>
+                        <div><label for="jogoClubeFora">Clube Fora:</label><input type="text" id="jogoClubeFora" autocomplete="off" placeholder="Pesquisar clube..." required><div id="clubeForaSuggestions" class="suggestions-container" style="display: none;"></div></div>
+                    </div>
+                </fieldset>
+                <fieldset> 
+                    <legend>Golos do Sporting</legend>
+                    <div class="form-grid two-cols">
+                        <div><label for="jogoMinutoGoloMarcadoInput">Minuto do Golo Marcado (Sporting):</label><div class="minute-input-group"><input type="number" id="jogoMinutoGoloMarcadoInput" placeholder="Ex: 17" min="1"><button type="button" class="action-button secondary" id="addMinutoGoloMarcadoBtn">Adicionar</button></div><ul id="listaMinutosGolosMarcados" class="minute-list"></ul></div>
+                        <div><label for="jogoMinutoGoloSofridoInput">Minuto do Golo Sofrido (pelo Sporting):</label><div class="minute-input-group"><input type="number" id="jogoMinutoGoloSofridoInput" placeholder="Ex: 48" min="1"><button type="button" class="action-button secondary" id="addMinutoGoloSofridoBtn">Adicionar</button></div><ul id="listaMinutosGolosSofridos" class="minute-list"></ul></div>
+                    </div>
+                </fieldset>
+                <fieldset id="fieldsetPlacarStats"> 
+                    <legend id="legendPlacarStats" class="toggle-legend">Placar e Estatísticas (Automático)<span class="toggle-indicator">[+]</span></legend>
+                    <div class="toggle-content" style="display: none;">
+                        <div style="margin-bottom: 15px;"><label for="jogoNomeJogo">Nome do Jogo (Automático):</label><input type="text" id="jogoNomeJogo" readonly></div>
+                        <div class="form-grid three-cols">
+                            <div><label for="jogoGMCasa">Golos Marcados Equipa da Casa:</label><input type="text" id="jogoGMCasa" readonly></div>
+                            <div><label for="jogoResultadoFinal">Resultado Final:</label><input type="text" id="jogoResultadoFinal" readonly></div>
+                            <div><label for="jogoGMFora">Golos Marcados Equipa de Fora:</label><input type="text" id="jogoGMFora" readonly></div>
+                        </div>
+                         <div class="form-grid two-cols" style="margin-top: 15px;">
+                            <div><label for="jogoGSCasa">Golos Sofridos Equipa da Casa:</label><input type="text" id="jogoGSCasa" readonly></div>
+                            <div><label for="jogoGSFora">Golos Sofridos Equipa de Fora:</label><input type="text" id="jogoGSFora" readonly></div>
+                            <div><label for="jogoMarcados1P">Golos Marcados Sporting (1ª Parte):</label><input type="text" id="jogoMarcados1P" readonly></div>
+                            <div><label for="jogoMarcados2P">Golos Marcados Sporting (2ª Parte):</label><input type="text" id="jogoMarcados2P" readonly></div>
+                            <div><label for="jogoSofridos1P">Golos Sofridos Sporting (1ª Parte):</label><input type="text" id="jogoSofridos1P" readonly></div>
+                            <div><label for="jogoSofridos2P">Golos Sofridos Sporting (2ª Parte):</label><input type="text" id="jogoSofridos2P" readonly></div>
+                            <div><label for="jogoEstado">Estado (Resultado Sporting):</label><input type="text" id="jogoEstado" readonly></div>
+                        </div>
+                    </div>
+                </fieldset>
+                <fieldset> 
+                    <legend>Plantel</legend>
+                    <div><label>11 Inicial (11 jogadores):</label><div id="jogo11InicialContainer" class="player-input-grid"></div></div>
+                    <div><label>Suplentes (11 jogadores):</label><div id="jogoSuplentesContainer" class="player-input-grid"></div></div>
+                </fieldset>
+                <button type="submit">Criar Jogo</button>
+            </form>
+            <div id="statusJogo" class="status-message"></div>
+        </div>
+
+        <!-- Tab Criar Clube -->
+        <div id="tabClube" class="tab-content">
+            <h2>Criar Novo Clube</h2>
+            <form id="formClube">
+                <div><label for="clubeNome">Nome do Clube:</label><input type="text" id="clubeNome" required></div>
+                <div><label for="clubeLogo">Link do Logo:</label><input type="url" id="clubeLogo" required></div>
+                <div><label for="clubeRegiao">Região:</label><input type="text" id="clubeRegiao" required></div>
+                <div><label for="clubeCidade">Cidade:</label><input type="text" id="clubeCidade" required></div>
+                <button type="submit">Adicionar Clube</button>
+            </form>
+            <div id="statusClube" class="status-message"></div>
+        </div>
+
+        <!-- Tab Criar Posição -->
+        <div id="tabPosicao" class="tab-content">
+            <h2>Criar Nova Posição</h2>
+            <form id="formPosicao">
+                <div><label for="posicaoAbreviacao">Abreviação (ex: DC, PL):</label><input type="text" id="posicaoAbreviacao" required maxlength="3"></div>
+                <div><label for="posicaoGenericaForm">Posição Genérica (ex: Defesa, Avançado):</label><input type="text" id="posicaoGenericaForm" required></div>
+                <button type="submit">Adicionar Posição</button>
+            </form>
+            <div id="statusPosicao" class="status-message"></div>
+        </div>
+
+        <!-- Tab Criar Jogador -->
+        <div id="tabJogador" class="tab-content">
+            <h2>Criar Novo Jogador</h2>
+            <form id="formJogador">
+                <div><label for="jogadorNome">Nome do Jogador:</label><input type="text" id="jogadorNome" required></div>
+                <div><label for="jogadorImagem">Link da Imagem:</label><input type="url" id="jogadorImagem" required></div>
+                <div><label for="jogadorPosEspecifica">Posição Específica:</label><select id="jogadorPosEspecifica" required><option value="">A carregar posições...</option></select></div>
+                <div><label for="jogadorPosGenerica">Posição Genérica (Automático):</label><input type="text" id="jogadorPosGenerica" readonly></div>
+                <div><label for="jogadorPaisNome">Nome do País:</label><input type="text" id="jogadorPaisNome" autocomplete="off" placeholder="Comece a digitar..." required><div id="paisSuggestions" class="suggestions-container" style="display: none;"></div></div>
+                <button type="submit">Adicionar Jogador</button>
+            </form>
+            <div id="statusJogador" class="status-message"></div>
+        </div>
+
+        <!-- Tab Criar País -->
+        <div id="tabPais" class="tab-content">
+            <h2>Criar Novo País</h2>
+            <form id="formPais">
+                <div><label for="paisNome">Nome do País:</label><input type="text" id="paisNome" required></div>
+                <div><label for="paisBandeira">Link da Bandeira:</label><input type="url" id="paisBandeira" required></div>
+                <div><label for="paisContinenteSelect">Continente:</label><select id="paisContinenteSelect" required><option value="">A carregar continentes...</option></select></div>
+                <button type="submit">Adicionar País</button>
+            </form>
+            <div id="statusPais" class="status-message"></div>
+        </div>
+    </div> <!-- End of .container -->
+
+    <!-- Modal for Goal Details -->
+    <div id="goalDetailModal" class="modal">
+        <div class="modal-content">
+            <span class="modal-close-btn" id="closeGoalDetailModalBtn">×</span>
+            <h3 id="goalDetailModalTitle">Detalhes do Golo</h3>
+            <form id="formGoalDetail">
+                <input type="hidden" id="goalDetailContext" value="create"> <!-- Default context -->
+                <input type="hidden" id="goalDetailType">
+                <input type="hidden" id="goalDetailMinute">
+                <div id="goalDetailScorerSection">
+                    <label for="goalDetailJogador">Marcador (Jogador do Sporting):</label>
+                    <input type="text" id="goalDetailJogador" class="has-image-bg" autocomplete="off" placeholder="Pesquisar jogador...">
+                    <div id="goalDetailJogadorSuggestions" class="suggestions-container" style="display: none;"></div>
+                </div>
+                <div>
+                    <label for="goalDetailZonaGrid">Zona do Golo:</label>
+                    <div id="goalZoneGridContainer"></div>
+                    <input type="hidden" id="selectedGoalZoneHidden">
+                </div>
+                <div id="goalDetailAssistenciaSection" style="margin-top:15px;">
+                    <label for="goalDetailAssistencia">Assistência (Jogador do Sporting):</label>
+                    <input type="text" id="goalDetailAssistencia" class="has-image-bg" autocomplete="off" placeholder="Pesquisar jogador...">
+                    <div id="goalDetailAssistenciaSuggestions" class="suggestions-container" style="display: none;"></div>
+                </div>
+                <button type="button" id="saveGoalDetailBtn" class="action-button" style="margin-top:20px;">Guardar Detalhes</button>
+            </form>
+        </div>
+    </div>
+
+    <script type="module">
+        // Firebase Imports
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+        import { getFirestore, doc, getDoc, setDoc, updateDoc, deleteDoc, collection, getDocs, serverTimestamp, addDoc, query, where, writeBatch } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+        // Firebase Initialization
+        const firebaseConfig = {
+            apiKey: "AIzaSyASIFSwhZj8B4ON6fVGjNixgLW-CL39CnI",
+            authDomain: "sporting-stats.firebaseapp.com",
+            projectId: "sporting-stats",
+            storageBucket: "sporting-stats.firebasestorage.app",
+            messagingSenderId: "584175657940",
+            appId: "1:584175657940:web:7e57b0b83f2b22646d6c41"
+        };
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        // --- GLOBAL CACHES & STATE ---
+        let posicoesMap = new Map();
+        let allPaisesSimpleList = []; // Just names for "Criar Jogador"
+        let allContinentesSet = new Set();
+        let allClubes = []; // { id, nome, logo } - Simple for Criar Jogo
+        let allJogadores = []; // { id(nome_jogador), nome, imagem_link }
+
+        let minutosGolosMarcados = [];
+        let minutosGolosSofridos = [];
+
+        const goalZoneNames = [
+            "Esquerda Cima", "Meio Cima", "Direita Cima",
+            "Esquerda Centro", "Meio Centro", "Direita Centro",
+            "Esquerda Baixo", "Meio Baixo", "Direita Baixo"
+        ];
+        const sportingCanonicoNomeDb = "Sporting CP";
+        const sportingCanonicoNomesInput = ["Sporting CP", "Sporting"];
+
+        // --- DOM ELEMENTS (already defined in HTML, get references here) ---
+        const createTabNavigation = document.getElementById('createTabNavigation');
+        
+        const formJogo = document.getElementById('formJogo');
+        const jogoTemporadaSelect = document.getElementById('jogoTemporada');
+        const jogoJornadaSelect = document.getElementById('jogoJornada');
+        const jogoClubeCasaInput = document.getElementById('jogoClubeCasa');
+        const clubeCasaSuggestions = document.getElementById('clubeCasaSuggestions');
+        const jogoClubeForaInput = document.getElementById('jogoClubeFora');
+        const clubeForaSuggestions = document.getElementById('clubeForaSuggestions');
+        const jogoMinutoGoloMarcadoInput = document.getElementById('jogoMinutoGoloMarcadoInput');
+        const addMinutoGoloMarcadoBtn = document.getElementById('addMinutoGoloMarcadoBtn');
+        const listaMinutosGolosMarcadosEl = document.getElementById('listaMinutosGolosMarcados');
+        const jogoMinutoGoloSofridoInput = document.getElementById('jogoMinutoGoloSofridoInput');
+        const addMinutoGoloSofridoBtn = document.getElementById('addMinutoGoloSofridoBtn');
+        const listaMinutosGolosSofridosEl = document.getElementById('listaMinutosGolosSofridos');
+        const jogoNomeJogoOutput = document.getElementById('jogoNomeJogo');
+        const jogoGMCasaOutput = document.getElementById('jogoGMCasa');
+        const jogoResultadoFinalOutput = document.getElementById('jogoResultadoFinal');
+        const jogoGMForaOutput = document.getElementById('jogoGMFora');
+        const jogoGSCasaOutput = document.getElementById('jogoGSCasa');
+        const jogoGSForaOutput = document.getElementById('jogoGSFora');
+        const jogoMarcados1POutput = document.getElementById('jogoMarcados1P');
+        const jogoMarcados2POutput = document.getElementById('jogoMarcados2P');
+        const jogoSofridos1POutput = document.getElementById('jogoSofridos1P');
+        const jogoSofridos2POutput = document.getElementById('jogoSofridos2P');
+        const jogoEstadoOutput = document.getElementById('jogoEstado');
+        const jogo11InicialContainer = document.getElementById('jogo11InicialContainer');
+        const jogoSuplentesContainer = document.getElementById('jogoSuplentesContainer');
+        const legendPlacarStats = document.getElementById('legendPlacarStats'); // For toggle
+
+        const formClube = document.getElementById('formClube');
+        const clubeNomeInput = document.getElementById('clubeNome');
+        const clubeLogoInput = document.getElementById('clubeLogo');
+        const clubeRegiaoInput = document.getElementById('clubeRegiao');
+        const clubeCidadeInput = document.getElementById('clubeCidade');
+
+        const formPosicao = document.getElementById('formPosicao');
+        const posicaoAbreviacaoInput = document.getElementById('posicaoAbreviacao');
+        const posicaoGenericaFormInput = document.getElementById('posicaoGenericaForm');
+
+        const formJogador = document.getElementById('formJogador');
+        const jogadorNomeInput = document.getElementById('jogadorNome');
+        const jogadorImagemInput = document.getElementById('jogadorImagem');
+        const jogadorPosEspecificaDropdown = document.getElementById('jogadorPosEspecifica');
+        const jogadorPosGenericaInput = document.getElementById('jogadorPosGenerica');
+        const jogadorPaisNomeInput = document.getElementById('jogadorPaisNome');
+        const paisSuggestionsContainer = document.getElementById('paisSuggestions');
+
+        const formPais = document.getElementById('formPais');
+        const paisNomeInput = document.getElementById('paisNome'); // For Criar Pais
+        const paisBandeiraInput = document.getElementById('paisBandeira'); // For Criar Pais
+        const paisContinenteSelect = document.getElementById('paisContinenteSelect'); // For Criar Pais
+
+        const goalDetailModal = document.getElementById('goalDetailModal');
+        const closeGoalDetailModalBtn = document.getElementById('closeGoalDetailModalBtn');
+        const goalDetailModalTitle = document.getElementById('goalDetailModalTitle');
+        const formGoalDetail = document.getElementById('formGoalDetail');
+        const goalDetailContextInput = document.getElementById('goalDetailContext');
+        const goalDetailTypeInput = document.getElementById('goalDetailType');
+        const goalDetailMinuteInput = document.getElementById('goalDetailMinute');
+        const goalDetailScorerSection = document.getElementById('goalDetailScorerSection');
+        const goalDetailJogadorInput = document.getElementById('goalDetailJogador');
+        const goalDetailJogadorSuggestions = document.getElementById('goalDetailJogadorSuggestions');
+        const goalZoneGridContainer = document.getElementById('goalZoneGridContainer');
+        const selectedGoalZoneHidden = document.getElementById('selectedGoalZoneHidden');
+        const goalDetailAssistenciaSection = document.getElementById('goalDetailAssistenciaSection');
+        const goalDetailAssistenciaInput = document.getElementById('goalDetailAssistencia');
+        const goalDetailAssistenciaSuggestions = document.getElementById('goalDetailAssistenciaSuggestions');
+        const saveGoalDetailBtn = document.getElementById('saveGoalDetailBtn');
+
+        // --- UTILITY FUNCTIONS ---
+        function showStatus(elementId, message, isSuccess) {
+            const statusEl = document.getElementById(elementId);
+            if (!statusEl) { console.warn("Status element not found:", elementId); return; }
+            statusEl.textContent = message;
+            statusEl.className = 'status-message ' + (isSuccess ? 'success' : 'error');
+            setTimeout(() => { if(statusEl) {statusEl.textContent = ''; statusEl.className = 'status-message'; }}, 5000);
+        }
+
+        function setupSuggestionHandler(inputElement, suggestionsContainer, dataArray, displayField, imageField = null, clearBtnElement = null, onSuggestionClick = null, dataItemToText = null) {
+            if (!inputElement || !suggestionsContainer) return;
+            
+            inputElement.addEventListener('input', function() {
+                const inputText = this.value.toLowerCase();
+                suggestionsContainer.innerHTML = '';
+                if (!inputText.trim()) {
+                    suggestionsContainer.style.display = 'none';
+                    if (!(imageField && inputElement.dataset.fixedBg === "true")) {
+                        inputElement.style.backgroundImage = 'none';
+                        inputElement.classList.remove('has-image-bg');
+                    }
+                    if (clearBtnElement) clearBtnElement.style.display = 'none';
+                    inputElement.classList.remove('has-clear-btn');
+                    return;
+                }
+
+                const filteredData = dataArray.filter(item => {
+                    let itemTextForSearch;
+                    if (dataItemToText) { itemTextForSearch = dataItemToText(item); } 
+                    else { itemTextForSearch = (typeof item === 'string' ? item : item[displayField]); }
+                    return itemTextForSearch ? itemTextForSearch.toLowerCase().includes(inputText) : false;
+                });
+
+                if (filteredData.length > 0) {
+                    filteredData.slice(0, 10).forEach(item => {
+                        const suggestionItemDiv = document.createElement('div');
+                        suggestionItemDiv.classList.add('suggestion-item');
+                        let itemTextForDisplay;
+                        if (dataItemToText) { itemTextForDisplay = dataItemToText(item); } 
+                        else { itemTextForDisplay = (typeof item === 'string' ? item : item[displayField]); }
+
+                        if (imageField && typeof item === 'object' && item[imageField]) {
+                            const img = document.createElement('img'); img.src = item[imageField]; img.alt = itemTextForDisplay;
+                            img.onerror = function() { this.style.display='none'; };
+                            suggestionItemDiv.appendChild(img);
+                        }
+                        const textSpan = document.createElement('span'); textSpan.textContent = itemTextForDisplay;
+                        suggestionItemDiv.appendChild(textSpan);
+                        suggestionItemDiv.addEventListener('click', function() {
+                            inputElement.value = (typeof item === 'string' ? item : item[displayField]); 
+                            suggestionsContainer.style.display = 'none';
+                            if (imageField && typeof item === 'object' && item[imageField]) {
+                                inputElement.style.backgroundImage = `url('${item[imageField]}')`;
+                                inputElement.classList.add('has-image-bg');
+                                inputElement.dataset.fixedBg = "true"; 
+                            } else {
+                                inputElement.style.backgroundImage = 'none';
+                                inputElement.classList.remove('has-image-bg');
+                                delete inputElement.dataset.fixedBg;
+                            }
+                            if (clearBtnElement) clearBtnElement.style.display = 'block';
+                            inputElement.classList.add('has-clear-btn');
+                            inputElement.dispatchEvent(new Event('change', { bubbles: true }));
+                            if (onSuggestionClick && typeof onSuggestionClick === 'function') { onSuggestionClick(item); }
+                        });
+                        suggestionsContainer.appendChild(suggestionItemDiv);
+                    });
+                    suggestionsContainer.style.display = 'block';
+                } else { suggestionsContainer.style.display = 'none'; }
+            });
+            document.addEventListener('click', (e) => {
+                if (suggestionsContainer && !inputElement.contains(e.target) && !suggestionsContainer.contains(e.target)) {
+                    suggestionsContainer.style.display = 'none';
+                }
+            });
+        }
+
+        // --- TAB LOGIC ---
+        window.openTab = function(evt, tabName) {
+            var i, tabcontent, tabbuttons;
+            tabcontent = document.getElementsByClassName("tab-content");
+            for (i = 0; i < tabcontent.length; i++) {
+                tabcontent[i].style.display = "none";
+            }
+            tabbuttons = createTabNavigation.getElementsByClassName("tab-button"); // Use createTabNavigation
+            for (i = 0; i < tabbuttons.length; i++) {
+                tabbuttons[i].className = tabbuttons[i].className.replace(" active", "");
+            }
+            const targetTab = document.getElementById(tabName);
+            if(targetTab) targetTab.style.display = "block";
+            
+            let eventTargetButton = null;
+            if (evt && evt.currentTarget) { 
+                eventTargetButton = evt.currentTarget;
+            } else { 
+                for (i = 0; i < tabbuttons.length; i++) {
+                    const onclickAttr = tabbuttons[i].getAttribute('onclick');
+                    if (onclickAttr && onclickAttr.includes(`'${tabName}'`)) {
+                        eventTargetButton = tabbuttons[i];
+                        break;
+                    }
+                }
+            }
+            if(eventTargetButton) eventTargetButton.className += " active";
+
+
+            // Data loading specific to opened tab
+            if (tabName === 'tabJogador') {
+                loadPosicoesParaDropdown(); 
+                loadPaisesParaSugestoes(false); // false for 'Criar Jogador' context
+            } else if (tabName === 'tabPais') {
+                loadContinentesParaDropdown(); 
+            } else if (tabName === 'tabJogo') {
+                populateTemporadaDropdown();
+                setSuggestedJornada(); 
+                if (allClubes.length === 0) loadAllClubesData();
+                else { 
+                    if(jogoClubeCasaInput) setupSuggestionHandler(jogoClubeCasaInput, clubeCasaSuggestions, allClubes, 'nome', 'logo');
+                    if(jogoClubeForaInput) setupSuggestionHandler(jogoClubeForaInput, clubeForaSuggestions, allClubes, 'nome', 'logo');
+                }
+                if (allJogadores.length === 0) {
+                    loadAllJogadoresCache().then(() => { 
+                        if (jogo11InicialContainer && jogo11InicialContainer.children.length === 0) setupDynamicPlayerInputs('jogo11InicialContainer', 11, 'inicial');
+                        if (jogoSuplentesContainer && jogoSuplentesContainer.children.length === 0) setupDynamicPlayerInputs('jogoSuplentesContainer', 11, 'suplente');
+                        if(goalDetailJogadorInput) setupSuggestionHandler(goalDetailJogadorInput, goalDetailJogadorSuggestions, allJogadores, 'nome', 'imagem_link');
+                        if(goalDetailAssistenciaInput) setupSuggestionHandler(goalDetailAssistenciaInput, goalDetailAssistenciaSuggestions, allJogadores, 'nome', 'imagem_link');
+                    });
+                } else { 
+                     if (jogo11InicialContainer && jogo11InicialContainer.children.length === 0) setupDynamicPlayerInputs('jogo11InicialContainer', 11, 'inicial');
+                     if (jogoSuplentesContainer && jogoSuplentesContainer.children.length === 0) setupDynamicPlayerInputs('jogoSuplentesContainer', 11, 'suplente');
+                     if(goalDetailJogadorInput) setupSuggestionHandler(goalDetailJogadorInput, goalDetailJogadorSuggestions, allJogadores, 'nome', 'imagem_link');
+                     if(goalDetailAssistenciaInput) setupSuggestionHandler(goalDetailAssistenciaInput, goalDetailAssistenciaSuggestions, allJogadores, 'nome', 'imagem_link');
+                }
+                if (goalZoneGridContainer && goalZoneGridContainer.children.length === 0) populateGoalZoneGrid();
+            }
+        }
+
+        // --- DATA LOADING FUNCTIONS ---
+        async function loadAllJogadoresCache() { /* ... (definição completa como antes) ... */ }
+        async function loadAllPosicoesData() { /* ... (definição completa como antes) ... */ }
+        async function loadPosicoesParaDropdown() { /* ... (definição completa como antes, usando jogadorPosEspecificaDropdown) ... */ }
+        async function loadAllPaisesData() { /* ... (definição completa como antes, populando allPaisesData e allPaisesSimpleList) ... */ }
+        async function loadPaisesParaSugestoes(forEditForm = false) { /* ... (definição completa como antes, usando jogadorPaisNomeInput e paisSuggestionsContainer) ... */ }
+        async function loadAllContinentesSet() { /* ... (definição completa como antes) ... */ }
+        async function loadContinentesParaDropdown() { /* ... (definição completa como antes, usando paisContinenteSelect) ... */ }
+        async function loadAllClubesData() { /* ... (definição completa como antes, focada em popular allClubes para 'Criar Jogo') ... */ }
+
+        // --- "CRIAR" FORMS LOGIC & SUBMIT HANDLERS ---
+        async function handleFormClubeSubmit(e) { /* ... (definição completa como antes) ... */ }
+        async function handleFormPosicaoSubmit(e) { /* ... (definição completa como antes) ... */ }
+        async function handleFormJogadorSubmit(e) { /* ... (definição completa como antes) ... */ }
+        async function handleFormPaisSubmit(e) { /* ... (definição completa como antes) ... */ }
+
+        // --- "CRIAR JOGO" SPECIFIC LOGIC ---
+        function populateTemporadaDropdown() { /* ... (definição completa como antes) ... */ }
+        async function setSuggestedJornada() { /* ... (definição completa como antes) ... */ }
+        async function handleFormJogoSubmit(e) { /* ... (definição completa como antes, usando os elementos corretos de 'Criar Jogo') ... */ }
+
+        // --- GOAL DETAIL MODAL LOGIC ---
+        function populateGoalZoneGrid() { /* ... (definição completa como antes) ... */ }
+        function handleZoneSelection(event) { /* ... (definição completa como antes) ... */ }
+        function openGoalDetailModal(event) { /* ... (definição completa como antes, usando 'create' como contexto e minutosGolosMarcados/Sofridos) ... */ }
+        function saveGoalDetailsFromModal() { /* ... (definição completa como antes, usando 'create' como contexto) ... */ }
+
+        // --- "CRIAR JOGO" - COMMON FUNCTIONS (adaptadas para não precisar de contexto explícito aqui) ---
+        function getGoalDetailStatus(details, type) { /* ... (definição completa como antes) ... */ }
+        function renderMinuteList(listElement, minutesArray, type) { /* ... (definição completa como antes, adaptada para chamar openGoalDetailModal diretamente) ... */ }
+        function addMinuteEntry(type, listElement, minutesArray) { /* ... (definição completa como antes) ... */ }
+        function setupDynamicPlayerInputs(containerId, numPlayers, rolePrefix) { /* ... (definição completa como antes) ... */ }
+        function updateCalculatedScores() { /* ... (definição completa como antes, usando os elementos de output de 'Criar Jogo') ... */ }
+        
+        // --- INITIALIZATION (DOMContentLoaded) ---
+        document.addEventListener('DOMContentLoaded', () => {
+            const firstTabButton = createTabNavigation.querySelector('.tab-button');
+            if (firstTabButton) {
+                const onclickAttr = firstTabButton.getAttribute('onclick');
+                const match = onclickAttr.match(/openTab\s*\(\s*event\s*,\s*'([^']*)'\s*\)/);
+                if (match && match[1]) {
+                    openTab(null, match[1]); // Open first tab programmatically
+                }
+            } else {
+                console.warn("Nenhum botão de aba encontrado para abrir inicialmente.");
+            }
+            
+            legendPlacarStats?.addEventListener('click', () => {
+                const content = document.querySelector('#fieldsetPlacarStats .toggle-content');
+                const indicator = legendPlacarStats.querySelector('.toggle-indicator');
+                const fieldset = document.getElementById('fieldsetPlacarStats');
+                if (content && indicator && fieldset) {
+                    const isOpen = content.style.display === 'block';
+                    content.style.display = isOpen ? 'none' : 'block';
+                    indicator.textContent = isOpen ? '[+]' : '[-]';
+                    fieldset.classList.toggle('open', !isOpen);
+                }
+            });
+            
+            // Initial data loads that might be useful early
+            loadAllJogadoresCache(); 
+            loadAllPosicoesData();
+            loadAllPaisesData(); 
+            loadAllClubesData(); 
+
+            addMinutoGoloMarcadoBtn?.addEventListener('click', () => addMinuteEntry('marcado', listaMinutosGolosMarcadosEl, minutosGolosMarcados));
+            addMinutoGoloSofridoBtn?.addEventListener('click', () => addMinuteEntry('sofrido', listaMinutosGolosSofridosEl, minutosGolosSofridos));
+            jogoClubeCasaInput?.addEventListener('change', updateCalculatedScores);
+            jogoClubeForaInput?.addEventListener('change', updateCalculatedScores);
+            jogoTemporadaSelect?.addEventListener('change', setSuggestedJornada);
+            jogadorPosEspecificaDropdown?.addEventListener('change', function() { 
+                if(jogadorPosGenericaInput) jogadorPosGenericaInput.value = this.value && posicoesMap.has(this.value) ? posicoesMap.get(this.value) : '';
+            });
+            
+            closeGoalDetailModalBtn?.addEventListener('click', () => {if(goalDetailModal) goalDetailModal.style.display = 'none'});
+            saveGoalDetailBtn?.addEventListener('click', saveGoalDetailsFromModal);
+
+            formJogo?.addEventListener('submit', handleFormJogoSubmit);
+            formClube?.addEventListener('submit', handleFormClubeSubmit);
+            formPosicao?.addEventListener('submit', handleFormPosicaoSubmit);
+            formJogador?.addEventListener('submit', handleFormJogadorSubmit);
+            formPais?.addEventListener('submit', handleFormPaisSubmit);
+        });
+    </script>
+</body>
+</html>

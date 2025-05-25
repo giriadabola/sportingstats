@@ -710,11 +710,11 @@
     </div>
 
     <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+              import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
         import { getFirestore, doc, setDoc, collection, getDocs, serverTimestamp, addDoc, query, where } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
         const firebaseConfig = {
-            apiKey: "AIzaSyASIFSwhZj8B4ON6fVGjNixgLW-CL39CnI", 
+            apiKey: "AIzaSyASIFSwhZj8B4ON6fVGjNixgLW-CL39CnI",
             authDomain: "sporting-stats.firebaseapp.com",
             projectId: "sporting-stats",
             storageBucket: "sporting-stats.firebasestorage.app",
@@ -728,27 +728,27 @@
         let posicoesMap = new Map();
         let allPaises = [];
         let allContinentesSet = new Set();
-        
+
         let allClubes = [];
-        let allJogadores = []; 
-        let minutosGolosMarcados = []; 
-        let minutosGolosSofridos = []; 
+        let allJogadores = [];
+        let minutosGolosMarcados = [];
+        let minutosGolosSofridos = [];
         const goalZoneNames = [
             "Esquerda Cima", "Meio Cima", "Direita Cima",
             "Esquerda Centro", "Meio Centro", "Direita Centro",
             "Esquerda Baixo", "Meio Baixo", "Direita Baixo"
         ];
-        
+
         let sportingClubeDetalhes = null;
-        const SPORTING_CP_CANONICAL_NAME = "Sporting CP"; 
-        const sportingCanonicoNomesInputCheck = ["sporting cp", "sporting"]; 
+        const SPORTING_CP_CANONICAL_NAME = "Sporting CP";
+        const sportingCanonicoNomesInputCheck = ["sporting cp", "sporting"];
 
         const jogoLiveCheckbox = document.getElementById('jogoLive');
         const jogoTerminadoCheckbox = document.getElementById('jogoTerminado');
         const jogoFuturoCheckbox = document.getElementById('jogoFuturo');
 
         function syncGameStatusCheckboxes() {
-            const source = this; 
+            const source = this;
 
             if (source === jogoTerminadoCheckbox && jogoTerminadoCheckbox.checked) {
                 jogoLiveCheckbox.checked = false;
@@ -760,13 +760,13 @@
                 jogoLiveCheckbox.checked = false;
                 jogoTerminadoCheckbox.checked = false;
             }
-            
-            if (jogoTerminadoCheckbox.checked) { 
+
+            if (jogoTerminadoCheckbox.checked) {
                 jogoLiveCheckbox.checked = false;
                 jogoFuturoCheckbox.checked = false;
-            } else if (jogoLiveCheckbox.checked) { 
+            } else if (jogoLiveCheckbox.checked) {
                 jogoFuturoCheckbox.checked = false;
-            } else { 
+            } else {
                 jogoFuturoCheckbox.checked = true;
             }
         }
@@ -787,7 +787,7 @@
                 tabbuttons[i].className = tabbuttons[i].className.replace(" active", "");
             }
             document.getElementById(tabName).style.display = "block";
-            if (evt && evt.currentTarget) { 
+            if (evt && evt.currentTarget) {
                  evt.currentTarget.className += " active";
             }
 
@@ -798,9 +798,9 @@
                 loadContinentesParaDropdown();
             } else if (tabName === 'tabJogo') {
                 populateTemporadaDropdown();
-                setSuggestedJornada(); 
-                loadClubesParaJogo(); 
-                loadJogadoresParaJogo().then(() => { 
+                setSuggestedJornada();
+                loadClubesParaJogo();
+                loadJogadoresParaJogo().then(() => {
                     if (document.getElementById('jogo11InicialContainer').children.length === 0) {
                          setupDynamicPlayerInputs('jogo11InicialContainer', 11, 'inicial');
                     }
@@ -808,19 +808,19 @@
                         setupDynamicPlayerInputs('jogoSuplentesContainer', 11, 'suplente');
                     }
                 });
-                if (goalZoneGridContainer.children.length === 0) { 
+                if (goalZoneGridContainer.children.length === 0) {
                     populateGoalZoneGrid();
                 }
-                syncGameStatusCheckboxes.call(window); 
+                syncGameStatusCheckboxes.call(window);
             }
         }
-        
+
         document.addEventListener('DOMContentLoaded', () => {
             const defaultTabButton = document.querySelector('.tab-button[onclick*="tabJogo"]');
             if (defaultTabButton) {
                  openTab({ currentTarget: defaultTabButton }, 'tabJogo');
             }
-            
+
             const placarStatsLegend = document.getElementById('legendPlacarStats');
             const placarStatsContent = document.querySelector('#fieldsetPlacarStats .toggle-content');
             const placarStatsFieldset = document.getElementById('fieldsetPlacarStats');
@@ -843,9 +843,15 @@
                 console.warn("Toggle elements for Placar/Estatísticas not found.");
             }
 
-            jogoTemporadaSelect.addEventListener('change', setSuggestedJornada); 
+            jogoTemporadaSelect.addEventListener('change', setSuggestedJornada);
             jogoClubeCasaInput.addEventListener('change', handleClubeCasaChange);
             jogoClubeForaInput.addEventListener('change', handleClubeForaChange);
+            // Trigger initial update of calculated scores based on default checkbox state
+            jogoClubeCasaInput.addEventListener('input', updateCalculatedScores);
+            jogoClubeForaInput.addEventListener('input', updateCalculatedScores);
+            jogoLiveCheckbox.addEventListener('change', updateCalculatedScores);
+            jogoTerminadoCheckbox.addEventListener('change', updateCalculatedScores);
+            jogoFuturoCheckbox.addEventListener('change', updateCalculatedScores);
         });
 
         function showStatus(elementId, message, isSuccess) {
@@ -855,7 +861,7 @@
             setTimeout(() => { statusEl.textContent = ''; statusEl.className = 'status-message'; }, 5000);
         }
 
-        document.getElementById('formClube').addEventListener('submit', async (e) => { 
+        document.getElementById('formClube').addEventListener('submit', async (e) => {
             e.preventDefault();
             const nome = document.getElementById('clubeNome').value.trim();
             const logo = document.getElementById('clubeLogo').value.trim();
@@ -865,8 +871,8 @@
             try {
                 await setDoc(doc(db, "clubes", nome), { nome, logo, regiao, cidade });
                 showStatus('statusClube', `Clube "${nome}" adicionado!`, true); e.target.reset();
-                allClubes = []; 
-                sportingClubeDetalhes = null; 
+                allClubes = [];
+                sportingClubeDetalhes = null;
             } catch (error) { showStatus('statusClube', `Erro: ${error.message}`, false); console.error(error); }
         });
 
@@ -878,11 +884,11 @@
             try {
                 await setDoc(doc(db, "posicoes", abreviacao), { abreviacao, posicao_generica });
                 showStatus('statusPosicao', `Posição "${abreviacao}" adicionada!`, true); e.target.reset();
-                posicoesMap.clear(); 
+                posicoesMap.clear();
                 if (document.getElementById('tabJogador').style.display === 'block') loadPosicoesParaDropdown();
             } catch (error) { showStatus('statusPosicao', `Erro: ${error.message}`, false); console.error(error); }
         });
-        
+
         const paisContinenteSelect = document.getElementById('paisContinenteSelect');
         async function loadContinentesParaDropdown() {
             if (allContinentesSet.size > 0 && paisContinenteSelect.options.length > 1 && paisContinenteSelect.options[0].value !== "") return;
@@ -903,18 +909,18 @@
                 showStatus('statusPais', 'Erro ao carregar continentes.', false);
             }
         }
-        document.getElementById('formPais').addEventListener('submit', async (e) => { 
+        document.getElementById('formPais').addEventListener('submit', async (e) => {
             e.preventDefault();
             const nome = document.getElementById('paisNome').value.trim();
             const bandeira = document.getElementById('paisBandeira').value.trim();
-            const continente = paisContinenteSelect.value; 
+            const continente = paisContinenteSelect.value;
             if (!nome || !bandeira || !continente) { showStatus('statusPais', 'Todos os campos são obrigatórios.', false); return; }
             try {
                 await setDoc(doc(db, "paises", nome), { nome, bandeira, continente });
-                showStatus('statusPais', `País "${nome}" adicionado!`, true); e.target.reset(); 
-                paisContinenteSelect.value = ""; allPaises = []; allContinentesSet.clear(); 
+                showStatus('statusPais', `País "${nome}" adicionado!`, true); e.target.reset();
+                paisContinenteSelect.value = ""; allPaises = []; allContinentesSet.clear();
                 if (document.getElementById('tabJogador').style.display === 'block') loadPaisesParaSugestoes();
-                loadContinentesParaDropdown(); 
+                loadContinentesParaDropdown();
             } catch (error) { showStatus('statusPais', `Erro: ${error.message}`, false); console.error(error); }
         });
 
@@ -923,7 +929,7 @@
         const jogadorPaisNomeInput = document.getElementById('jogadorPaisNome');
         const paisSuggestionsContainer = document.getElementById('paisSuggestions');
 
-        async function loadPosicoesParaDropdown() { 
+        async function loadPosicoesParaDropdown() {
             if (posicoesMap.size > 0 && posEspecificaDropdown.options.length > 1 && posEspecificaDropdown.options[0].value !== "") return;
             posEspecificaDropdown.innerHTML = '<option value="">A carregar posições...</option>';
             posGenericaInput.value = ''; posicoesMap.clear();
@@ -941,19 +947,19 @@
                 showStatus('statusJogador', 'Erro ao carregar posições.', false);
             }
         }
-        posEspecificaDropdown.addEventListener('change', function() { 
+        posEspecificaDropdown.addEventListener('change', function() {
             posGenericaInput.value = this.value && posicoesMap.has(this.value) ? posicoesMap.get(this.value) : '';
         });
-        async function loadPaisesParaSugestoes() { 
-            if (allPaises.length > 0) return; 
-            allPaises = []; 
+        async function loadPaisesParaSugestoes() {
+            if (allPaises.length > 0) return;
+            allPaises = [];
             try {
                 const querySnapshot = await getDocs(collection(db, "paises"));
                 querySnapshot.forEach((docSnap) => allPaises.push(docSnap.data().nome));
-                allPaises.sort(); 
+                allPaises.sort();
             } catch (error) { console.error("Erro ao carregar países: ", error); showStatus('statusJogador', 'Erro ao carregar países.', false); }
         }
-        
+
         function setupSuggestionHandler(inputElement, suggestionsContainer, dataArray, displayField, imageField = null, clearBtnElement = null) {
             inputElement.addEventListener('input', function() {
                 const inputText = this.value.toLowerCase();
@@ -988,7 +994,7 @@
                         const textSpan = document.createElement('span'); textSpan.textContent = itemText;
                         suggestionItemDiv.appendChild(textSpan);
                         suggestionItemDiv.addEventListener('click', function() {
-                            inputElement.value = itemText; 
+                            inputElement.value = itemText;
                             suggestionsContainer.style.display = 'none';
                             if (imageField && typeof item === 'object' && item[imageField]) {
                                 inputElement.style.backgroundImage = `url('${item[imageField]}')`;
@@ -1006,8 +1012,8 @@
                         suggestionsContainer.appendChild(suggestionItemDiv);
                     });
                     suggestionsContainer.style.display = 'block';
-                } else { 
-                    suggestionsContainer.style.display = 'none'; 
+                } else {
+                    suggestionsContainer.style.display = 'none';
                 }
             });
             document.addEventListener('click', (e) => {
@@ -1015,7 +1021,7 @@
             });
         }
         setupSuggestionHandler(jogadorPaisNomeInput, paisSuggestionsContainer, allPaises, null);
-        
+
         document.getElementById('formJogador').addEventListener('submit', async (e) => {
             e.preventDefault();
             const nome_jogador = document.getElementById('jogadorNome').value.trim();
@@ -1026,19 +1032,19 @@
             if (!nome_jogador || !imagem_link || !posEspecifica || !paisNomeForm) { showStatus('statusJogador', 'Todos os campos são obrigatórios.', false); return; }
             if (!posGenerica) { showStatus('statusJogador', 'Posição genérica não definida.', false); return; }
             try {
-                await setDoc(doc(db, "jogadores", nome_jogador), { 
+                await setDoc(doc(db, "jogadores", nome_jogador), {
                     nome_jogador, imagem_link, posicao_especifica_id: posEspecifica, posicao_especifica_nome: posEspecifica,
                     posicao_generica_id: posGenerica, posicao_generica_nome: posGenerica,
-                    pais_id: paisNomeForm, pais_nome: paisNomeForm 
+                    pais_id: paisNomeForm, pais_nome: paisNomeForm
                 });
-                showStatus('statusJogador', `Jogador "${nome_jogador}" adicionado!`, true); 
-                e.target.reset(); posGenericaInput.value = ''; paisSuggestionsContainer.style.display = 'none'; 
-                allJogadores = []; 
+                showStatus('statusJogador', `Jogador "${nome_jogador}" adicionado!`, true);
+                e.target.reset(); posGenericaInput.value = ''; paisSuggestionsContainer.style.display = 'none';
+                allJogadores = [];
             } catch (error) { showStatus('statusJogador', `Erro: ${error.message}`, false); console.error(error); }
         });
 
         const jogoTemporadaSelect = document.getElementById('jogoTemporada');
-        const jogoJornadaSelect = document.getElementById('jogoJornada'); 
+        const jogoJornadaSelect = document.getElementById('jogoJornada');
         const jogoClubeCasaInput = document.getElementById('jogoClubeCasa');
         const clubeCasaSuggestions = document.getElementById('clubeCasaSuggestions');
         const jogoClubeForaInput = document.getElementById('jogoClubeFora');
@@ -1058,7 +1064,7 @@
         const jogoSofridos1P = document.getElementById('jogoSofridos1P');
         const jogoSofridos2P = document.getElementById('jogoSofridos2P');
         const jogoEstado = document.getElementById('jogoEstado');
-        const jogoNomeJogo = document.getElementById('jogoNomeJogo'); 
+        const jogoNomeJogo = document.getElementById('jogoNomeJogo');
         const jogoResultadoFinal = document.getElementById('jogoResultadoFinal');
         const goalDetailModal = document.getElementById('goalDetailModal');
         const closeGoalDetailModalBtn = document.getElementById('closeGoalDetailModalBtn');
@@ -1085,7 +1091,7 @@
                 jogoTemporadaSelect.add(new Option(displayTemporada, displayTemporada));
             }
         }
-        
+
         async function setSuggestedJornada() {
             const selectedTemporadaValue = jogoTemporadaSelect.value;
             if (!selectedTemporadaValue) {
@@ -1104,7 +1110,7 @@
                      jogoTerminadoCheckbox.checked = false;
                 }
             }
-            syncGameStatusCheckboxes(); 
+            syncGameStatusCheckboxes();
 
             if (jogoJornadaSelect.options.length <= 1 || (jogoJornadaSelect.options.length > 0 && jogoJornadaSelect.options[0].value === "")) {
                 const currentJornadaVal = jogoJornadaSelect.value;
@@ -1115,7 +1121,7 @@
                 if (currentJornadaVal && !isNaN(parseInt(currentJornadaVal)) && parseInt(currentJornadaVal) >=1 && parseInt(currentJornadaVal) <=40) {
                     jogoJornadaSelect.value = currentJornadaVal;
                 } else {
-                     jogoJornadaSelect.value = ""; 
+                     jogoJornadaSelect.value = "";
                 }
                 if (jogoJornadaSelect.value === "") {
                     jogoJornadaSelect.options[0].textContent = "Selecione a Jornada";
@@ -1127,7 +1133,7 @@
                 if (jogoJornadaSelect.value === "" && jogoJornadaSelect.options.length > 0 && jogoJornadaSelect.options[0].value === "") {
                      jogoJornadaSelect.options[0].textContent = "Selecione a Jornada";
                 }
-                return; 
+                return;
             }
             const originalJornadaPlaceholder = jogoJornadaSelect.options[0].value === "" ? jogoJornadaSelect.options[0].textContent : null;
             if (jogoJornadaSelect.options[0].value === "") {
@@ -1144,20 +1150,20 @@
                     }
                 });
                 const nextJornada = maxJornada + 1;
-                const suggestedJornadaValue = Math.min(nextJornada, 40); 
+                const suggestedJornadaValue = Math.min(nextJornada, 40);
                 if (jogoJornadaSelect.querySelector(`option[value="${suggestedJornadaValue.toString()}"]`)) {
                     jogoJornadaSelect.value = suggestedJornadaValue.toString();
-                } else if (jogoJornadaSelect.options.length > 1) { 
-                     jogoJornadaSelect.value = jogoJornadaSelect.options[1].value; 
+                } else if (jogoJornadaSelect.options.length > 1) {
+                     jogoJornadaSelect.value = jogoJornadaSelect.options[1].value;
                 } else {
-                    jogoJornadaSelect.value = ""; 
+                    jogoJornadaSelect.value = "";
                 }
             } catch (error) {
                 console.error("Erro ao sugerir próxima jornada:", error);
                 showStatus('statusJogo', 'Erro ao calcular jornada. Selecione manualmente.', false);
             } finally {
                  if (jogoJornadaSelect.options[0].value === "" && (jogoJornadaSelect.options[0].textContent.includes("calcular") || jogoJornadaSelect.options[0].textContent.includes("carregar")) ) {
-                     if (jogoJornadaSelect.value === "") { 
+                     if (jogoJornadaSelect.value === "") {
                         jogoJornadaSelect.options[0].textContent = originalJornadaPlaceholder || "Selecione a Jornada";
                      } else {
                         if (jogoJornadaSelect.options[0].value === "") jogoJornadaSelect.options[0].textContent = "Selecione a Jornada";
@@ -1167,7 +1173,7 @@
         }
 
         async function loadClubesParaJogo() {
-            if (allClubes.length > 0 && sportingClubeDetalhes) { 
+            if (allClubes.length > 0 && sportingClubeDetalhes) {
                  setupSuggestionHandler(jogoClubeCasaInput, clubeCasaSuggestions, allClubes, 'nome', 'logo');
                  setupSuggestionHandler(jogoClubeForaInput, clubeForaSuggestions, allClubes, 'nome', 'logo');
                 return;
@@ -1178,7 +1184,7 @@
                 const snap = await getDocs(collection(db, "clubes"));
                 snap.forEach(s => allClubes.push({ id: s.id, nome: s.data().nome, logo: s.data().logo }));
                 allClubes.sort((a, b) => a.nome.localeCompare(b.nome));
-                
+
                 sportingClubeDetalhes = allClubes.find(c => c.nome.toLowerCase() === SPORTING_CP_CANONICAL_NAME.toLowerCase());
                 if (!sportingClubeDetalhes) {
                     sportingClubeDetalhes = allClubes.find(c => sportingCanonicoNomesInputCheck.includes(c.nome.toLowerCase()));
@@ -1191,7 +1197,7 @@
                 setupSuggestionHandler(jogoClubeForaInput, clubeForaSuggestions, allClubes, 'nome', 'logo');
             } catch (e) { console.error("Erro loadClubes: ", e); showStatus('statusJogo', 'Erro lista de clubes.', false); }
         }
-        
+
         function handleClubeCasaChange() {
             if (!sportingClubeDetalhes) return;
             const casaNome = jogoClubeCasaInput.value.trim();
@@ -1242,12 +1248,12 @@
 
 
         async function loadJogadoresParaJogo() {
-            if (allJogadores.length > 0) { 
+            if (allJogadores.length > 0) {
                 setupSuggestionHandler(goalDetailJogadorInput, goalDetailJogadorSuggestions, allJogadores, 'nome', 'imagem_link');
                 setupSuggestionHandler(goalDetailAssistenciaInput, goalDetailAssistenciaSuggestions, allJogadores, 'nome', 'imagem_link');
                 return;
             }
-            allJogadores = []; 
+            allJogadores = [];
             try {
                 const snap = await getDocs(collection(db, "jogadores"));
                 snap.forEach(s => allJogadores.push({ id: s.id, nome: s.data().nome_jogador, imagem_link: s.data().imagem_link }));
@@ -1278,7 +1284,7 @@
                 listItem.classList.add('minute-list-item');
                 const statusClass = getGoalDetailStatus(entry.details, type);
                 listItem.classList.add(statusClass);
-                
+
                 const textAndScorerContainer = document.createElement('div');
                 textAndScorerContainer.classList.add('minute-text-scorer-container');
 
@@ -1286,8 +1292,8 @@
                 minuteSpan.classList.add('minute-value');
                 minuteSpan.textContent = `Minuto ${entry.minute}`;
                 minuteSpan.dataset.index = index;
-                minuteSpan.dataset.type = type; 
-                minuteSpan.dataset.minute = entry.minute; 
+                minuteSpan.dataset.type = type;
+                minuteSpan.dataset.minute = entry.minute;
                 minuteSpan.addEventListener('click', openGoalDetailModal);
                 textAndScorerContainer.appendChild(minuteSpan);
 
@@ -1308,7 +1314,7 @@
 
                     const scorerSpan = document.createElement('span');
                     scorerSpan.classList.add('scorer-name');
-                    scorerSpan.textContent = entry.details.jogadorNome; 
+                    scorerSpan.textContent = entry.details.jogadorNome;
                     textAndScorerContainer.appendChild(scorerSpan);
                 }
 
@@ -1317,7 +1323,7 @@
                 removeBtn.innerHTML = '×';
                 removeBtn.addEventListener('click', () => {
                     minutesArray.splice(index, 1);
-                    renderMinuteList(listElement, minutesArray, type); 
+                    renderMinuteList(listElement, minutesArray, type);
                     updateCalculatedScores();
                 });
 
@@ -1359,7 +1365,7 @@
             goalDetailModalTitle.textContent = `Detalhes do Golo - Minuto ${minuteEntry.minute} (${type})`;
             formGoalDetail.reset(); selectedGoalZoneHidden.value = '';
             goalZoneGridContainer.querySelectorAll('.goal-zone-cell').forEach(cell => cell.classList.remove('selected'));
-            
+
             goalDetailJogadorInput.style.backgroundImage = 'none';
             goalDetailJogadorInput.classList.remove('has-image-bg');
             goalDetailAssistenciaInput.style.backgroundImage = 'none';
@@ -1413,52 +1419,52 @@
         });
 
         function updateCalculatedScores() {
-            const casaNomeInput = jogoClubeCasaInput.value.trim(); 
-            const foraNomeInput = jogoClubeForaInput.value.trim(); 
+            const casaNomeInput = jogoClubeCasaInput.value.trim();
+            const foraNomeInput = jogoClubeForaInput.value.trim();
             const casaNomeLower = casaNomeInput.toLowerCase();
             const foraNomeLower = foraNomeInput.toLowerCase();
-            
+
             const isSportingCasa = sportingCanonicoNomesInputCheck.includes(casaNomeLower);
             const isSportingFora = sportingCanonicoNomesInputCheck.includes(foraNomeLower);
 
             const gMarcadosPeloSporting = minutosGolosMarcados.length;
             const gSofridosPeloSporting = minutosGolosSofridos.length;
-            
+
             let gmCasaFinal, gmForaFinal, gsCasaFinal, gsForaFinal;
 
             if (isSportingCasa) {
-                gmCasaFinal = gMarcadosPeloSporting; 
-                gmForaFinal = gSofridosPeloSporting; 
-                gsCasaFinal = gSofridosPeloSporting; 
-                gsForaFinal = gMarcadosPeloSporting; 
+                gmCasaFinal = gMarcadosPeloSporting;
+                gmForaFinal = gSofridosPeloSporting;
+                gsCasaFinal = gSofridosPeloSporting;
+                gsForaFinal = gMarcadosPeloSporting;
             } else if (isSportingFora) {
-                gmCasaFinal = gSofridosPeloSporting; 
-                gmForaFinal = gMarcadosPeloSporting; 
-                gsCasaFinal = gMarcadosPeloSporting; 
-                gsForaFinal = gSofridosPeloSporting; 
-            } else { 
-                if (isSportingCasa && !foraNomeInput) { 
+                gmCasaFinal = gSofridosPeloSporting;
+                gmForaFinal = gMarcadosPeloSporting;
+                gsCasaFinal = gMarcadosPeloSporting;
+                gsForaFinal = gSofridosPeloSporting;
+            } else {
+                if (isSportingCasa && !foraNomeInput) {
                     gmCasaFinal = gMarcadosPeloSporting;
-                    gmForaFinal = gSofridosPeloSporting; 
+                    gmForaFinal = gSofridosPeloSporting;
                     gsCasaFinal = gSofridosPeloSporting;
                     gsForaFinal = gMarcadosPeloSporting;
-                } else if (isSportingFora && !casaNomeInput) { 
+                } else if (isSportingFora && !casaNomeInput) {
                      gmForaFinal = gMarcadosPeloSporting;
-                     gmCasaFinal = gSofridosPeloSporting; 
+                     gmCasaFinal = gSofridosPeloSporting;
                      gsForaFinal = gSofridosPeloSporting;
                      gsCasaFinal = gMarcadosPeloSporting;
-                } else if (!casaNomeInput && !foraNomeInput) { 
+                } else if (!casaNomeInput && !foraNomeInput) {
                     gmCasaFinal = 0; gmForaFinal = 0; gsCasaFinal = 0; gsForaFinal = 0;
                 } else if ((casaNomeInput && !isSportingCasa) && (foraNomeInput && !isSportingFora)) {
                     gmCasaFinal = 0; gmForaFinal = 0; gsCasaFinal = 0; gsForaFinal = 0;
-                } else { 
+                } else {
                     gmCasaFinal = 0; gmForaFinal = 0; gsCasaFinal = 0; gsForaFinal = 0;
                 }
             }
-            
-            jogoGMCasa.value = gmCasaFinal; 
+
+            jogoGMCasa.value = gmCasaFinal;
             jogoGMFora.value = gmForaFinal;
-            jogoGSCasa.value = gsCasaFinal; 
+            jogoGSCasa.value = gsCasaFinal;
             jogoGSFora.value = gsForaFinal;
 
             jogoResultadoFinal.value = `${gmCasaFinal}-${gmForaFinal}`;
@@ -1479,7 +1485,7 @@
                 // Original logic for non-futuro games (e.g., Live, Terminado)
                 // or when "Futuro" is not the primary active state.
                 jogoNomeJogo.value = (casaNomeInput && foraNomeInput) ? `${casaNomeInput} ${gmCasaFinal}-${gmForaFinal} ${foraNomeInput}` : (casaNomeInput ? `${casaNomeInput} vs ?` : (foraNomeInput ? `? vs ${foraNomeInput}`: ""));
-            }                        
+            }
             jogoMarcados1P.value = minutosGolosMarcados.filter(g => g.minute <= 45).length;
             jogoMarcados2P.value = minutosGolosMarcados.filter(g => g.minute > 45).length;
             jogoSofridos1P.value = minutosGolosSofridos.filter(g => g.minute <= 45).length;
@@ -1491,16 +1497,16 @@
                 jogoEstado.value = "V (Vitória)";
             } else if (gMarcadosPeloSporting < gSofridosPeloSporting) {
                 jogoEstado.value = "D (Derrota)";
-            } else { 
+            } else {
                 jogoEstado.value = "E (Empate)";
             }
         }
-        
+
         function setupDynamicPlayerInputs(containerId, numPlayers, rolePrefix) {
-            const container = document.getElementById(containerId); 
-            container.innerHTML = ''; 
+            const container = document.getElementById(containerId);
+            container.innerHTML = '';
             for (let i = 1; i <= numPlayers; i++) {
-                const wrapperDiv = document.createElement('div'); 
+                const wrapperDiv = document.createElement('div');
                 wrapperDiv.classList.add('player-input-wrapper');
                 const inputId = `${containerId}_${rolePrefix}_${i}`;
                 const input = document.createElement('input');
@@ -1509,15 +1515,15 @@
                 const suggId = `${containerId}_sugg_${rolePrefix}_${i}`;
                 const suggDiv = document.createElement('div');
                 suggDiv.id = suggId; suggDiv.classList.add('suggestions-container'); suggDiv.style.display = 'none';
-                const clearBtn = document.createElement('span'); 
-                clearBtn.classList.add('player-input-clear-btn'); clearBtn.innerHTML = '×'; clearBtn.style.display = 'none'; 
+                const clearBtn = document.createElement('span');
+                clearBtn.classList.add('player-input-clear-btn'); clearBtn.innerHTML = '×'; clearBtn.style.display = 'none';
                 clearBtn.addEventListener('click', function() {
                     input.value = ''; input.style.backgroundImage = 'none';
-                    input.classList.remove('has-image-bg'); input.classList.remove('has-clear-btn'); 
-                    this.style.display = 'none'; 
-                    input.dispatchEvent(new Event('input', { bubbles: true })); 
+                    input.classList.remove('has-image-bg'); input.classList.remove('has-clear-btn');
+                    this.style.display = 'none';
+                    input.dispatchEvent(new Event('input', { bubbles: true }));
                 });
-                input.addEventListener('input', function() { 
+                input.addEventListener('input', function() {
                     if (this.value.trim() !== '') {
                         clearBtn.style.display = 'block'; input.classList.add('has-clear-btn');
                     } else {
@@ -1525,22 +1531,22 @@
                         input.style.backgroundImage = 'none'; input.classList.remove('has-image-bg');
                     }
                 });
-                wrapperDiv.appendChild(input); wrapperDiv.appendChild(clearBtn); 
-                wrapperDiv.appendChild(suggDiv); 
+                wrapperDiv.appendChild(input); wrapperDiv.appendChild(clearBtn);
+                wrapperDiv.appendChild(suggDiv);
                 container.appendChild(wrapperDiv);
                 if (allJogadores.length > 0) {
-                    setupSuggestionHandler(input, suggDiv, allJogadores, 'nome', 'imagem_link', clearBtn); 
+                    setupSuggestionHandler(input, suggDiv, allJogadores, 'nome', 'imagem_link', clearBtn);
                 }
             }
         }
-        
+
         document.getElementById('formJogo').addEventListener('submit', async (e) => {
             e.preventDefault(); const statusEl = 'statusJogo';
             const temporada = jogoTemporadaSelect.value;
-            const jornada = jogoJornadaSelect.value; 
+            const jornada = jogoJornadaSelect.value;
             const clubeCasaNome = jogoClubeCasaInput.value.trim();
             const clubeForaNome = jogoClubeForaInput.value.trim();
-            
+
             const isSportingCasa = sportingCanonicoNomesInputCheck.includes(clubeCasaNome.toLowerCase());
             const isSportingFora = sportingCanonicoNomesInputCheck.includes(clubeForaNome.toLowerCase());
 
@@ -1551,26 +1557,26 @@
             const getPlantel = (containerSel) => Array.from(document.querySelectorAll(`${containerSel} input[type="text"]`))
                 .map(inp => {
                     const nome = inp.value.trim();
-                    if (!nome) return { nome: null, id: null }; 
+                    if (!nome) return { nome: null, id: null };
                     const jogador = allJogadores.find(j => j.nome === nome);
-                    return { nome, id: jogador ? jogador.id : nome }; 
-                }).filter(p => p.nome); 
+                    return { nome, id: jogador ? jogador.id : nome };
+                }).filter(p => p.nome);
 
             const jogoData = {
-                temporada, jornada: parseInt(jornada), 
-                nomeJogo: jogoNomeJogo.value, clubeCasaNome, clubeForaNome, 
-                sportingCasa: isSportingCasa, 
+                temporada, jornada: parseInt(jornada),
+                nomeJogo: jogoNomeJogo.value, clubeCasaNome, clubeForaNome,
+                sportingCasa: isSportingCasa,
                 golosMarcadosSportingMinutos: minutosGolosMarcados.map(g => ({ minute: g.minute, details: g.details || {} })),
                 golosSofridosSportingMinutos: minutosGolosSofridos.map(g => ({ minute: g.minute, details: g.details || {} })),
-                resultadoFinal: jogoResultadoFinal.value, 
-                resultadoGMCasa: parseInt(jogoGMCasa.value) || 0, 
+                resultadoFinal: jogoResultadoFinal.value,
+                resultadoGMCasa: parseInt(jogoGMCasa.value) || 0,
                 resultadoGMFora: parseInt(jogoGMFora.value) || 0,
-                sportingGolosMarcados1P: parseInt(jogoMarcados1P.value) || 0, 
+                sportingGolosMarcados1P: parseInt(jogoMarcados1P.value) || 0,
                 sportingGolosMarcados2P: parseInt(jogoMarcados2P.value) || 0,
-                sportingGolosSofridos1P: parseInt(jogoSofridos1P.value) || 0, 
+                sportingGolosSofridos1P: parseInt(jogoSofridos1P.value) || 0,
                 sportingGolosSofridos2P: parseInt(jogoSofridos2P.value) || 0,
                 resultadoEstadoSporting: jogoEstado.value,
-                onzeInicial: getPlantel('#jogo11InicialContainer'), 
+                onzeInicial: getPlantel('#jogo11InicialContainer'),
                 suplentes: getPlantel('#jogoSuplentesContainer'),
                 jogoLive: jogoLiveCheckbox.checked,
                 jogoTerminado: jogoTerminadoCheckbox.checked,
@@ -1581,9 +1587,9 @@
             try {
                 const docRef = await addDoc(collection(db, "jogos"), jogoData);
                 showStatus(statusEl, `Jogo adicionado ID: ${docRef.id}!`, true);
-                const currentTemporada = jogoTemporadaSelect.value; 
-                e.target.reset(); 
-                
+                const currentTemporada = jogoTemporadaSelect.value;
+                e.target.reset();
+
                 jogoClubeCasaInput.style.backgroundImage = 'none';
                 jogoClubeCasaInput.classList.remove('has-image-bg');
                 jogoClubeForaInput.style.backgroundImage = 'none';
@@ -1600,15 +1606,15 @@
                 minutosGolosMarcados = []; minutosGolosSofridos = [];
                 renderMinuteList(listaMinutosGolosMarcados, minutosGolosMarcados, 'marcado');
                 renderMinuteList(listaMinutosGolosSofridos, minutosGolosSofridos, 'sofrido');
-                setupDynamicPlayerInputs('jogo11InicialContainer', 11, 'inicial'); 
+                setupDynamicPlayerInputs('jogo11InicialContainer', 11, 'inicial');
                 setupDynamicPlayerInputs('jogoSuplentesContainer', 11, 'suplente');
-                
-                updateCalculatedScores(); 
-                syncGameStatusCheckboxes.call(window); 
-                
+
+                updateCalculatedScores();
+                syncGameStatusCheckboxes.call(window);
+
                 if (currentTemporada) jogoTemporadaSelect.value = currentTemporada;
-                else jogoTemporadaSelect.value = ""; 
-                setSuggestedJornada(); 
+                else jogoTemporadaSelect.value = "";
+                setSuggestedJornada();
 
             } catch (error) { showStatus(statusEl, `Erro: ${error.message}`, false); console.error(error); }
         });

@@ -1462,8 +1462,24 @@
             jogoGSFora.value = gsForaFinal;
 
             jogoResultadoFinal.value = `${gmCasaFinal}-${gmForaFinal}`;
-            jogoNomeJogo.value = (casaNomeInput && foraNomeInput) ? `${casaNomeInput} ${gmCasaFinal}-${gmForaFinal} ${foraNomeInput}` : (casaNomeInput ? `${casaNomeInput} vs ?` : (foraNomeInput ? `? vs ${foraNomeInput}`: ""));
-            
+            if (jogoFuturoCheckbox.checked) {
+                // If "Futuro" checkbox is checked
+                if (casaNomeInput && foraNomeInput) {
+                    jogoNomeJogo.value = `${casaNomeInput} x ${foraNomeInput}`;
+                } else if (casaNomeInput) {
+                    // Consistent with existing display for partial names if "Futuro"
+                    jogoNomeJogo.value = `${casaNomeInput} vs ?`;
+                } else if (foraNomeInput) {
+                    // Consistent with existing display for partial names if "Futuro"
+                    jogoNomeJogo.value = `? vs ${foraNomeInput}`;
+                } else {
+                    jogoNomeJogo.value = "";
+                }
+            } else {
+                // Original logic for non-futuro games (e.g., Live, Terminado)
+                // or when "Futuro" is not the primary active state.
+                jogoNomeJogo.value = (casaNomeInput && foraNomeInput) ? `${casaNomeInput} ${gmCasaFinal}-${gmForaFinal} ${foraNomeInput}` : (casaNomeInput ? `${casaNomeInput} vs ?` : (foraNomeInput ? `? vs ${foraNomeInput}`: ""));
+            }                        
             jogoMarcados1P.value = minutosGolosMarcados.filter(g => g.minute <= 45).length;
             jogoMarcados2P.value = minutosGolosMarcados.filter(g => g.minute > 45).length;
             jogoSofridos1P.value = minutosGolosSofridos.filter(g => g.minute <= 45).length;

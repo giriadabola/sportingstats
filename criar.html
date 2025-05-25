@@ -5,538 +5,665 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Gestão Firebase</title>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap');
+       @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap');
 
-        body {
-            font-family: 'Roboto', Arial, sans-serif;
-            margin: 0;
-            padding: 0;
-            background-color: #f8f9fa; 
-            color: #343a40; 
-            line-height: 1.7;
-            font-size: 17px; 
-        }
-        .container {
-            width: 85%; 
-            margin: 30px auto; 
-            padding: 30px; 
-            background: #fff;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.12); 
-            border-radius: 12px; 
-        }
-        h1 {
-            color: #0056b3; 
-            text-align: center;
-            margin-bottom: 30px;
-            font-size: 2.8em; 
-            font-weight: 700;
-        }
-        h2 { 
-            color: #17a2b8; 
-            margin-top: 25px;
-            margin-bottom: 20px;
-            font-size: 2em; 
-            border-bottom: 2px solid #e9ecef;
-            padding-bottom: 10px;
-            font-weight: 500;
-        }
-        .tab-navigation {
-            overflow: hidden;
-            border-bottom: 1px solid #dee2e6;
-            margin-bottom: 30px; 
-        }
-        .tab-navigation button {
-            background-color: #e9ecef; 
-            float: left;
-            border: none;
-            outline: none;
-            cursor: pointer;
-            padding: 16px 22px; 
-            transition: background-color 0.3s ease, color 0.3s ease;
-            font-size: 1.1em; 
-            border-radius: 8px 8px 0 0; 
-            margin-right: 8px;
-            color: #495057; 
-            font-weight: 500;
-        }
-        .tab-navigation button:hover {
-            background-color: #ced4da; 
-            color: #0056b3;
-        }
-        .tab-navigation button.active {
-            background-color: #007bff; 
-            color: white;
-            box-shadow: 0 -2px 5px rgba(0,0,0,0.1) inset;
-        }
-        .tab-content {
-            display: none;
-            padding: 20px; 
-            border-top: none;
-            animation: fadeIn 0.5s ease-in-out;
-        }
-        @keyframes fadeIn {
-            from {opacity: 0; transform: translateY(10px);}
-            to {opacity: 1; transform: translateY(0);}
-        }
-        form { 
-            display: flex;
-            flex-direction: column;
-            gap: 25px; 
-        }
-        form div, form fieldset { 
-            display: flex;
-            flex-direction: column;
-            position: relative;
-            gap: 8px; 
-        }
-        
-        label { 
-            margin-bottom: 0px; 
-            font-weight: 500;
-            font-size: 1.1em; 
-            color: #495057;
-        }
-        input[type="text"], input[type="url"], input[type="number"], select { 
-            padding: 12px; 
-            border: 1px solid #ced4da;
-            border-radius: 6px;
-            font-size: 1em; 
-            box-sizing: border-box;
-            transition: border-color 0.2s ease, box-shadow 0.2s ease;
-        }
-        input[type="text"]:focus, input[type="url"]:focus, input[type="number"]:focus, select:focus {
-            border-color: #007bff;
-            box-shadow: 0 0 0 0.2rem rgba(0,123,255,.25);
-            outline: none;
-        }
-        input[readonly] { 
-            background-color: #e9ecef;
-            cursor: not-allowed;
-        }
-        button[type="submit"], .action-button { 
-            background-color: #28a745; /* Default green for submit/action */
-            color: white;
-            padding: 12px 20px; 
-            border: none;
-            border-radius: 6px;
-            cursor: pointer;
-            font-size: 1.05em; 
-            align-self: flex-start;
-            transition: background-color 0.2s ease, transform 0.1s ease;
-            font-weight: 500;
-        }
-        button[type="submit"]:hover, .action-button:hover {
-            background-color: #218838;
-            transform: translateY(-1px);
-        }
-        button[type="submit"]:active, .action-button:active {
-            transform: translateY(0px);
-        }
-        
-        /* Specific button for "Update Game" - might be blue */
-        button.update-button {
-            background-color: #007bff; /* Blue for update */
-        }
-        button.update-button:hover {
-            background-color: #0056b3;
-        }
-
-        .action-button.secondary { background-color: #6c757d; }
-        .action-button.secondary:hover { background-color: #5a6268; }
-        .action-button.danger { background-color: #dc3545; }
-        .action-button.danger:hover { background-color: #c82333; }
-
-        .status-message {
-            margin-top: 20px; padding: 15px; border-radius: 6px; font-size: 1em; font-weight: 500;
-        }
-        .status-message.success { background-color: #d1e7dd; color: #0f5132; border: 1px solid #badbcc; }
-        .status-message.error { background-color: #f8d7da; color: #842029; border: 1px solid #f5c2c7; }
-        
-        .suggestions-container {
-            position: absolute; border: 1px solid #ced4da; border-top: none; z-index: 99;
-            top: 100%; left: 0; right: 0; background-color: white; max-height: 180px;
-            overflow-y: auto; box-shadow: 0 4px 8px rgba(0,0,0,0.1); border-radius: 0 0 6px 6px;
-        }
-        .suggestion-item { 
-            padding: 8px 12px; 
-            cursor: pointer;
-            border-bottom: 1px solid #eee;
-            font-size: 1em;
-            display: flex; 
-            flex-direction: row;
-            align-items: center; 
-        }
-        .suggestion-item img {
-            width: 30px; 
-            height: 30px;
-            object-fit: contain; 
-            margin-right: 10px;
-            border-radius: 50%; 
-            border: 1px solid #ddd; 
-            flex-shrink: 0;
-        }
-        .suggestion-item span {
-            flex-grow: 1;
-            line-height: 1.4;
-        }
-        .suggestion-item:last-child { border-bottom: none; }
-        .suggestion-item:hover { background-color: #f0f8ff; color: #0056b3; }
-
-        .modal {
-            display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%;
-            overflow: auto; background-color: rgba(0,0,0,0.5);
-        }
-        .modal-content {
-            background-color: #fefefe; margin: 10% auto; padding: 25px; border: 1px solid #888;
-            width: 60%; max-width: 550px; border-radius: 8px; box-shadow: 0 5px 15px rgba(0,0,0,0.2);
-        }
-        .modal-content h3 { margin-top: 0; color: #007bff; }
-        .modal-close-btn {
-            color: #aaa; float: right; font-size: 28px; font-weight: bold;
-        }
-        .modal-close-btn:hover, .modal-close-btn:focus { color: black; text-decoration: none; cursor: pointer; }
-        
-        .form-grid { display: grid; grid-template-columns: 1fr; gap: 15px; }
-         @media (min-width: 600px) {
-            .form-grid.two-cols { grid-template-columns: 1fr 1fr; }
-            .form-grid.three-cols { grid-template-columns: repeat(3, 1fr); align-items: end; }
-        }
-        
-        /* ============================================ */
-        /* === STYLES SPECIFIC TO #tabJogo & #tabEditarJogo (SHARED) === */
-        /* ============================================ */
-
-        #tabJogo h2, #tabEditarJogo h2.form-section-title { /* Target specific h2 for form sections */
-            color: #007bff; 
-            border-bottom: 2px solid #007bff;
-            padding-bottom: 15px;
-            margin-bottom: 30px;
-            font-size: 2.2em; 
-        }
-         /* Main title for Edit tab */
-        #tabEditarJogo > h2:first-of-type {
-            color: #007bff; /* Or your preferred color for the main edit title */
-             border-bottom: 2px solid #007bff;
-            padding-bottom: 15px;
-            margin-bottom: 30px;
-            font-size: 2.2em;
-        }
-
-
-        #tabJogo form, #tabEditarJogo form {
-            gap: 30px; 
-        }
-
-        #tabJogo fieldset, #tabEditarJogo fieldset {
-            border: 1px solid #ced4da; 
-            border-radius: 10px; 
-            padding: 25px; 
-            background-color: #ffffff; 
-            box-shadow: 0 2px 8px rgba(0,0,0,0.07); 
-            transition: all 0.3s ease-in-out;
-        }
-
-        #tabJogo fieldset:nth-of-type(1), #tabEditarJogo fieldset.general-info-fieldset { 
-            border-left: 5px solid #17a2b8; 
-            background-color: #f8f9fa; 
-        }
-        #tabJogo fieldset:nth-of-type(1) legend, #tabEditarJogo fieldset.general-info-fieldset legend { color: #17a2b8; }
-
-        #tabJogo fieldset:nth-of-type(2), #tabEditarJogo fieldset.sporting-goals-fieldset { 
-            border-left: 5px solid #28a745; 
-        }
-        #tabJogo fieldset:nth-of-type(2) legend, #tabEditarJogo fieldset.sporting-goals-fieldset legend { color: #28a745; }
-        
-        #tabJogo fieldset#fieldsetPlacarStats, #tabEditarJogo fieldset.placar-stats-fieldset { 
-            border-left: 5px solid #ffc107; 
-            background-color: #fdf8e2; 
-        }
-        #tabJogo fieldset#fieldsetPlacarStats.open, #tabEditarJogo fieldset.placar-stats-fieldset.open {
-            background-color: #f8f9fa; 
-        }
-        #tabJogo fieldset#fieldsetPlacarStats legend#legendPlacarStats,
-        #tabEditarJogo fieldset.placar-stats-fieldset legend.toggle-legend { 
-            color: #c89400; 
-        }
-        
-        #tabJogo fieldset#fieldsetPlantel, #tabEditarJogo fieldset.plantel-fieldset { 
-            border-left: 5px solid #6f42c1; 
-        }
-        #tabJogo fieldset#fieldsetPlantel legend, #tabEditarJogo fieldset.plantel-fieldset legend { color: #6f42c1; }
-
-        #tabJogo fieldset#fieldsetEstadoJogo, #tabEditarJogo fieldset.estado-jogo-fieldset { 
-            border-left: 5px solid #fd7e14; 
-        }
-        #tabJogo fieldset#fieldsetEstadoJogo legend, #tabEditarJogo fieldset.estado-jogo-fieldset legend { color: #fd7e14; }
-
-        .estado-jogo-checkbox-container {
-            display: flex;
-            flex-direction: row; 
-            align-items: center; 
-            gap: 25px; 
-            flex-wrap: wrap; 
-            padding: 5px 0; 
-        }
-
-        .checkbox-item-wrapper {
-            display: flex;
-            align-items: center; 
-        }
-
-        .checkbox-item-wrapper input[type="checkbox"] {
-            margin-right: 5px; 
-            width: auto; 
-            height: auto;
-            vertical-align: middle;
-        }
-        
-        .checkbox-item-wrapper label {
-            margin-bottom: 0; 
-            font-size: 1.1em; 
-            color: #343a40;
-            font-weight: 500; 
-        }
-
-
-        #tabJogo legend, #tabEditarJogo legend {
-            font-size: 1.6em; 
-            font-weight: 600; 
-            padding: 0 15px;
-            margin-bottom: 15px; 
-        }
-
-        #tabJogo label, #tabEditarJogo label { 
-            font-size: 1.2em; 
-            color: #343a40; 
-            margin-bottom: 8px; 
-        }
-
-        #tabJogo input[type="text"], #tabEditarJogo input[type="text"],
-        #tabJogo input[type="url"], #tabEditarJogo input[type="url"],
-        #tabJogo input[type="number"], #tabEditarJogo input[type="number"],
-        #tabJogo select, #tabEditarJogo select {
-            font-size: 1.1em; 
-            padding: 14px; 
-            border-radius: 6px;
-            border: 1px solid #bcc3ca; 
-        }
-        
-        #tabJogo input#jogoClubeCasa.has-image-bg, #tabEditarJogo input#editJogoClubeCasa.has-image-bg,
-        #tabJogo input#jogoClubeFora.has-image-bg, #tabEditarJogo input#editJogoClubeFora.has-image-bg {
-            background-repeat: no-repeat;
-            background-position: 8px center;  
-            background-size: 28px 28px;    
-            padding-left: 42px !important; 
-        }
-        
-        #tabJogo .player-input-grid input[type="text"].has-image-bg,
-        #tabEditarJogo .player-input-grid input[type="text"].has-image-bg,
-        #goalDetailModal input[type="text"].has-image-bg,
-        #editGoalDetailModal input[type="text"].has-image-bg { /* For edit form modal */
-            background-repeat: no-repeat;
-            background-position: 8px center;  
-            background-size: 28px 28px;    
-            padding-left: 42px !important;  
-        }
-
-
-        #tabJogo input[readonly], #tabEditarJogo input[readonly] {
-            background-color: #e2e6ea; 
-            color: #495057;
-            font-weight: 500;
-        }
-
-        #tabJogo .minute-input-group, #tabEditarJogo .minute-input-group {
-            display: flex; align-items: center; gap: 12px; margin-bottom: 15px;
-        }
-        #tabJogo .minute-input-group input[type="number"], #tabEditarJogo .minute-input-group input[type="number"] { flex-grow: 1; }
-        #tabJogo .minute-list, #tabEditarJogo .minute-list { list-style: none; padding: 0; }
-        
-        #tabJogo .minute-list-item, #tabEditarJogo .minute-list-item {
-            padding: 10px 15px; font-size: 1em; 
-            border-radius: 4px; margin-bottom: 5px;
-            display: flex; 
-            justify-content: space-between; 
-            align-items: center; 
-            transition: background-color 0.3s ease, border-left-color 0.3s ease; 
-            border-left: 5px solid transparent; 
-        }
-        
-        #tabJogo .minute-text-scorer-container, #tabEditarJogo .minute-text-scorer-container {
-            display: flex;
-            flex-direction: row;   
-            justify-content: flex-start; 
-            align-items: center;   
-            flex-grow: 1;
-            margin-right: 8px;
-            flex-wrap: nowrap;     
-        }
-        
-        #tabJogo .minute-text-scorer-container > *, #tabEditarJogo .minute-text-scorer-container > * { }
-        
-        #tabJogo .minute-text-scorer-container .minute-value, #tabEditarJogo .minute-text-scorer-container .minute-value,
-        #tabJogo .minute-text-scorer-container .scorer-name, #tabEditarJogo .minute-text-scorer-container .scorer-name {
-            white-space: nowrap; 
-        }
-
-        #tabJogo .minute-list-item .minute-value, #tabEditarJogo .minute-list-item .minute-value { 
-            font-weight: 500; 
-            cursor: pointer; 
-            text-decoration: underline;
-        }
-
-        #tabJogo .minute-list-separator, #tabEditarJogo .minute-list-separator {
-            margin: 0 8px; 
-            color: #555;
-        }
-
-        #tabJogo .minute-list-player-image, #tabEditarJogo .minute-list-player-image {
-            width: 24px; 
-            height: 24px;
-            object-fit: cover; 
-            border-radius: 50%; 
-            margin-right: 6px; 
-            border: 1px solid #ddd; 
-            flex-shrink: 0; 
-        }
-        
-        #tabJogo .minute-list-item .scorer-name, #tabEditarJogo .minute-list-item .scorer-name { 
-            font-style: normal; 
-            color: #333; 
-            margin-left: 0; 
-            font-size: 1em; 
-            font-weight: 500;
-        }
-
-        #tabJogo .minute-list-item .remove-minute-btn, #tabEditarJogo .minute-list-item .remove-minute-btn {
-            background: none; border: none; color: #dc3545; cursor: pointer;
-            font-weight: bold; font-size: 1.3em; 
-            flex-shrink: 0; 
-        }
-        #tabJogo .minute-list-item.status-pending, #tabEditarJogo .minute-list-item.status-pending { background-color: #fde0e0; border-left-color: #dc3545; }
-        #tabJogo .minute-list-item.status-pending .minute-value, #tabEditarJogo .minute-list-item.status-pending .minute-value { color: #721c24; }
-        #tabJogo .minute-list-item.status-incomplete, #tabEditarJogo .minute-list-item.status-incomplete { background-color: #fff9e0; border-left-color: #ffc107; }
-        #tabJogo .minute-list-item.status-incomplete .minute-value, #tabEditarJogo .minute-list-item.status-incomplete .minute-value { color: #856404; }
-        #tabJogo .minute-list-item.status-complete, #tabEditarJogo .minute-list-item.status-complete { background-color: #d4edda; border-left-color: #28a745; }
-        #tabJogo .minute-list-item.status-complete .minute-value, #tabEditarJogo .minute-list-item.status-complete .minute-value { color: #155724; }
-
-
-        #tabJogo > form > button[type="submit"], #tabEditarJogo > form > button.update-button { /* Target specific submit for Jogo/EditarJogo */
-            padding: 15px 30px; font-size: 1.25em; 
-            font-weight: 600; width: auto; align-self: center; margin-top: 20px; 
-        }
-         /* Create Jogo button */
-        #tabJogo > form > button[type="submit"] { background-color: #0069d9; }
-        #tabJogo > form > button[type="submit"]:hover { background-color: #0056b3; }
-
-        /* Update Jogo button - already styled by .update-button */
-        #tabEditarJogo > form > button.update-button {} /* Specificity if needed */
-
-
-        #tabJogo .suggestions-container, #tabEditarJogo .suggestions-container { border-color: #adb5bd; font-size: 1em; }
-        #tabJogo .suggestion-item, #tabEditarJogo .suggestion-item { padding: 12px; }
-
-        #tabJogo .player-input-grid, #tabEditarJogo .player-input-grid {
-            display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); 
-            gap: 18px; margin-bottom: 20px; 
-        }
-        #tabJogo .player-input-wrapper, #tabEditarJogo .player-input-wrapper {
-            position: relative; 
-            display: flex;      
-            align-items: center;
-        }
-        #tabJogo .player-input-grid input[type="text"], #tabEditarJogo .player-input-grid input[type="text"] { 
-            background-color: #fff; 
-            width: 100%;
-            box-sizing: border-box;
-        }
-        .player-input-clear-btn {
-            position: absolute;
-            right: 8px;
-            top: 50%;
-            transform: translateY(-50%);
-            background: none;
-            border: none;
-            color: #888;
-            font-size: 1.4em; 
-            font-weight: bold;
-            cursor: pointer;
-            padding: 0 5px; 
-            line-height: 1;
-            display: none; 
-            z-index: 2; 
-        }
-        .player-input-clear-btn:hover { color: #333; }
-
-        #tabJogo .player-input-grid input[type="text"].has-image-bg.has-clear-btn,
-        #tabEditarJogo .player-input-grid input[type="text"].has-image-bg.has-clear-btn,
-        #goalDetailModal input[type="text"].has-image-bg.has-clear-btn,
-        #editGoalDetailModal input[type="text"].has-image-bg.has-clear-btn { 
-            padding-right: 35px !important; 
-        }
-        #tabJogo .player-input-grid input[type="text"].has-clear-btn:not(.has-image-bg),
-        #tabEditarJogo .player-input-grid input[type="text"].has-clear-btn:not(.has-image-bg),
-        #goalDetailModal input[type="text"].has-clear-btn:not(.has-image-bg),
-        #editGoalDetailModal input[type="text"].has-clear-btn:not(.has-image-bg) {
-            padding-right: 35px !important; 
-        }
-
-        #goalDetailModal .modal-content, #editGoalDetailModal .modal-content { padding: 30px; }
-        #goalDetailModal .modal-content label, #editGoalDetailModal .modal-content label { font-size: 1.15em; }
-        #goalDetailModal .modal-content input[type="text"], #editGoalDetailModal .modal-content input[type="text"],
-        #goalDetailModal .modal-content select, #editGoalDetailModal .modal-content select,
-        #goalDetailModal #goalZoneGridContainer, #editGoalDetailModal #editGoalZoneGridContainer { font-size: 1.05em; }
-        
-        #goalZoneGridContainer, #editGoalZoneGridContainer {
-            display: grid; grid-template-columns: repeat(3, 1fr);
-            grid-template-rows: repeat(3, 55px); gap: 6px;
-            margin-top: 5px; border: 1px solid #ccc; padding: 5px; border-radius: 4px;
-        }
-        .goal-zone-cell {
-            display: flex; align-items: center; justify-content: center;
-            border: 1px solid #ddd; background-color: #f9f9f9; cursor: pointer;
-            font-size: 0.9em; text-align: center; transition: background-color 0.2s;
-        }
-        .goal-zone-cell:hover { background-color: #e9e9e9; }
-        .goal-zone-cell.selected { background-color: #007bff; color: white; border-color: #0056b3; }
-
-        #tabJogo .toggle-legend, #tabEditarJogo .toggle-legend {
-            cursor: pointer; display: flex; justify-content: space-between; 
-            align-items: center; width: 100%; 
-            padding-left: 15px; padding-right: 15px; box-sizing: border-box; 
-        }
-        #tabJogo .toggle-legend .toggle-indicator, #tabEditarJogo .toggle-legend .toggle-indicator { 
-            font-weight: bold; font-size: 1.2em; margin-left: 10px; 
-        }
-        
-        #tabJogo fieldset.open .toggle-content, #tabEditarJogo fieldset.open .toggle-content { 
-            animation: slideDown 0.3s ease-out; 
-        }
-        @keyframes slideDown {
-            from { opacity: 0; transform: translateY(-10px); max-height: 0; }
-            to { opacity: 1; transform: translateY(0); max-height: 1000px; } /* Ensure max-height is sufficient */
-        }
-
-        /* Specific styles for Edit Jogo Selection Area */
-        #editJogoSelectionFieldset {
-            border-left: 5px solid #007bff; /* Blue accent */
-            margin-bottom: 30px;
-        }
-        #editJogoSelectionFieldset legend {
-            color: #007bff;
-        }
-        #editJogoFormContainer {
-            display: none; /* Initially hidden until a game is loaded */
-        }
-
-        #editJogoSelectionFieldset > .form-grid > div {
+body {
+    font-family: 'Roboto', Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #f8f9fa; 
+    color: #343a40; 
+    line-height: 1.7;
+    font-size: 17px; 
+}
+.container {
+    width: 85%; 
+    margin: 30px auto; 
+    padding: 30px; 
+    background: #fff;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.12); 
+    border-radius: 12px; 
+}
+h1 {
+    color: #0056b3; 
+    text-align: center;
+    margin-bottom: 30px;
+    font-size: 2.8em; 
+    font-weight: 700;
+}
+h2 { 
+    color: #17a2b8; 
+    margin-top: 25px;
+    margin-bottom: 20px;
+    font-size: 2em; 
+    border-bottom: 2px solid #e9ecef;
+    padding-bottom: 10px;
+    font-weight: 500;
+}
+.tab-navigation {
+    overflow: hidden;
+    border-bottom: 1px solid #dee2e6;
+    margin-bottom: 30px; 
+}
+.tab-navigation button {
+    background-color: #e9ecef; 
+    float: left;
+    border: none;
+    outline: none;
+    cursor: pointer;
+    padding: 16px 22px; 
+    transition: background-color 0.3s ease, color 0.3s ease;
+    font-size: 1.1em; 
+    border-radius: 8px 8px 0 0; 
+    margin-right: 8px;
+    color: #495057; 
+    font-weight: 500;
+}
+.tab-navigation button:hover {
+    background-color: #ced4da; 
+    color: #0056b3;
+}
+.tab-navigation button.active {
+    background-color: #007bff; 
+    color: white;
+    box-shadow: 0 -2px 5px rgba(0,0,0,0.1) inset;
+}
+.tab-content {
+    display: none;
+    padding: 20px; 
+    border-top: none;
+    animation: fadeIn 0.5s ease-in-out;
+}
+@keyframes fadeIn {
+    from {opacity: 0; transform: translateY(10px);}
+    to {opacity: 1; transform: translateY(0);}
+}
+form { 
+    display: flex;
+    flex-direction: column;
+    gap: 25px; 
+}
+form div, form fieldset { 
+    display: flex;
+    flex-direction: column;
     position: relative;
+    gap: 8px; 
+}
+
+label { 
+    margin-bottom: 0px; 
+    font-weight: 500;
+    font-size: 1.1em; 
+    color: #495057;
+}
+input[type="text"], input[type="url"], input[type="number"], select { 
+    padding: 12px; 
+    border: 1px solid #ced4da;
+    border-radius: 6px;
+    font-size: 1em; 
+    box-sizing: border-box;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+input[type="text"]:focus, input[type="url"]:focus, input[type="number"]:focus, select:focus {
+    border-color: #007bff;
+    box-shadow: 0 0 0 0.2rem rgba(0,123,255,.25);
+    outline: none;
+}
+input[readonly] { 
+    background-color: #e9ecef;
+    cursor: not-allowed;
+}
+button[type="submit"], .action-button { 
+    background-color: #28a745; /* Default green for submit/action */
+    color: white;
+    padding: 12px 20px; 
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 1.05em; 
+    align-self: flex-start;
+    transition: background-color 0.2s ease, transform 0.1s ease;
+    font-weight: 500;
+}
+button[type="submit"]:hover, .action-button:hover {
+    background-color: #218838;
+    transform: translateY(-1px);
+}
+button[type="submit"]:active, .action-button:active {
+    transform: translateY(0px);
+}
+
+/* Specific button for "Update Game" - might be blue */
+button.update-button {
+    background-color: #007bff; /* Blue for update */
+}
+button.update-button:hover {
+    background-color: #0056b3;
+}
+
+.action-button.secondary { background-color: #6c757d; }
+.action-button.secondary:hover { background-color: #5a6268; }
+.action-button.danger { background-color: #dc3545; }
+.action-button.danger:hover { background-color: #c82333; }
+
+.status-message {
+    margin-top: 20px; padding: 15px; border-radius: 6px; font-size: 1em; font-weight: 500;
+}
+.status-message.success { background-color: #d1e7dd; color: #0f5132; border: 1px solid #badbcc; }
+.status-message.error { background-color: #f8d7da; color: #842029; border: 1px solid #f5c2c7; }
+
+.suggestions-container {
+    position: absolute; border: 1px solid #ced4da; border-top: none; z-index: 99;
+    top: 100%; left: 0; right: 0; background-color: white; max-height: 180px;
+    overflow-y: auto; box-shadow: 0 4px 8px rgba(0,0,0,0.1); border-radius: 0 0 6px 6px;
+}
+.suggestion-item { 
+    padding: 8px 12px; 
+    cursor: pointer;
+    border-bottom: 1px solid #eee;
+    font-size: 1em;
+    display: flex; 
+    flex-direction: row;
+    align-items: center; 
+}
+.suggestion-item img {
+    width: 30px; 
+    height: 30px;
+    object-fit: contain; 
+    margin-right: 10px;
+    border-radius: 50%; 
+    border: 1px solid #ddd; 
+    flex-shrink: 0;
+}
+.suggestion-item span {
+    flex-grow: 1;
+    line-height: 1.4;
+}
+.suggestion-item:last-child { border-bottom: none; }
+.suggestion-item:hover { background-color: #f0f8ff; color: #0056b3; }
+
+.modal {
+    display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%;
+    overflow: auto; background-color: rgba(0,0,0,0.5);
+}
+.modal-content {
+    background-color: #fefefe; margin: 10% auto; padding: 25px; border: 1px solid #888;
+    width: 60%; max-width: 550px; border-radius: 8px; box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+}
+.modal-content h3 { margin-top: 0; color: #007bff; }
+.modal-close-btn {
+    color: #aaa; float: right; font-size: 28px; font-weight: bold;
+}
+.modal-close-btn:hover, .modal-close-btn:focus { color: black; text-decoration: none; cursor: pointer; }
+
+.form-grid { display: grid; grid-template-columns: 1fr; gap: 15px; }
+ @media (min-width: 600px) {
+    .form-grid.two-cols { grid-template-columns: 1fr 1fr; }
+    .form-grid.three-cols { grid-template-columns: repeat(3, 1fr); align-items: end; }
+}
+
+/* ============================================ */
+/* === STYLES SPECIFIC TO #tabJogo & #tabEditarJogo (SHARED) === */
+/* ============================================ */
+
+#tabJogo h2, #tabEditarJogo h2.form-section-title { /* Target specific h2 for form sections */
+    color: #007bff; 
+    border-bottom: 2px solid #007bff;
+    padding-bottom: 15px;
+    margin-bottom: 30px;
+    font-size: 2.2em; 
+}
+ /* Main title for Edit tab */
+#tabEditarJogo > h2:first-of-type {
+    color: #007bff; /* Or your preferred color for the main edit title */
+     border-bottom: 2px solid #007bff;
+    padding-bottom: 15px;
+    margin-bottom: 30px;
+    font-size: 2.2em;
 }
 
 
+#tabJogo form, #tabEditarJogo form {
+    gap: 30px; 
+}
+
+#tabJogo fieldset, #tabEditarJogo fieldset {
+    border: 1px solid #ced4da; 
+    border-radius: 10px; 
+    padding: 25px; 
+    background-color: #ffffff; 
+    box-shadow: 0 2px 8px rgba(0,0,0,0.07); 
+    transition: all 0.3s ease-in-out;
+}
+
+#tabJogo fieldset:nth-of-type(1), #tabEditarJogo fieldset.general-info-fieldset { 
+    border-left: 5px solid #17a2b8; 
+    background-color: #f8f9fa; 
+}
+#tabJogo fieldset:nth-of-type(1) legend, #tabEditarJogo fieldset.general-info-fieldset legend { color: #17a2b8; }
+
+#tabJogo fieldset:nth-of-type(2), #tabEditarJogo fieldset.sporting-goals-fieldset { 
+    border-left: 5px solid #28a745; 
+}
+#tabJogo fieldset:nth-of-type(2) legend, #tabEditarJogo fieldset.sporting-goals-fieldset legend { color: #28a745; }
+
+#tabJogo fieldset#fieldsetPlacarStats, #tabEditarJogo fieldset.placar-stats-fieldset { 
+    border-left: 5px solid #ffc107; 
+    background-color: #fdf8e2; 
+}
+#tabJogo fieldset#fieldsetPlacarStats.open, #tabEditarJogo fieldset.placar-stats-fieldset.open {
+    background-color: #f8f9fa; 
+}
+#tabJogo fieldset#fieldsetPlacarStats legend#legendPlacarStats,
+#tabEditarJogo fieldset.placar-stats-fieldset legend.toggle-legend { 
+    color: #c89400; 
+}
+
+#tabJogo fieldset#fieldsetPlantel, #tabEditarJogo fieldset.plantel-fieldset { 
+    border-left: 5px solid #6f42c1; 
+}
+#tabJogo fieldset#fieldsetPlantel legend, #tabEditarJogo fieldset.plantel-fieldset legend { color: #6f42c1; }
+
+#tabJogo fieldset#fieldsetEstadoJogo, #tabEditarJogo fieldset.estado-jogo-fieldset { 
+    border-left: 5px solid #fd7e14; 
+}
+#tabJogo fieldset#fieldsetEstadoJogo legend, #tabEditarJogo fieldset.estado-jogo-fieldset legend { color: #fd7e14; }
+
+.estado-jogo-checkbox-container {
+    display: flex;
+    flex-direction: row; 
+    align-items: center; 
+    gap: 25px; 
+    flex-wrap: wrap; 
+    padding: 5px 0; 
+}
+
+.checkbox-item-wrapper {
+    display: flex;
+    align-items: center; 
+}
+
+.checkbox-item-wrapper input[type="checkbox"] {
+    margin-right: 5px; 
+    width: auto; 
+    height: auto;
+    vertical-align: middle;
+}
+
+.checkbox-item-wrapper label {
+    margin-bottom: 0; 
+    font-size: 1.1em; 
+    color: #343a40;
+    font-weight: 500; 
+}
 
 
+#tabJogo legend, #tabEditarJogo legend {
+    font-size: 1.6em; 
+    font-weight: 600; 
+    padding: 0 15px;
+    margin-bottom: 15px; 
+}
 
+#tabJogo label, #tabEditarJogo label { 
+    font-size: 1.2em; 
+    color: #343a40; 
+    margin-bottom: 8px; 
+}
+
+#tabJogo input[type="text"], #tabEditarJogo input[type="text"],
+#tabJogo input[type="url"], #tabEditarJogo input[type="url"],
+#tabJogo input[type="number"], #tabEditarJogo input[type="number"],
+#tabJogo select, #tabEditarJogo select {
+    font-size: 1.1em; 
+    padding: 14px; 
+    border-radius: 6px;
+    border: 1px solid #bcc3ca; 
+}
+
+#tabJogo input#jogoClubeCasa.has-image-bg, #tabEditarJogo input#editJogoClubeCasa.has-image-bg,
+#tabJogo input#jogoClubeFora.has-image-bg, #tabEditarJogo input#editJogoClubeFora.has-image-bg {
+    background-repeat: no-repeat;
+    background-position: 8px center;  
+    background-size: 28px 28px;    
+    padding-left: 42px !important; 
+}
+
+#tabJogo .player-input-grid input[type="text"].has-image-bg,
+#tabEditarJogo .player-input-grid input[type="text"].has-image-bg,
+#goalDetailModal input[type="text"].has-image-bg,
+#editGoalDetailModal input[type="text"].has-image-bg { /* For edit form modal */
+    background-repeat: no-repeat;
+    background-position: 8px center;  
+    background-size: 28px 28px;    
+    padding-left: 42px !important;  
+}
+
+
+#tabJogo input[readonly], #tabEditarJogo input[readonly] {
+    background-color: #e2e6ea; 
+    color: #495057;
+    font-weight: 500;
+}
+
+#tabJogo .minute-input-group, #tabEditarJogo .minute-input-group {
+    display: flex; align-items: center; gap: 12px; margin-bottom: 15px;
+}
+#tabJogo .minute-input-group input[type="number"], #tabEditarJogo .minute-input-group input[type="number"] { flex-grow: 1; }
+#tabJogo .minute-list, #tabEditarJogo .minute-list { list-style: none; padding: 0; }
+
+#tabJogo .minute-list-item, #tabEditarJogo .minute-list-item {
+    padding: 10px 15px; font-size: 1em; 
+    border-radius: 4px; margin-bottom: 5px;
+    display: flex; 
+    justify-content: space-between; 
+    align-items: center; 
+    transition: background-color 0.3s ease, border-left-color 0.3s ease; 
+    border-left: 5px solid transparent; 
+}
+
+#tabJogo .minute-text-scorer-container, #tabEditarJogo .minute-text-scorer-container {
+    display: flex;
+    flex-direction: row;   
+    justify-content: flex-start; 
+    align-items: center;   
+    flex-grow: 1;
+    margin-right: 8px;
+    flex-wrap: nowrap;     
+}
+
+#tabJogo .minute-text-scorer-container > *, #tabEditarJogo .minute-text-scorer-container > * { }
+
+#tabJogo .minute-text-scorer-container .minute-value, #tabEditarJogo .minute-text-scorer-container .minute-value,
+#tabJogo .minute-text-scorer-container .scorer-name, #tabEditarJogo .minute-text-scorer-container .scorer-name {
+    white-space: nowrap; 
+}
+
+#tabJogo .minute-list-item .minute-value, #tabEditarJogo .minute-list-item .minute-value { 
+    font-weight: 500; 
+    cursor: pointer; 
+    text-decoration: underline;
+}
+
+#tabJogo .minute-list-separator, #tabEditarJogo .minute-list-separator {
+    margin: 0 8px; 
+    color: #555;
+}
+
+#tabJogo .minute-list-player-image, #tabEditarJogo .minute-list-player-image {
+    width: 24px; 
+    height: 24px;
+    object-fit: cover; 
+    border-radius: 50%; 
+    margin-right: 6px; 
+    border: 1px solid #ddd; 
+    flex-shrink: 0; 
+}
+
+#tabJogo .minute-list-item .scorer-name, #tabEditarJogo .minute-list-item .scorer-name { 
+    font-style: normal; 
+    color: #333; 
+    margin-left: 0; 
+    font-size: 1em; 
+    font-weight: 500;
+}
+
+#tabJogo .minute-list-item .remove-minute-btn, #tabEditarJogo .minute-list-item .remove-minute-btn {
+    background: none; border: none; color: #dc3545; cursor: pointer;
+    font-weight: bold; font-size: 1.3em; 
+    flex-shrink: 0; 
+}
+#tabJogo .minute-list-item.status-pending, #tabEditarJogo .minute-list-item.status-pending { background-color: #fde0e0; border-left-color: #dc3545; }
+#tabJogo .minute-list-item.status-pending .minute-value, #tabEditarJogo .minute-list-item.status-pending .minute-value { color: #721c24; }
+#tabJogo .minute-list-item.status-incomplete, #tabEditarJogo .minute-list-item.status-incomplete { background-color: #fff9e0; border-left-color: #ffc107; }
+#tabJogo .minute-list-item.status-incomplete .minute-value, #tabEditarJogo .minute-list-item.status-incomplete .minute-value { color: #856404; }
+#tabJogo .minute-list-item.status-complete, #tabEditarJogo .minute-list-item.status-complete { background-color: #d4edda; border-left-color: #28a745; }
+#tabJogo .minute-list-item.status-complete .minute-value, #tabEditarJogo .minute-list-item.status-complete .minute-value { color: #155724; }
+
+
+#tabJogo > form > button[type="submit"], #tabEditarJogo > form > button.update-button { /* Target specific submit for Jogo/EditarJogo */
+    padding: 15px 30px; font-size: 1.25em; 
+    font-weight: 600; width: auto; align-self: center; margin-top: 20px; 
+}
+ /* Create Jogo button */
+#tabJogo > form > button[type="submit"] { background-color: #0069d9; }
+#tabJogo > form > button[type="submit"]:hover { background-color: #0056b3; }
+
+/* Update Jogo button - already styled by .update-button */
+#tabEditarJogo > form > button.update-button {} /* Specificity if needed */
+
+
+#tabJogo .suggestions-container, #tabEditarJogo .suggestions-container { border-color: #adb5bd; font-size: 1em; }
+#tabJogo .suggestion-item, #tabEditarJogo .suggestion-item { padding: 12px; }
+
+#tabJogo .player-input-grid, #tabEditarJogo .player-input-grid {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); 
+    gap: 18px; margin-bottom: 20px; 
+}
+#tabJogo .player-input-wrapper, #tabEditarJogo .player-input-wrapper {
+    position: relative; 
+    display: flex;      
+    align-items: center;
+}
+#tabJogo .player-input-grid input[type="text"], #tabEditarJogo .player-input-grid input[type="text"] { 
+    background-color: #fff; 
+    width: 100%;
+    box-sizing: border-box;
+}
+.player-input-clear-btn {
+    position: absolute;
+    right: 8px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    color: #888;
+    font-size: 1.4em; 
+    font-weight: bold;
+    cursor: pointer;
+    padding: 0 5px; 
+    line-height: 1;
+    display: none; 
+    z-index: 2; 
+}
+.player-input-clear-btn:hover { color: #333; }
+
+#tabJogo .player-input-grid input[type="text"].has-image-bg.has-clear-btn,
+#tabEditarJogo .player-input-grid input[type="text"].has-image-bg.has-clear-btn,
+#goalDetailModal input[type="text"].has-image-bg.has-clear-btn,
+#editGoalDetailModal input[type="text"].has-image-bg.has-clear-btn { 
+    padding-right: 35px !important; 
+}
+#tabJogo .player-input-grid input[type="text"].has-clear-btn:not(.has-image-bg),
+#tabEditarJogo .player-input-grid input[type="text"].has-clear-btn:not(.has-image-bg),
+#goalDetailModal input[type="text"].has-clear-btn:not(.has-image-bg),
+#editGoalDetailModal input[type="text"].has-clear-btn:not(.has-image-bg) {
+    padding-right: 35px !important; 
+}
+
+#goalDetailModal .modal-content, #editGoalDetailModal .modal-content { padding: 30px; }
+#goalDetailModal .modal-content label, #editGoalDetailModal .modal-content label { font-size: 1.15em; }
+#goalDetailModal .modal-content input[type="text"], #editGoalDetailModal .modal-content input[type="text"],
+#goalDetailModal .modal-content select, #editGoalDetailModal .modal-content select,
+#goalDetailModal #goalZoneGridContainer, #editGoalDetailModal #editGoalZoneGridContainer { font-size: 1.05em; }
+
+#goalZoneGridContainer, #editGoalZoneGridContainer {
+    display: grid; grid-template-columns: repeat(3, 1fr);
+    grid-template-rows: repeat(3, 55px); gap: 6px;
+    margin-top: 5px; border: 1px solid #ccc; padding: 5px; border-radius: 4px;
+}
+.goal-zone-cell {
+    display: flex; align-items: center; justify-content: center;
+    border: 1px solid #ddd; background-color: #f9f9f9; cursor: pointer;
+    font-size: 0.9em; text-align: center; transition: background-color 0.2s;
+}
+.goal-zone-cell:hover { background-color: #e9e9e9; }
+.goal-zone-cell.selected { background-color: #007bff; color: white; border-color: #0056b3; }
+
+#tabJogo .toggle-legend, #tabEditarJogo .toggle-legend {
+    cursor: pointer; display: flex; justify-content: space-between; 
+    align-items: center; width: 100%; 
+    padding-left: 15px; padding-right: 15px; box-sizing: border-box; 
+}
+#tabJogo .toggle-legend .toggle-indicator, #tabEditarJogo .toggle-legend .toggle-indicator { 
+    font-weight: bold; font-size: 1.2em; margin-left: 10px; 
+}
+
+#tabJogo fieldset.open .toggle-content, #tabEditarJogo fieldset.open .toggle-content { 
+    animation: slideDown 0.3s ease-out; 
+}
+@keyframes slideDown {
+    from { opacity: 0; transform: translateY(-10px); max-height: 0; }
+    to { opacity: 1; transform: translateY(0); max-height: 1000px; } /* Ensure max-height is sufficient */
+}
+
+/* Specific styles for Edit Jogo Selection Area */
+#editJogoSelectionFieldset {
+    border-left: 5px solid #007bff; /* Blue accent */
+    margin-bottom: 30px;
+}
+#editJogoSelectionFieldset legend {
+    color: #007bff;
+}
+#editJogoFormContainer {
+    display: none; /* Initially hidden until a game is loaded */
+}
+
+#editJogoSelectionFieldset > .form-grid > div {
+     position: relative;
+}
+
+
+/* Styles for Relevant/Live Games Display */
+/* Use #relevantGamesSection or #liveGamesSection depending on your HTML ID choice */
+#relevantGamesSection { /* Or #liveGamesSection */
+    background-color: #f0f3f5;
+    padding: 20px;
+    border-radius: 8px;
+    margin-bottom: 30px; 
+    box-shadow: 0 3px 6px rgba(0,0,0,0.07);
+}
+
+#relevantGamesSection h3 { /* Or #liveGamesSection h3 */
+    margin-top: 0;
+    margin-bottom: 18px;
+    color: #0069d9;
+    text-align: center;
+    font-size: 1.7em;
+    font-weight: 600;
+    border-bottom: 2px solid #0069d9;
+    padding-bottom: 12px;
+}
+
+.live-game-list { /* This class name is used by relevantGamesListDisplay or liveGamesListDisplay */
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.live-game-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 15px;
+    background-color: #fff;
+    border: 1px solid #ced4da;
+    border-radius: 6px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+    transition: transform 0.2s ease-out, box-shadow 0.2s ease-out;
+}
+.live-game-item:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.08);
+}
+
+.live-game-item .team-info {
+    display: flex;
+    align-items: center;
+    gap: 10px; 
+    flex-basis: 40%; /* Ajustado para dar espaço ao botão */
+    min-width: 0; /* Para permitir que flex-basis funcione com text-overflow */
+}
+.live-game-item .team-info.home-team { 
+    justify-content: flex-start;
+}
+.live-game-item .team-info.away-team { 
+    justify-content: flex-end;
+    text-align: right;
+}
+
+.live-game-item .team-info img {
+    width: 28px; 
+    height: 28px;
+    object-fit: contain;
+    border-radius: 50%;
+    border: 1px solid #eee;
+    background-color: #f8f9fa;
+    flex-shrink: 0; /* Para não encolher o logo */
+}
+
+.live-game-item .team-info span {
+    font-weight: 500;
+    font-size: 1.05em;
+    color: #212529;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    flex-grow: 1; /* Para ocupar espaço disponível e permitir ellipsis */
+}
+
+.live-game-item .game-details {
+    font-weight: bold;
+    color: #dc3545; 
+    font-size: 1em;
+    flex-basis: auto; /* Deixa o conteúdo central ditar sua largura */
+    flex-shrink: 0; /* Para não ser esmagado */
+    padding: 0 10px;
+    text-align: center;
+}
+.live-game-item .game-details .score {
+    font-size: 1.1em;
+}
+.live-game-item .game-details .live-indicator { /* Renomeado de .live-indicator para ser mais genérico */
+    display: block;
+    font-size: 0.8em;
+    color: #c82333; /* Pode variar a cor baseada no status se quiser */
+    font-weight: normal;
+}
+.live-game-item .game-details .jornada-info {
+    display: block;
+    font-size: 0.8em;
+    color: #495057;
+    font-weight: normal;
+    margin-bottom: 3px;
+}
+
+.live-game-item .edit-game-btn {
+    background-color: #007bff;
+    color: white;
+    border: none;
+    padding: 6px 12px;
+    font-size: 0.9em;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+    margin-left: 10px; /* Espaço para separar do time visitante */
+    flex-shrink: 0; /* Para não ser esmagado */
+}
+
+.live-game-item .edit-game-btn:hover {
+    background-color: #0056b3;
+}
+
+.no-live-games {
+    text-align: center;
+    color: #6c757d;
+    font-style: italic;
+    padding: 15px;
+    background-color: #fff;
+    border: 1px dashed #ced4da;
+    border-radius: 6px;
+}
     </style>
 </head>
 <body>
@@ -546,7 +673,7 @@
 
         <div class="tab-navigation">
             <button class="tab-button" onclick="openTab(event, 'tabJogo')">Criar Jogo</button>
-            <button class="tab-button" onclick="openTab(event, 'tabEditarJogo')">Editar Jogo</button> <!-- New Tab -->
+            <button class="tab-button" onclick="openTab(event, 'tabEditarJogo')">Editar Jogo</button>
             <button class="tab-button" onclick="openTab(event, 'tabClube')">Criar Clube</button>
             <button class="tab-button" onclick="openTab(event, 'tabPosicao')">Criar Posição</button>
             <button class="tab-button" onclick="openTab(event, 'tabJogador')">Criar Jogador</button>
@@ -668,6 +795,15 @@
 
         <!-- Tab Editar Jogo (New) -->
         <div id="tabEditarJogo" class="tab-content">
+             <!-- SEÇÃO PARA JOGOS RELEVANTES (AO VIVO / FUTUROS) -->
+            <div id="relevantGamesSection" style="display: none;">
+                <h3>Jogos Em Destaque (Ao Vivo / Futuros)</h3>
+                <div id="relevantGamesListDisplay" class="live-game-list">
+                    <!-- Os jogos serão inseridos aqui pelo JavaScript -->
+                </div>
+            </div>
+            <!-- FIM DA SEÇÃO -->
+
             <h2>Editar Jogo Existente</h2>
             <fieldset id="editJogoSelectionFieldset">
                 <legend>Selecionar Jogo para Editar</legend>
@@ -684,10 +820,10 @@
                 </div>
             </fieldset>
 
-            <div id="editJogoFormContainer" style="display:none;"> <!-- This container will be shown when a game is loaded -->
-                <h2 class="form-section-title" style="margin-top: 0;">Detalhes do Jogo</h2> <!-- Title for the actual form -->
+            <div id="editJogoFormContainer" style="display:none;">
+                <h2 class="form-section-title" style="margin-top: 0;">Detalhes do Jogo</h2>
                 <form id="formEditarJogo">
-                    <input type="hidden" id="editJogoDocId"> <!-- To store the ID of the game being edited -->
+                    <input type="hidden" id="editJogoDocId"> 
                     
                     <fieldset class="general-info-fieldset">
                         <legend>Informações Gerais do Jogo</legend>
@@ -697,7 +833,6 @@
                                 <select id="editJogoJornada" required></select>
                             </div>
                             <div>
-                                <!-- Temporada is selected above, shown here as readonly or just not displayed if preferred -->
                                 <label for="editJogoTemporadaDisplay">Temporada (Selecionada):</label>
                                 <input type="text" id="editJogoTemporadaDisplay" readonly>
                             </div>
@@ -796,7 +931,7 @@
 
                     <button type="submit" class="update-button">Guardar Alterações</button>
                 </form>
-            </div> <!-- End of editJogoFormContainer -->
+            </div> 
             <div id="statusEditarJogo" class="status-message"></div>
         </div>
 
@@ -926,13 +1061,12 @@
         </div>
     </div>
 
-
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
         import { getFirestore, doc, setDoc, getDoc, collection, getDocs, serverTimestamp, addDoc, query, where, updateDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
         const firebaseConfig = {
-            apiKey: "AIzaSyASIFSwhZj8B4ON6fVGjNixgLW-CL39CnI",
+            apiKey: "AIzaSyASIFSwhZj8B4ON6fVGjNixgLW-CL39CnI", // SUBSTITUA COM SUA API KEY REAL
             authDomain: "sporting-stats.firebaseapp.com",
             projectId: "sporting-stats",
             storageBucket: "sporting-stats.firebasestorage.app",
@@ -965,8 +1099,8 @@
         // === STATE VARIABLES FOR EDIT JOGO ===
         let editMinutosGolosMarcados = [];
         let editMinutosGolosSofridos = [];
-        let loadedGamesForSeason = []; // Stores games for the selected season in edit tab
-        let currentEditingGameData = null; // Stores full data of the game being edited
+        let loadedGamesForSeason = []; 
+        let currentEditingGameData = null; 
 
         // === DOM ELEMENTS (CREATE JOGO - general) ===
         const jogoLiveCheckbox = document.getElementById('jogoLive');
@@ -984,7 +1118,6 @@
         const jogoMinutoGoloSofridoInput = document.getElementById('jogoMinutoGoloSofridoInput');
         const addMinutoGoloSofridoBtn = document.getElementById('addMinutoGoloSofridoBtn');
         const listaMinutosGolosSofridos = document.getElementById('listaMinutosGolosSofridos');
-        // Calculated score fields (Create)
         const jogoNomeJogo = document.getElementById('jogoNomeJogo');
         const jogoGMCasa = document.getElementById('jogoGMCasa');
         const jogoGMFora = document.getElementById('jogoGMFora');
@@ -996,7 +1129,6 @@
         const jogoSofridos1P = document.getElementById('jogoSofridos1P');
         const jogoSofridos2P = document.getElementById('jogoSofridos2P');
         const jogoEstado = document.getElementById('jogoEstado');
-        // Goal Detail Modal (Create)
         const goalDetailModal = document.getElementById('goalDetailModal');
         const closeGoalDetailModalBtn = document.getElementById('closeGoalDetailModalBtn');
         const goalDetailModalTitle = document.getElementById('goalDetailModalTitle');
@@ -1015,7 +1147,6 @@
         const createJogo11InicialContainer = document.getElementById('jogo11InicialContainer');
         const createJogoSuplentesContainer = document.getElementById('jogoSuplentesContainer');
 
-
         // === DOM ELEMENTS (EDIT JOGO - specific) ===
         const editJogoTemporadaSelect = document.getElementById('editJogoTemporadaSelect');
         const editJogoSearchInput = document.getElementById('editJogoSearchInput');
@@ -1023,7 +1154,6 @@
         const editJogoFormContainer = document.getElementById('editJogoFormContainer');
         const formEditarJogo = document.getElementById('formEditarJogo');
         const editJogoDocIdInput = document.getElementById('editJogoDocId');
-        // Form fields
         const editJogoJornadaSelect = document.getElementById('editJogoJornada');
         const editJogoTemporadaDisplay = document.getElementById('editJogoTemporadaDisplay');
         const editJogoClubeCasaInput = document.getElementById('editJogoClubeCasa');
@@ -1036,7 +1166,6 @@
         const editJogoMinutoGoloSofridoInput = document.getElementById('editJogoMinutoGoloSofridoInput');
         const editAddMinutoGoloSofridoBtn = document.getElementById('editAddMinutoGoloSofridoBtn');
         const editListaMinutosGolosSofridos = document.getElementById('editListaMinutosGolosSofridos');
-        // Calculated score fields (Edit)
         const editJogoNomeJogo = document.getElementById('editJogoNomeJogo');
         const editJogoGMCasa = document.getElementById('editJogoGMCasa');
         const editJogoGMFora = document.getElementById('editJogoGMFora');
@@ -1048,18 +1177,14 @@
         const editJogoSofridos1P = document.getElementById('editJogoSofridos1P');
         const editJogoSofridos2P = document.getElementById('editJogoSofridos2P');
         const editJogoEstado = document.getElementById('editJogoEstado');
-        // Checkboxes (Edit)
         const editJogoLiveCheckbox = document.getElementById('editJogoLive');
         const editJogoTerminadoCheckbox = document.getElementById('editJogoTerminado');
         const editJogoFuturoCheckbox = document.getElementById('editJogoFuturo');
-        // Player containers (Edit)
         const editJogo11InicialContainer = document.getElementById('editJogo11InicialContainer');
         const editJogoSuplentesContainer = document.getElementById('editJogoSuplentesContainer');
-         // Goal Detail Modal (Edit)
         const editGoalDetailModal = document.getElementById('editGoalDetailModal');
         const editCloseGoalDetailModalBtn = document.getElementById('editCloseGoalDetailModalBtn');
         const editGoalDetailModalTitle = document.getElementById('editGoalDetailModalTitle');
-        // const editFormGoalDetail = document.getElementById('editFormGoalDetail'); // Already declared with formEditarJogo
         const editGoalDetailTypeInput = document.getElementById('editGoalDetailType');
         const editGoalDetailMinuteInput = document.getElementById('editGoalDetailMinute');
         const editGoalDetailScorerSection = document.getElementById('editGoalDetailScorerSection');
@@ -1071,8 +1196,10 @@
         const editGoalDetailAssistenciaInput = document.getElementById('editGoalDetailAssistencia');
         const editGoalDetailAssistenciaSuggestions = document.getElementById('editGoalDetailAssistenciaSuggestions');
         const editSaveGoalDetailBtn = document.getElementById('editSaveGoalDetailBtn');
+        // Relevant Games Display (Edit Tab) - Make sure these IDs match your HTML
+        const relevantGamesSection = document.getElementById('relevantGamesSection'); 
+        const relevantGamesListDisplay = document.getElementById('relevantGamesListDisplay');
         
-
         // === UTILITY FUNCTIONS ===
         function showStatus(elementId, message, isSuccess) {
             const statusEl = document.getElementById(elementId);
@@ -1083,8 +1210,7 @@
         }
 
         function syncGameStatusCheckboxes(liveCb, termCb, futCb) {
-            const source = this; // The checkbox that triggered the event
-
+            const source = this; 
             if (source === termCb && termCb.checked) {
                 liveCb.checked = false;
                 futCb.checked = false;
@@ -1095,28 +1221,123 @@
                 liveCb.checked = false;
                 termCb.checked = false;
             }
-
-            // Ensure logical consistency if multiple are somehow checked or all unchecked
             if (termCb.checked) {
                 liveCb.checked = false;
                 futCb.checked = false;
             } else if (liveCb.checked) {
-                futCb.checked = false; // termCb is already false
-            } else if (!futCb.checked) { // If none are checked (e.g. after a reset), default to futuro
+                futCb.checked = false; 
+            } else if (!futCb.checked && !liveCb.checked && !termCb.checked) { 
                  futCb.checked = true;
             }
         }
         
-        // Attach to Create Jogo checkboxes
-        jogoLiveCheckbox.addEventListener('change', function() { syncGameStatusCheckboxes.call(this, jogoLiveCheckbox, jogoTerminadoCheckbox, jogoFuturoCheckbox); });
-        jogoTerminadoCheckbox.addEventListener('change', function() { syncGameStatusCheckboxes.call(this, jogoLiveCheckbox, jogoTerminadoCheckbox, jogoFuturoCheckbox); });
-        jogoFuturoCheckbox.addEventListener('change', function() { syncGameStatusCheckboxes.call(this, jogoLiveCheckbox, jogoTerminadoCheckbox, jogoFuturoCheckbox); });
+        jogoLiveCheckbox.addEventListener('change', function() { syncGameStatusCheckboxes.call(this, jogoLiveCheckbox, jogoTerminadoCheckbox, jogoFuturoCheckbox); updateCalculatedScores('create'); });
+        jogoTerminadoCheckbox.addEventListener('change', function() { syncGameStatusCheckboxes.call(this, jogoLiveCheckbox, jogoTerminadoCheckbox, jogoFuturoCheckbox); updateCalculatedScores('create'); });
+        jogoFuturoCheckbox.addEventListener('change', function() { syncGameStatusCheckboxes.call(this, jogoLiveCheckbox, jogoTerminadoCheckbox, jogoFuturoCheckbox); updateCalculatedScores('create'); });
         
-        // Attach to Edit Jogo checkboxes
         editJogoLiveCheckbox.addEventListener('change', function() { syncGameStatusCheckboxes.call(this, editJogoLiveCheckbox, editJogoTerminadoCheckbox, editJogoFuturoCheckbox); updateCalculatedScores('edit'); });
         editJogoTerminadoCheckbox.addEventListener('change', function() { syncGameStatusCheckboxes.call(this, editJogoLiveCheckbox, editJogoTerminadoCheckbox, editJogoFuturoCheckbox); updateCalculatedScores('edit'); });
         editJogoFuturoCheckbox.addEventListener('change', function() { syncGameStatusCheckboxes.call(this, editJogoLiveCheckbox, editJogoTerminadoCheckbox, editJogoFuturoCheckbox); updateCalculatedScores('edit');});
 
+        async function displayRelevantGames() {
+            if (!relevantGamesSection || !relevantGamesListDisplay) {
+                console.warn("Relevant games display elements not found. Check IDs in HTML and JS.");
+                return;
+            }
+            relevantGamesListDisplay.innerHTML = ''; 
+            relevantGamesSection.style.display = 'none'; 
+            try {
+                const liveGamesQuery = query(collection(db, "jogos"), where("jogoLive", "==", true));
+                const liveGamesSnapshot = await getDocs(liveGamesQuery);
+                const futureGamesQuery = query(collection(db, "jogos"), where("jogoFuturo", "==", true));
+                const futureGamesSnapshot = await getDocs(futureGamesQuery);
+                let allRelevantGames = [];
+                const gameIds = new Set(); 
+                liveGamesSnapshot.forEach(docSnap => {
+                    if (!gameIds.has(docSnap.id)) {
+                        allRelevantGames.push({ id: docSnap.id, ...docSnap.data(), statusIndicator: "LIVE" });
+                        gameIds.add(docSnap.id);
+                    }
+                });
+                futureGamesSnapshot.forEach(docSnap => {
+                    if (!gameIds.has(docSnap.id)) { 
+                        allRelevantGames.push({ id: docSnap.id, ...docSnap.data(), statusIndicator: "FUTURO" });
+                        gameIds.add(docSnap.id);
+                    }
+                });
+                if (allRelevantGames.length === 0) {
+                    relevantGamesListDisplay.innerHTML = '<div class="no-live-games">Nenhum jogo em destaque (Ao Vivo ou Futuro) neste momento.</div>';
+                    relevantGamesSection.style.display = 'block'; 
+                    return;
+                }
+                allRelevantGames.sort((a, b) => {
+                    const jornadaA = parseInt(a.jornada) || 0; 
+                    const jornadaB = parseInt(b.jornada) || 0;
+                    if (jornadaA !== jornadaB) {
+                        return jornadaA - jornadaB; 
+                    }
+                    if (a.statusIndicator === "LIVE" && b.statusIndicator !== "LIVE") return -1;
+                    if (a.statusIndicator !== "LIVE" && b.statusIndicator === "LIVE") return 1;
+                    return (a.nomeJogo || "").localeCompare(b.nomeJogo || "");
+                });
+                let gameItemsHtml = '';
+                allRelevantGames.forEach(jogo => {
+                    const clubeCasa = allClubes.find(c => c.nome === jogo.clubeCasaNome);
+                    const clubeFora = allClubes.find(c => c.nome === jogo.clubeForaNome);
+                    const logoCasaSrc = clubeCasa?.logo || ''; 
+                    const logoForaSrc = clubeFora?.logo || '';
+                    const jornadaInfo = jogo.jornada ? `<span class="jornada-info">Jornada ${jogo.jornada}</span>` : '<span class="jornada-info">Jornada N/D</span>';
+                    let gameCenterContent = `vs <span class="live-indicator">${jogo.statusIndicator}</span>`;
+                    if (jogo.statusIndicator === "LIVE") { 
+                         if (jogo.resultadoGMCasa !== undefined && jogo.resultadoGMFora !== undefined) { 
+                           gameCenterContent = `<span class="score">${jogo.resultadoGMCasa} - ${jogo.resultadoGMFora}</span><span class="live-indicator">${jogo.statusIndicator}</span>`;
+                        }
+                    }
+                    const gameCenterDetails = `${jornadaInfo}${gameCenterContent}`;
+                    gameItemsHtml += `
+                        <div class="live-game-item">
+                            <div class="team-info home-team">
+                                ${logoCasaSrc ? `<img src="${logoCasaSrc}" alt="${jogo.clubeCasaNome || 'Casa'}" onerror="this.style.display='none';">` : ''}
+                                <span>${jogo.clubeCasaNome || 'Equipa da Casa'}</span>
+                            </div>
+                            <div class="game-details">
+                                ${gameCenterDetails}
+                            </div>
+                            <div class="team-info away-team">
+                                <span>${jogo.clubeForaNome || 'Equipa Visitante'}</span>
+                                ${logoForaSrc ? `<img src="${logoForaSrc}" alt="${jogo.clubeForaNome || 'Fora'}" onerror="this.style.display='none';">` : ''}
+                            </div>
+                            <button class="edit-game-btn" data-game-id="${jogo.id}">Editar</button>
+                        </div>
+                    `;
+                });
+                relevantGamesListDisplay.innerHTML = gameItemsHtml;
+                relevantGamesSection.style.display = 'block'; 
+                relevantGamesListDisplay.querySelectorAll('.edit-game-btn').forEach(button => {
+                    button.addEventListener('click', async (event) => {
+                        const gameId = event.target.dataset.gameId;
+                        if (gameId) {
+                            const gameData = allRelevantGames.find(g => g.id === gameId);
+                            if(gameData) {
+                                editJogoTemporadaSelect.value = gameData.temporada;
+                                editJogoSearchInput.value = gameData.nomeJogo || `Jogo ID: ${gameId}`;
+                                editJogoSearchInput.disabled = false; 
+                                editJogoSuggestionsContainer.style.display = 'none'; 
+                            }
+                            await loadGameForEditing(gameId);
+                            const formElement = document.getElementById('editJogoFormContainer');
+                            if (formElement) {
+                                formElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                            }
+                        }
+                    });
+                });
+            } catch (error) {
+                console.error("Erro ao buscar jogos em destaque:", error);
+                relevantGamesListDisplay.innerHTML = '<div class="no-live-games">Erro ao carregar jogos em destaque.</div>';
+                relevantGamesSection.style.display = 'block';
+            }
+        }
 
         window.openTab = async function(evt, tabName) {
             var i, tabcontent, tabbuttons;
@@ -1130,15 +1351,15 @@
             }
             const currentTabDiv = document.getElementById(tabName);
             if (currentTabDiv) currentTabDiv.style.display = "block";
-            
             if (evt && evt.currentTarget) {
                  evt.currentTarget.className += " active";
             }
-
-            // Common data loading, ensure it's done once or when necessary
-            await Promise.all([loadClubesParaJogo(), loadJogadoresParaJogo()]);
-
-
+            if (!allClubes.length) { 
+                await loadClubesParaJogo();
+            }
+            if (!allJogadores.length) {
+                await loadJogadoresParaJogo();
+            }
             if (tabName === 'tabJogador') {
                 loadPosicoesParaDropdown();
                 loadPaisesParaSugestoes();
@@ -1147,7 +1368,6 @@
             } else if (tabName === 'tabJogo') {
                 populateTemporadaDropdown(jogoTemporadaSelect);
                 await setSuggestedJornada(jogoTemporadaSelect, jogoJornadaSelect, 'statusJogo', jogoTerminadoCheckbox, jogoLiveCheckbox, jogoFuturoCheckbox);
-                
                 if (createJogo11InicialContainer.children.length === 0) {
                      setupDynamicPlayerInputs('jogo11InicialContainer', 11, 'inicial', 'create');
                 }
@@ -1157,11 +1377,10 @@
                 if (goalZoneGridContainer.children.length === 0) {
                     populateGoalZoneGrid(goalZoneGridContainer, 'create');
                 }
-                 syncGameStatusCheckboxes.call(window, jogoLiveCheckbox, jogoTerminadoCheckbox, jogoFuturoCheckbox); // Call with dummy `this` initially
-                 updateCalculatedScores('create'); // Ensure scores are updated on tab open
+                 syncGameStatusCheckboxes.call(window, jogoLiveCheckbox, jogoTerminadoCheckbox, jogoFuturoCheckbox); 
+                 updateCalculatedScores('create'); 
             } else if (tabName === 'tabEditarJogo') {
                 populateTemporadaDropdown(editJogoTemporadaSelect);
-                // Jornada dropdown for edit form
                 if (editJogoJornadaSelect.options.length <= 1 || (editJogoJornadaSelect.options.length > 0 && editJogoJornadaSelect.options[0].value === "")) {
                     editJogoJornadaSelect.innerHTML = '<option value="">Selecione a Jornada</option>';
                     for (let i = 1; i <= 40; i++) {
@@ -1171,25 +1390,24 @@
                 editJogoSearchInput.value = '';
                 editJogoSearchInput.disabled = true;
                 editJogoSuggestionsContainer.style.display = 'none';
-                editJogoFormContainer.style.display = 'none'; // Hide form until game is loaded
+                editJogoFormContainer.style.display = 'none'; 
                 currentEditingGameData = null;
                 editJogoDocIdInput.value = '';
-
                 if (editJogo11InicialContainer.children.length === 0) {
                      setupDynamicPlayerInputs('editJogo11InicialContainer', 11, 'edit_inicial', 'edit');
                 }
                 if (editJogoSuplentesContainer.children.length === 0) {
                     setupDynamicPlayerInputs('editJogoSuplentesContainer', 11, 'edit_suplente', 'edit');
                 }
-                if (editGoalZoneGridContainer.children.length === 0) { // For the edit modal
+                if (editGoalZoneGridContainer.children.length === 0) { 
                     populateGoalZoneGrid(editGoalZoneGridContainer, 'edit');
                 }
-                // Reset edit form specific states if any, e.g. minute lists
                 editMinutosGolosMarcados = [];
                 editMinutosGolosSofridos = [];
                 renderMinuteList(editListaMinutosGolosMarcados, editMinutosGolosMarcados, 'marcado', 'edit');
                 renderMinuteList(editListaMinutosGolosSofridos, editMinutosGolosSofridos, 'sofrido', 'edit');
                 syncGameStatusCheckboxes.call(window, editJogoLiveCheckbox, editJogoTerminadoCheckbox, editJogoFuturoCheckbox);
+                await displayRelevantGames(); 
             }
         }
 
@@ -1198,13 +1416,10 @@
             if (defaultTabButton) {
                  openTab({ currentTarget: defaultTabButton }, 'tabJogo');
             }
-
-            // Toggle for Create Jogo Placar/Stats
             const placarStatsLegend = document.getElementById('legendPlacarStats');
             const placarStatsContent = document.querySelector('#fieldsetPlacarStats .toggle-content');
             const placarStatsFieldset = document.getElementById('fieldsetPlacarStats');
             const placarStatsIndicator = placarStatsLegend ? placarStatsLegend.querySelector('.toggle-indicator') : null;
-
             if (placarStatsLegend && placarStatsContent && placarStatsIndicator && placarStatsFieldset) {
                 placarStatsLegend.addEventListener('click', () => {
                     const isOpen = placarStatsContent.style.display === 'block';
@@ -1213,13 +1428,10 @@
                     placarStatsFieldset.classList.toggle('open', !isOpen);
                 });
             }
-
-            // Toggle for Edit Jogo Placar/Stats
             const editPlacarStatsLegend = document.getElementById('editLegendPlacarStats');
             const editPlacarStatsContent = document.querySelector('#editFieldsetPlacarStats .toggle-content');
             const editPlacarStatsFieldset = document.getElementById('editFieldsetPlacarStats');
             const editPlacarStatsIndicator = editPlacarStatsLegend ? editPlacarStatsLegend.querySelector('.toggle-indicator') : null;
-            
             if (editPlacarStatsLegend && editPlacarStatsContent && editPlacarStatsIndicator && editPlacarStatsFieldset) {
                 editPlacarStatsLegend.addEventListener('click', () => {
                     const isOpen = editPlacarStatsContent.style.display === 'block';
@@ -1228,8 +1440,6 @@
                     editPlacarStatsFieldset.classList.toggle('open', !isOpen);
                 });
             }
-            
-            // Event listeners for Create Jogo
             jogoTemporadaSelect.addEventListener('change', () => setSuggestedJornada(jogoTemporadaSelect, jogoJornadaSelect, 'statusJogo', jogoTerminadoCheckbox, jogoLiveCheckbox, jogoFuturoCheckbox));
             jogoClubeCasaInput.addEventListener('change', () => handleClubeChange('create', 'casa'));
             jogoClubeForaInput.addEventListener('change', () => handleClubeChange('create', 'fora'));
@@ -1238,24 +1448,17 @@
             jogoLiveCheckbox.addEventListener('change', () => updateCalculatedScores('create'));
             jogoTerminadoCheckbox.addEventListener('change', () => updateCalculatedScores('create'));
             jogoFuturoCheckbox.addEventListener('change', () => updateCalculatedScores('create'));
-
-            // Event listeners for Edit Jogo
             editJogoTemporadaSelect.addEventListener('change', handleEditTemporadaChange);
             editJogoSearchInput.addEventListener('input', handleEditJogoSearch);
             editJogoClubeCasaInput.addEventListener('change', () => handleClubeChange('edit', 'casa'));
             editJogoClubeForaInput.addEventListener('change', () => handleClubeChange('edit', 'fora'));
-
-            // Update scores on input for edit form too
             editJogoClubeCasaInput.addEventListener('input', () => updateCalculatedScores('edit'));
             editJogoClubeForaInput.addEventListener('input', () => updateCalculatedScores('edit'));
             editJogoLiveCheckbox.addEventListener('change', () => updateCalculatedScores('edit'));
             editJogoTerminadoCheckbox.addEventListener('change', () => updateCalculatedScores('edit'));
             editJogoFuturoCheckbox.addEventListener('change', () => updateCalculatedScores('edit'));
-
-
         });
 
-        // === FORM SUBMISSIONS (Clube, Posição, País, Jogador) ===
         document.getElementById('formClube').addEventListener('submit', async (e) => {
             e.preventDefault();
             const nome = document.getElementById('clubeNome').value.trim();
@@ -1266,11 +1469,10 @@
             try {
                 await setDoc(doc(db, "clubes", nome), { nome, logo, regiao, cidade });
                 showStatus('statusClube', `Clube "${nome}" adicionado!`, true); e.target.reset();
-                allClubes = []; // Invalidate cache
-                sportingClubeDetalhes = null; // Invalidate Sporting details
-                 // Reload club suggestions if relevant tabs are active or will be activated
+                allClubes = []; 
+                sportingClubeDetalhes = null; 
                 if (document.getElementById('tabJogo').style.display === 'block' || document.getElementById('tabEditarJogo').style.display === 'block') {
-                    await loadClubesParaJogo(); // This will re-setup suggestion handlers
+                    await loadClubesParaJogo(); 
                 }
             } catch (error) { showStatus('statusClube', `Erro: ${error.message}`, false); console.error(error); }
         });
@@ -1283,7 +1485,7 @@
             try {
                 await setDoc(doc(db, "posicoes", abreviacao), { abreviacao, posicao_generica });
                 showStatus('statusPosicao', `Posição "${abreviacao}" adicionada!`, true); e.target.reset();
-                posicoesMap.clear(); // Invalidate cache
+                posicoesMap.clear(); 
                 if (document.getElementById('tabJogador').style.display === 'block') loadPosicoesParaDropdown();
             } catch (error) { showStatus('statusPosicao', `Erro: ${error.message}`, false); console.error(error); }
         });
@@ -1317,9 +1519,9 @@
             try {
                 await setDoc(doc(db, "paises", nome), { nome, bandeira, continente });
                 showStatus('statusPais', `País "${nome}" adicionado!`, true); e.target.reset();
-                paisContinenteSelect.value = ""; allPaises = []; allContinentesSet.clear(); // Invalidate caches
-                if (document.getElementById('tabJogador').style.display === 'block') loadPaisesParaSugestoes(); // Reload for jogador tab
-                loadContinentesParaDropdown(); // Reload continentes dropdown
+                paisContinenteSelect.value = ""; allPaises = []; allContinentesSet.clear(); 
+                if (document.getElementById('tabJogador').style.display === 'block') loadPaisesParaSugestoes(); 
+                loadContinentesParaDropdown(); 
             } catch (error) { showStatus('statusPais', `Erro: ${error.message}`, false); console.error(error); }
         });
 
@@ -1350,14 +1552,14 @@
             posGenericaInput.value = this.value && posicoesMap.has(this.value) ? posicoesMap.get(this.value) : '';
         });
         async function loadPaisesParaSugestoes() {
-            if (allPaises.length > 0) { // Check if already loaded and setup
-                 if (!jogadorPaisNomeInput.getAttribute('data-suggestions-setup')) { // If not setup, set it up
+            if (allPaises.length > 0) { 
+                 if (!jogadorPaisNomeInput.getAttribute('data-suggestions-setup')) { 
                     setupSuggestionHandler(jogadorPaisNomeInput, paisSuggestionsContainer, () => allPaises, null, null, null, 'jogador');
                     jogadorPaisNomeInput.setAttribute('data-suggestions-setup', 'true');
                 }
                 return;
             }
-            allPaises = []; // Clear before fetching
+            allPaises = []; 
             try {
                 const querySnapshot = await getDocs(collection(db, "paises"));
                 querySnapshot.forEach((docSnap) => allPaises.push(docSnap.data().nome));
@@ -1366,9 +1568,7 @@
                  jogadorPaisNomeInput.setAttribute('data-suggestions-setup', 'true');
             } catch (error) { console.error("Erro ao carregar países: ", error); showStatus('statusJogador', 'Erro ao carregar países.', false); }
         }
-        // Initial call if tabJogador is the default (though openTab handles it too)
-        // loadPaisesParaSugestoes(); 
-
+        
         document.getElementById('formJogador').addEventListener('submit', async (e) => {
             e.preventDefault();
             const nome_jogador = document.getElementById('jogadorNome').value.trim();
@@ -1386,26 +1586,22 @@
                 });
                 showStatus('statusJogador', `Jogador "${nome_jogador}" adicionado!`, true);
                 e.target.reset(); posGenericaInput.value = ''; paisSuggestionsContainer.style.display = 'none';
-                jogadorPaisNomeInput.style.backgroundImage = 'none'; // Clear image if any was set by mistake
+                jogadorPaisNomeInput.style.backgroundImage = 'none'; 
                 jogadorPaisNomeInput.classList.remove('has-image-bg');
-                allJogadores = []; // Invalidate cache
+                allJogadores = []; 
                  if (document.getElementById('tabJogo').style.display === 'block' || document.getElementById('tabEditarJogo').style.display === 'block') {
-                    await loadJogadoresParaJogo(); // This re-setups suggestion handlers for relevant inputs
+                    await loadJogadoresParaJogo(); 
                 }
             } catch (error) { showStatus('statusJogador', `Erro: ${error.message}`, false); console.error(error); }
         });
 
-        // === SUGGESTION HANDLER (Generic) ===
         function setupSuggestionHandler(inputElement, suggestionsContainer, dataProvider, displayField, imageField = null, clearBtnElement = null, context = 'default') {
-            // dataProvider can be an array or a function that returns an array
             inputElement.addEventListener('input', async function() {
                 const currentDataArray = typeof dataProvider === 'function' ? await dataProvider() : dataProvider;
                 const inputText = this.value.toLowerCase();
                 suggestionsContainer.innerHTML = '';
-
                 const isClubInput = inputElement.id.toLowerCase().includes('clube');
                 const isPlayerInput = inputElement.id.toLowerCase().includes('jogador') || inputElement.id.toLowerCase().includes('assistencia') || inputElement.classList.contains('player-input-grid') || (inputElement.parentElement && inputElement.parentElement.classList.contains('player-input-wrapper'));
-                
                 if (!inputText.trim()) {
                     suggestionsContainer.style.display = 'none';
                     if ( (isClubInput || isPlayerInput) && (clearBtnElement || inputElement.classList.contains('has-image-bg'))) {
@@ -1418,24 +1614,18 @@
                     }
                     return;
                 }
-
                 const filteredData = currentDataArray.filter(item => {
                     const itemText = (typeof item === 'string' ? item : item[displayField]);
                     return itemText ? itemText.toLowerCase().includes(inputText) : false;
                 });
-
-                if (filteredData.length > 0 && inputElement.matches(':focus')) { // <--- MODIFICAÇÃO AQUI
+                if (filteredData.length > 0 && inputElement.matches(':focus')) { 
                     filteredData.slice(0, 10).forEach(item => {
                         const suggestionItemDiv = document.createElement('div');
                         suggestionItemDiv.classList.add('suggestion-item');
                         const itemText = (typeof item === 'string' ? item : item[displayField]);
-                        
-                        // Store the full item object if it's an object, for later use (e.g., getting ID)
                         if (typeof item === 'object') {
                             suggestionItemDiv.dataset.itemData = JSON.stringify(item);
                         }
-
-
                         if (imageField && typeof item === 'object' && item[imageField]) {
                             const img = document.createElement('img'); img.src = item[imageField]; img.alt = itemText;
                             img.onerror = function() { this.style.display='none'; };
@@ -1443,41 +1633,35 @@
                         }
                         const textSpan = document.createElement('span'); textSpan.textContent = itemText;
                         suggestionItemDiv.appendChild(textSpan);
-                        
                         suggestionItemDiv.addEventListener('click', async function() {
                             inputElement.value = itemText;
                             suggestionsContainer.style.display = 'none';
-                            
-                            // Special handling for game search in edit tab
                             if (context === 'edit-game-search') {
-                                const gameId = item.id; // 'item' here is the game object from loadedGamesForSeason
+                                const gameId = item.id; 
                                 document.getElementById('editJogoDocId').value = gameId;
                                 await loadGameForEditing(gameId);
-                                return; // Prevent further default behavior
+                                return; 
                             }
-
                             if ( (isClubInput || isPlayerInput) && imageField && typeof item === 'object' && item[imageField]) {
                                 inputElement.style.backgroundImage = `url('${item[imageField]}')`;
                                 inputElement.classList.add('has-image-bg');
-                            } else if (isClubInput || isPlayerInput) { // if no image, ensure it's cleared
+                            } else if (isClubInput || isPlayerInput) { 
                                 inputElement.style.backgroundImage = 'none';
                                 inputElement.classList.remove('has-image-bg');
                             }
-
                             if (clearBtnElement) {
                                 clearBtnElement.style.display = 'block';
                                 inputElement.classList.add('has-clear-btn');
                             }
-                            inputElement.dispatchEvent(new Event('change', { bubbles: true })); // Important for club auto-fill
+                            inputElement.dispatchEvent(new Event('change', { bubbles: true })); 
                         });
                         suggestionsContainer.appendChild(suggestionItemDiv);
                     });
                     suggestionsContainer.style.display = 'block';
                 } else {
-                    suggestionsContainer.style.display = 'none'; // Esta linha garante que as sugestões sejam escondidas se não houver dados ou se o campo não estiver focado
+                    suggestionsContainer.style.display = 'none';
                 }
             });
-             // Close suggestions when clicking outside
             document.addEventListener('click', (e) => {
                 if (suggestionsContainer && !inputElement.contains(e.target) && !suggestionsContainer.contains(e.target)) {
                     suggestionsContainer.style.display = 'none';
@@ -1485,35 +1669,30 @@
             });
         }
 
-
-        // === JOGO TAB LOGIC (CREATE & EDIT SHARED HELPERS) ===
         function populateTemporadaDropdown(selectElement) {
-            if (selectElement.options.length > 1 && selectElement.options[0].value !== "") return; // Already populated and not on placeholder
-            
-            const previouslySelected = selectElement.value; // Preserve selection if any
+            if (selectElement.options.length > 1 && selectElement.options[0].value !== "") return; 
+            const previouslySelected = selectElement.value; 
             selectElement.innerHTML = '<option value="">Selecione a Temporada</option>';
             const currentYear = new Date().getFullYear();
             for (let year = currentYear + 1; year >= 2000; year--) {
                 const displayTemporada = `${year-1}/${year}`;
                 selectElement.add(new Option(displayTemporada, displayTemporada));
             }
-            if (previouslySelected) { // try to restore
+            if (previouslySelected) { 
                  selectElement.value = previouslySelected;
             }
-             if (selectElement.value === "" && selectElement.options[0].value === "") { // Ensure placeholder text is correct
+             if (selectElement.value === "" && selectElement.options[0].value === "") { 
                 selectElement.options[0].textContent = "Selecione a Temporada";
             }
         }
 
         async function setSuggestedJornada(temporadaSelect, jornadaSelect, statusElementId, termCb, liveCb, futCb) {
             const selectedTemporadaValue = temporadaSelect.value;
-
-            // Set "Terminado" checkbox based on season selection
             if (!selectedTemporadaValue) {
-                termCb.checked = false; // Default if no season
+                termCb.checked = false; 
             } else {
                 const options = Array.from(temporadaSelect.options);
-                const firstSelectableOption = options.find(opt => opt.value !== ""); // First actual season
+                const firstSelectableOption = options.find(opt => opt.value !== ""); 
                 if (firstSelectableOption) {
                     const mostRecentSeasonInDropdown = firstSelectableOption.value;
                     termCb.checked = (selectedTemporadaValue < mostRecentSeasonInDropdown);
@@ -1521,38 +1700,32 @@
                      termCb.checked = false;
                 }
             }
-            syncGameStatusCheckboxes.call(termCb, liveCb, termCb, futCb); // Update other checkboxes based on this change
-
-            // Populate Jornada dropdown if not already done
+            syncGameStatusCheckboxes.call(termCb, liveCb, termCb, futCb); 
             if (jornadaSelect.options.length <= 1 || (jornadaSelect.options.length > 0 && jornadaSelect.options[0].value === "")) {
-                const currentJornadaVal = jornadaSelect.value; // Preserve selection if any
+                const currentJornadaVal = jornadaSelect.value; 
                 jornadaSelect.innerHTML = '<option value="">A carregar jornadas...</option>';
-                for (let i = 1; i <= 40; i++) { // Assuming max 40 jornadas
+                for (let i = 1; i <= 40; i++) { 
                     jornadaSelect.add(new Option(i.toString(), i.toString()));
                 }
                 if (currentJornadaVal && !isNaN(parseInt(currentJornadaVal)) && parseInt(currentJornadaVal) >=1 && parseInt(currentJornadaVal) <=40) {
                     jornadaSelect.value = currentJornadaVal;
                 } else {
-                     jornadaSelect.value = ""; // Default to placeholder
+                     jornadaSelect.value = ""; 
                 }
-                // Ensure placeholder text is correct
                 if (jornadaSelect.value === "" && jornadaSelect.options[0].value === "") {
                     jornadaSelect.options[0].textContent = "Selecione a Jornada";
-                } else if (jornadaSelect.options[0].value === "") { // If a value is selected but placeholder still exists
+                } else if (jornadaSelect.options[0].value === "") { 
                      jornadaSelect.options[0].textContent = "Selecione a Jornada";
                 }
             }
-            
-            if (!selectedTemporadaValue) { // No season selected, ensure placeholder for jornada is "Selecione a Jornada"
+            if (!selectedTemporadaValue) { 
                  if (jornadaSelect.value === "" && jornadaSelect.options.length > 0 && jornadaSelect.options[0].value === "") {
                      jornadaSelect.options[0].textContent = "Selecione a Jornada";
                 }
                 return;
             }
-
-            // Suggest next jornada logic
             const originalJornadaPlaceholder = jornadaSelect.options[0].value === "" ? jornadaSelect.options[0].textContent : null;
-            if (jornadaSelect.options[0].value === "") { // If placeholder exists
+            if (jornadaSelect.options[0].value === "") { 
                  jornadaSelect.options[0].textContent = "A calcular...";
             }
             try {
@@ -1566,13 +1739,12 @@
                     }
                 });
                 const nextJornada = maxJornada + 1;
-                const suggestedJornadaValue = Math.min(nextJornada, 40); // Cap at max 40
-                
+                const suggestedJornadaValue = Math.min(nextJornada, 40); 
                 if (jornadaSelect.querySelector(`option[value="${suggestedJornadaValue.toString()}"]`)) {
                     jornadaSelect.value = suggestedJornadaValue.toString();
-                } else if (jornadaSelect.options.length > 1) { // Fallback to first actual jornada if suggestion not found
+                } else if (jornadaSelect.options.length > 1) { 
                      jornadaSelect.value = jornadaSelect.options[1].value;
-                } else { // No jornadas populated other than placeholder
+                } else { 
                     jornadaSelect.value = ""; 
                 }
             } catch (error) {
@@ -1580,9 +1752,9 @@
                 showStatus(statusElementId, 'Erro ao calcular jornada. Selecione manualmente.', false);
             } finally {
                  if (jornadaSelect.options[0].value === "" && (jornadaSelect.options[0].textContent.includes("calcular") || jornadaSelect.options[0].textContent.includes("carregar")) ) {
-                     if (jornadaSelect.value === "") { // If no value selected, restore original or default placeholder
+                     if (jornadaSelect.value === "") { 
                         jornadaSelect.options[0].textContent = originalJornadaPlaceholder || "Selecione a Jornada";
-                     } else { // If a value is selected, ensure placeholder is generic
+                     } else { 
                         if (jornadaSelect.options[0].value === "") jornadaSelect.options[0].textContent = "Selecione a Jornada";
                      }
                 }
@@ -1591,7 +1763,6 @@
 
         async function loadClubesParaJogo() {
             if (allClubes.length > 0 && sportingClubeDetalhes) {
-                // Re-setup if necessary, or assume they are already set if caches are hit
                 if (!jogoClubeCasaInput.getAttribute('data-suggestions-setup')) {
                     setupSuggestionHandler(jogoClubeCasaInput, clubeCasaSuggestions, () => allClubes, 'nome', 'logo', null, 'create_club_casa');
                     jogoClubeCasaInput.setAttribute('data-suggestions-setup', 'true');
@@ -1616,7 +1787,6 @@
                 const snap = await getDocs(collection(db, "clubes"));
                 snap.forEach(s => allClubes.push({ id: s.id, nome: s.data().nome, logo: s.data().logo }));
                 allClubes.sort((a, b) => a.nome.localeCompare(b.nome));
-
                 sportingClubeDetalhes = allClubes.find(c => c.nome.toLowerCase() === SPORTING_CP_CANONICAL_NAME.toLowerCase());
                 if (!sportingClubeDetalhes) {
                     sportingClubeDetalhes = allClubes.find(c => sportingCanonicoNomesInputCheck.includes(c.nome.toLowerCase()));
@@ -1624,17 +1794,14 @@
                 if (!sportingClubeDetalhes) {
                      console.warn("Detalhes do Sporting CP não foram encontrados na lista de clubes.");
                 }
-                // Setup for Create Jogo tab
                 setupSuggestionHandler(jogoClubeCasaInput, clubeCasaSuggestions, () => allClubes, 'nome', 'logo', null, 'create_club_casa');
                 jogoClubeCasaInput.setAttribute('data-suggestions-setup', 'true');
                 setupSuggestionHandler(jogoClubeForaInput, clubeForaSuggestions, () => allClubes, 'nome', 'logo', null, 'create_club_fora');
                 jogoClubeForaInput.setAttribute('data-suggestions-setup', 'true');
-                // Setup for Edit Jogo tab
                 setupSuggestionHandler(editJogoClubeCasaInput, editClubeCasaSuggestions, () => allClubes, 'nome', 'logo', null, 'edit_club_casa');
                 editJogoClubeCasaInput.setAttribute('data-suggestions-setup', 'true');
                 setupSuggestionHandler(editJogoClubeForaInput, editClubeForaSuggestions, () => allClubes, 'nome', 'logo', null, 'edit_club_fora');
                 editJogoClubeForaInput.setAttribute('data-suggestions-setup', 'true');
-
             } catch (e) { 
                 console.error("Erro loadClubes: ", e); 
                 showStatus('statusJogo', 'Erro lista de clubes.', false);
@@ -1642,48 +1809,38 @@
             }
         }
 
-        function handleClubeChange(context, side) { // context: 'create' or 'edit', side: 'casa' or 'fora'
+        function handleClubeChange(context, side) { 
             if (!sportingClubeDetalhes) return;
-
             const casaInput = context === 'create' ? jogoClubeCasaInput : editJogoClubeCasaInput;
             const foraInput = context === 'create' ? jogoClubeForaInput : editJogoClubeForaInput;
-            
             const casaNome = casaInput.value.trim();
             const foraNome = foraInput.value.trim();
-
-            let changedInput = null; // To track which input was programmatically changed
-
-            if (side === 'casa') { // Home club was changed by user
+            let changedInput = null; 
+            if (side === 'casa') { 
                 if (casaNome && !sportingCanonicoNomesInputCheck.includes(casaNome.toLowerCase())) {
-                    // If home is not Sporting, set away to Sporting
                     if (foraInput.value !== sportingClubeDetalhes.nome) {
                         foraInput.value = sportingClubeDetalhes.nome;
                         changedInput = foraInput;
                     }
                 } else if (casaNome && sportingCanonicoNomesInputCheck.includes(casaNome.toLowerCase())) {
-                    // If home is Sporting and away is also Sporting, clear away
                     if (foraNome && sportingCanonicoNomesInputCheck.includes(foraNome.toLowerCase())) {
                         foraInput.value = "";
                         changedInput = foraInput;
                     }
                 }
-            } else { // Away club was changed by user (side === 'fora')
+            } else { 
                 if (foraNome && !sportingCanonicoNomesInputCheck.includes(foraNome.toLowerCase())) {
-                    // If away is not Sporting, set home to Sporting
                      if (casaInput.value !== sportingClubeDetalhes.nome) {
                         casaInput.value = sportingClubeDetalhes.nome;
                         changedInput = casaInput;
                     }
                 } else if (foraNome && sportingCanonicoNomesInputCheck.includes(foraNome.toLowerCase())) {
-                    // If away is Sporting and home is also Sporting, clear home
                     if (casaNome && sportingCanonicoNomesInputCheck.includes(casaNome.toLowerCase())) {
                         casaInput.value = "";
                         changedInput = casaInput;
                     }
                 }
             }
-
-            // Update background image for the programmatically changed input
             if (changedInput) {
                 if (changedInput.value === sportingClubeDetalhes.nome && sportingClubeDetalhes.logo) {
                     changedInput.style.backgroundImage = `url('${sportingClubeDetalhes.logo}')`;
@@ -1692,16 +1849,13 @@
                     changedInput.style.backgroundImage = 'none';
                     changedInput.classList.remove('has-image-bg');
                 }
-                // Manually trigger change event for the modified input to update its clear button etc.
                 changedInput.dispatchEvent(new Event('input', { bubbles: true })); 
             }
             updateCalculatedScores(context);
         }
 
-
         async function loadJogadoresParaJogo() {
              if (allJogadores.length > 0) {
-                // Ensure handlers are set up if cache is hit but elements weren't ready before
                 if (!goalDetailJogadorInput.getAttribute('data-suggestions-setup')) {
                     setupSuggestionHandler(goalDetailJogadorInput, goalDetailJogadorSuggestions, () => allJogadores, 'nome', 'imagem_link', null, 'create_goal_scorer');
                     goalDetailJogadorInput.setAttribute('data-suggestions-setup', 'true');
@@ -1718,7 +1872,6 @@
                     setupSuggestionHandler(editGoalDetailAssistenciaInput, editGoalDetailAssistenciaSuggestions, () => allJogadores, 'nome', 'imagem_link', null, 'edit_goal_assist');
                     editGoalDetailAssistenciaInput.setAttribute('data-suggestions-setup', 'true');
                 }
-                // Also re-setup for dynamic player inputs if they exist
                 document.querySelectorAll('#jogo11InicialContainer input[type="text"], #jogoSuplentesContainer input[type="text"], #editJogo11InicialContainer input[type="text"], #editJogoSuplentesContainer input[type="text"]').forEach(input => {
                     if (!input.getAttribute('data-suggestions-setup')) {
                         const suggContainer = input.parentElement.querySelector('.suggestions-container');
@@ -1735,20 +1888,14 @@
                 const snap = await getDocs(collection(db, "jogadores"));
                 snap.forEach(s => allJogadores.push({ id: s.id, nome: s.data().nome_jogador, imagem_link: s.data().imagem_link }));
                 allJogadores.sort((a, b) => a.nome.localeCompare(b.nome));
-                
-                // Setup for Create Jogo Modals
                 setupSuggestionHandler(goalDetailJogadorInput, goalDetailJogadorSuggestions, () => allJogadores, 'nome', 'imagem_link', null, 'create_goal_scorer');
                 goalDetailJogadorInput.setAttribute('data-suggestions-setup', 'true');
                 setupSuggestionHandler(goalDetailAssistenciaInput, goalDetailAssistenciaSuggestions, () => allJogadores, 'nome', 'imagem_link', null, 'create_goal_assist');
                 goalDetailAssistenciaInput.setAttribute('data-suggestions-setup', 'true');
-                
-                // Setup for Edit Jogo Modals
                 setupSuggestionHandler(editGoalDetailJogadorInput, editGoalDetailJogadorSuggestions, () => allJogadores, 'nome', 'imagem_link', null, 'edit_goal_scorer');
                 editGoalDetailJogadorInput.setAttribute('data-suggestions-setup', 'true');
                 setupSuggestionHandler(editGoalDetailAssistenciaInput, editGoalDetailAssistenciaSuggestions, () => allJogadores, 'nome', 'imagem_link', null, 'edit_goal_assist');
                 editGoalDetailAssistenciaInput.setAttribute('data-suggestions-setup', 'true');
-
-                 // Setup for dynamic player inputs (both create and edit)
                 document.querySelectorAll('#jogo11InicialContainer input[type="text"], #jogoSuplentesContainer input[type="text"], #editJogo11InicialContainer input[type="text"], #editJogoSuplentesContainer input[type="text"]').forEach(input => {
                     const suggContainer = input.parentElement.querySelector('.suggestions-container');
                     const clearBtn = input.parentElement.querySelector('.player-input-clear-btn');
@@ -1756,8 +1903,6 @@
                     setupSuggestionHandler(input, suggContainer, () => allJogadores, 'nome', 'imagem_link', clearBtn, contextPrefix + input.id);
                     input.setAttribute('data-suggestions-setup', 'true');
                 });
-
-
             } catch (e) { 
                 console.error("Erro loadJogadores: ", e); 
                 showStatus('statusJogo', 'Erro lista de jogadores.', false);
@@ -1765,50 +1910,42 @@
             }
         }
 
-        function getGoalDetailStatus(details, type) { // type: 'marcado' or 'sofrido'
+        function getGoalDetailStatus(details, type) { 
             if (!details || Object.keys(details).length === 0) return 'status-pending';
-
             const hasScorer = !!details.jogadorNome;
             const hasZone = !!details.zona;
-            // Assistencia is optional even for 'marcado' for status purposes here.
-            // const hasAssist = !!details.assistenciaNome;
-
             if (type === 'marcado') {
-                if (hasScorer && hasZone) return 'status-complete'; // Scorer and Zone are primary for 'marcado'
-                if (hasScorer || hasZone) return 'status-incomplete'; // At least one primary detail exists
+                if (hasScorer && hasZone) return 'status-complete'; 
+                if (hasScorer || hasZone) return 'status-incomplete'; 
             } else if (type === 'sofrido') {
-                if (hasZone) return 'status-complete'; // Zone is primary for 'sofrido'
+                if (hasZone) return 'status-complete'; 
             }
-            return 'status-pending'; // Default if conditions not met
+            return 'status-pending'; 
         }
 
-        function renderMinuteList(listElement, minutesArray, type, context) { // context: 'create' or 'edit'
+        function renderMinuteList(listElement, minutesArray, type, context) { 
             listElement.innerHTML = '';
             minutesArray.forEach((entry, index) => {
                 const listItem = document.createElement('li');
                 listItem.classList.add('minute-list-item');
                 const statusClass = getGoalDetailStatus(entry.details, type);
                 listItem.classList.add(statusClass);
-
                 const textAndScorerContainer = document.createElement('div');
                 textAndScorerContainer.classList.add('minute-text-scorer-container');
-
                 const minuteSpan = document.createElement('span');
                 minuteSpan.classList.add('minute-value');
                 minuteSpan.textContent = `Minuto ${entry.minute}`;
                 minuteSpan.dataset.index = index;
                 minuteSpan.dataset.type = type;
                 minuteSpan.dataset.minute = entry.minute;
-                minuteSpan.dataset.context = context; // Add context for the modal
-                minuteSpan.addEventListener('click', openGoalDetailModalHandler); // Universal handler
+                minuteSpan.dataset.context = context; 
+                minuteSpan.addEventListener('click', openGoalDetailModalHandler); 
                 textAndScorerContainer.appendChild(minuteSpan);
-
                 if (type === 'marcado' && entry.details && entry.details.jogadorNome) {
                     const separatorSpan = document.createElement('span');
                     separatorSpan.classList.add('minute-list-separator');
                     separatorSpan.textContent = " | ";
                     textAndScorerContainer.appendChild(separatorSpan);
-
                     const jogador = allJogadores.find(j => j.nome === entry.details.jogadorNome);
                     if (jogador && jogador.imagem_link) {
                         const imgJogador = document.createElement('img');
@@ -1817,13 +1954,11 @@
                         imgJogador.classList.add('minute-list-player-image');
                         textAndScorerContainer.appendChild(imgJogador);
                     }
-
                     const scorerSpan = document.createElement('span');
                     scorerSpan.classList.add('scorer-name');
                     scorerSpan.textContent = entry.details.jogadorNome;
                     textAndScorerContainer.appendChild(scorerSpan);
                 }
-
                 const removeBtn = document.createElement('button');
                 removeBtn.classList.add('remove-minute-btn');
                 removeBtn.innerHTML = '×';
@@ -1832,24 +1967,20 @@
                     renderMinuteList(listElement, minutesArray, type, context);
                     updateCalculatedScores(context);
                 });
-
                 listItem.appendChild(textAndScorerContainer);
                 listItem.appendChild(removeBtn);
                 listElement.appendChild(listItem);
             });
         }
         
-        function addMinuteEntry(type, listElement, minutesArray, minuteInputEl, context) { // context: 'create' or 'edit'
+        function addMinuteEntry(type, listElement, minutesArray, minuteInputEl, context) { 
             const minute = parseInt(minuteInputEl.value);
             const statusElId = context === 'create' ? 'statusJogo' : 'statusEditarJogo';
             if (!minute || minute <= 0) { showStatus(statusElId, 'Minuto inválido.', false); return; }
-            
-            // Check for duplicate minute
             if (minutesArray.some(entry => entry.minute === minute)) {
                 showStatus(statusElId, `Golo no minuto ${minute} já foi adicionado. Edite o existente se necessário.`, false);
                 return;
             }
-
             minutesArray.push({ minute, details: {} });
             minutesArray.sort((a, b) => a.minute - b.minute);
             renderMinuteList(listElement, minutesArray, type, context);
@@ -1857,18 +1988,14 @@
             updateCalculatedScores(context);
         }
         
-        // Create Jogo Listeners
         addMinutoGoloMarcadoBtn.addEventListener('click', () => addMinuteEntry('marcado', listaMinutosGolosMarcados, createMinutosGolosMarcados, jogoMinutoGoloMarcadoInput, 'create'));
         addMinutoGoloSofridoBtn.addEventListener('click', () => addMinuteEntry('sofrido', listaMinutosGolosSofridos, createMinutosGolosSofridos, jogoMinutoGoloSofridoInput, 'create'));
-        
-        // Edit Jogo Listeners
         editAddMinutoGoloMarcadoBtn.addEventListener('click', () => addMinuteEntry('marcado', editListaMinutosGolosMarcados, editMinutosGolosMarcados, editJogoMinutoGoloMarcadoInput, 'edit'));
         editAddMinutoGoloSofridoBtn.addEventListener('click', () => addMinuteEntry('sofrido', editListaMinutosGolosSofridos, editMinutosGolosSofridos, editJogoMinutoGoloSofridoInput, 'edit'));
 
-
-        function populateGoalZoneGrid(gridContainer, context) { // context for targeting correct hidden input
+        function populateGoalZoneGrid(gridContainer, context) { 
             if (gridContainer.children.length > 0 && gridContainer.getAttribute('data-populated') === 'true') return;
-            gridContainer.innerHTML = ''; // Clear previous if any (e.g. on tab switch and reload)
+            gridContainer.innerHTML = ''; 
             goalZoneNames.forEach(zoneName => {
                 const cell = document.createElement('div'); cell.classList.add('goal-zone-cell');
                 cell.textContent = zoneName; cell.dataset.zone = zoneName;
@@ -1882,27 +2009,22 @@
             const selectedCell = event.target;
             const currentGridContainer = context === 'create' ? goalZoneGridContainer : editGoalZoneGridContainer;
             const currentHiddenInput = context === 'create' ? selectedGoalZoneHidden : editSelectedGoalZoneHidden;
-
             currentGridContainer.querySelectorAll('.goal-zone-cell').forEach(cell => cell.classList.remove('selected'));
             selectedCell.classList.add('selected'); 
             currentHiddenInput.value = selectedCell.dataset.zone;
         }
 
-        // Universal Modal Opener
         function openGoalDetailModalHandler(event) {
             const type = event.target.dataset.type; 
             const index = parseInt(event.target.dataset.index);
-            const context = event.target.dataset.context; // 'create' or 'edit'
-
+            const context = event.target.dataset.context; 
             const minutesArray = context === 'create' 
                 ? (type === 'marcado' ? createMinutosGolosMarcados : createMinutosGolosSofridos)
                 : (type === 'marcado' ? editMinutosGolosMarcados : editMinutosGolosSofridos);
-            
             const minuteEntry = minutesArray[index];
-
             const currentModal = context === 'create' ? goalDetailModal : editGoalDetailModal;
             const currentTitle = context === 'create' ? goalDetailModalTitle : editGoalDetailModalTitle;
-            const currentForm = context === 'create' ? formGoalDetail : document.getElementById('editFormGoalDetail'); // Target specific form
+            const currentForm = context === 'create' ? formGoalDetail : document.getElementById('editFormGoalDetail'); 
             const currentTypeInput = context === 'create' ? goalDetailTypeInput : editGoalDetailTypeInput;
             const currentMinuteInput = context === 'create' ? goalDetailMinuteInput : editGoalDetailMinuteInput;
             const currentScorerSection = context === 'create' ? goalDetailScorerSection : editGoalDetailScorerSection;
@@ -1911,26 +2033,20 @@
             const currentAssistenciaInput = context === 'create' ? goalDetailAssistenciaInput : editGoalDetailAssistenciaInput;
             const currentGrid = context === 'create' ? goalZoneGridContainer : editGoalZoneGridContainer;
             const currentHiddenZone = context === 'create' ? selectedGoalZoneHidden : editSelectedGoalZoneHidden;
-
-
             currentTypeInput.value = type; 
             currentMinuteInput.value = minuteEntry.minute;
             currentTitle.textContent = `Detalhes do Golo - Minuto ${minuteEntry.minute} (${type === 'marcado' ? 'Marcado' : 'Sofrido'}) ${context === 'edit' ? '(Editar)' : ''}`;
             currentForm.reset(); 
             currentHiddenZone.value = '';
             currentGrid.querySelectorAll('.goal-zone-cell').forEach(cell => cell.classList.remove('selected'));
-
             currentJogadorInput.style.backgroundImage = 'none';
             currentJogadorInput.classList.remove('has-image-bg', 'has-clear-btn');
             currentAssistenciaInput.style.backgroundImage = 'none';
             currentAssistenciaInput.classList.remove('has-image-bg', 'has-clear-btn');
-             // Hide clear buttons for modal inputs initially
             const jogadorClearBtn = currentJogadorInput.parentElement.querySelector('.player-input-clear-btn');
             const assistClearBtn = currentAssistenciaInput.parentElement.querySelector('.player-input-clear-btn');
             if(jogadorClearBtn) jogadorClearBtn.style.display = 'none';
             if(assistClearBtn) assistClearBtn.style.display = 'none';
-
-
             currentJogadorInput.value = minuteEntry.details?.jogadorNome || '';
             if (minuteEntry.details?.jogadorNome && allJogadores.length > 0) {
                 const scorerDetails = allJogadores.find(j => j.nome === minuteEntry.details.jogadorNome);
@@ -1940,7 +2056,6 @@
                 }
                 if(jogadorClearBtn) { jogadorClearBtn.style.display = 'block'; currentJogadorInput.classList.add('has-clear-btn'); }
             }
-
             currentAssistenciaInput.value = minuteEntry.details?.assistenciaNome || '';
             if (minuteEntry.details?.assistenciaNome && allJogadores.length > 0) {
                 const assisterDetails = allJogadores.find(j => j.nome === minuteEntry.details.assistenciaNome);
@@ -1950,70 +2065,54 @@
                 }
                  if(assistClearBtn) { assistClearBtn.style.display = 'block'; currentAssistenciaInput.classList.add('has-clear-btn');}
             }
-
             if (minuteEntry.details?.zona) {
                 currentHiddenZone.value = minuteEntry.details.zona;
                 const preSelected = currentGrid.querySelector(`.goal-zone-cell[data-zone="${minuteEntry.details.zona}"]`);
                 if (preSelected) preSelected.classList.add('selected');
             }
-            currentScorerSection.style.display = type === 'marcado' ? 'flex' : 'none'; // Using flex for consistency with form items
+            currentScorerSection.style.display = type === 'marcado' ? 'flex' : 'none'; 
             currentAssistenciaSection.style.display = type === 'marcado' ? 'flex' : 'none';
             currentModal.style.display = 'block';
         }
         
-        // Close buttons for modals
         closeGoalDetailModalBtn.onclick = () => goalDetailModal.style.display = 'none';
         editCloseGoalDetailModalBtn.onclick = () => editGoalDetailModal.style.display = 'none';
 
-        // Universal Modal Save Handler
         function saveGoalDetailHandler(context) {
             const type = (context === 'create' ? goalDetailTypeInput : editGoalDetailTypeInput).value;
             const minute = parseInt((context === 'create' ? goalDetailMinuteInput : editGoalDetailMinuteInput).value);
-            
             let targetArray = context === 'create' 
                 ? (type === 'marcado' ? createMinutosGolosMarcados : createMinutosGolosSofridos)
                 : (type === 'marcado' ? editMinutosGolosMarcados : editMinutosGolosSofridos);
-
             const entry = targetArray.find(e => e.minute === minute);
             const statusElId = context === 'create' ? 'statusJogo' : 'statusEditarJogo';
-
             if (!entry) { showStatus(statusElId, 'Erro ao encontrar golo para guardar detalhes.', false); return; }
-            
             entry.details = {
                 jogadorNome: (context === 'create' ? goalDetailJogadorInput : editGoalDetailJogadorInput).value.trim() || null,
                 zona: (context === 'create' ? selectedGoalZoneHidden : editSelectedGoalZoneHidden).value || null,
                 assistenciaNome: (context === 'create' ? goalDetailAssistenciaInput : editGoalDetailAssistenciaInput).value.trim() || null,
             };
-            
-            // Add IDs if names are found
             if (entry.details.jogadorNome) {
                 const scorer = allJogadores.find(j => j.nome === entry.details.jogadorNome);
-                if(scorer) entry.details.jogadorId = scorer.id; else entry.details.jogadorId = null; // Store null if not found
+                if(scorer) entry.details.jogadorId = scorer.id; else entry.details.jogadorId = null; 
             } else { entry.details.jogadorId = null; }
-
             if (entry.details.assistenciaNome) {
                 const assister = allJogadores.find(j => j.nome === entry.details.assistenciaNome);
                 if(assister) entry.details.assistenciaId = assister.id; else entry.details.assistenciaId = null;
             } else { entry.details.assistenciaId = null; }
-
-
             showStatus(statusElId, `Detalhes para golo aos ${minute}' guardados.`, true);
             (context === 'create' ? goalDetailModal : editGoalDetailModal).style.display = 'none';
-            
             const listEl = context === 'create' 
                 ? (type === 'marcado' ? listaMinutosGolosMarcados : listaMinutosGolosSofridos)
                 : (type === 'marcado' ? editListaMinutosGolosMarcados : editListaMinutosGolosSofridos);
-            
             renderMinuteList(listEl, targetArray, type, context);
-            updateCalculatedScores(context); // Update main form scores
+            updateCalculatedScores(context); 
         }
 
         saveGoalDetailBtn.addEventListener('click', () => saveGoalDetailHandler('create'));
         editSaveGoalDetailBtn.addEventListener('click', () => saveGoalDetailHandler('edit'));
 
-
-        function updateCalculatedScores(context) { // context: 'create' or 'edit'
-            // Determine which set of elements to use
+        function updateCalculatedScores(context) { 
             const clubeCasaIn = context === 'create' ? jogoClubeCasaInput : editJogoClubeCasaInput;
             const clubeForaIn = context === 'create' ? jogoClubeForaInput : editJogoClubeForaInput;
             const minutosMarcadosArr = context === 'create' ? createMinutosGolosMarcados : editMinutosGolosMarcados;
@@ -2030,68 +2129,50 @@
             const sofridos2POut = context === 'create' ? jogoSofridos2P : editJogoSofridos2P;
             const estadoOut = context === 'create' ? jogoEstado : editJogoEstado;
             const futuroCb = context === 'create' ? jogoFuturoCheckbox : editJogoFuturoCheckbox;
-            // const liveCb = context === 'create' ? jogoLiveCheckbox : editJogoLiveCheckbox;
-            // const termCb = context === 'create' ? jogoTerminadoCheckbox : editJogoTerminadoCheckbox;
-
-
             const casaNomeInput = clubeCasaIn.value.trim();
             const foraNomeInput = clubeForaIn.value.trim();
             const casaNomeLower = casaNomeInput.toLowerCase();
             const foraNomeLower = foraNomeInput.toLowerCase();
-
             const isSportingCasa = sportingCanonicoNomesInputCheck.includes(casaNomeLower);
             const isSportingFora = sportingCanonicoNomesInputCheck.includes(foraNomeLower);
-
             const gMarcadosPeloSporting = minutosMarcadosArr.length;
             const gSofridosPeloSporting = minutosSofridosArr.length;
-
             let gmCasaFinal = 0, gmForaFinal = 0, gsCasaFinal = 0, gsForaFinal = 0;
-
             if (isSportingCasa) {
                 gmCasaFinal = gMarcadosPeloSporting;
                 gmForaFinal = gSofridosPeloSporting;
-                gsCasaFinal = gSofridosPeloSporting; // Golos sofridos pela equipa da casa (Sporting) são os sofridos pelo Sporting
-                gsForaFinal = gMarcadosPeloSporting; // Golos sofridos pela equipa de fora são os marcados pelo Sporting
+                gsCasaFinal = gSofridosPeloSporting; 
+                gsForaFinal = gMarcadosPeloSporting; 
             } else if (isSportingFora) {
                 gmCasaFinal = gSofridosPeloSporting;
                 gmForaFinal = gMarcadosPeloSporting;
-                gsCasaFinal = gMarcadosPeloSporting; // Golos sofridos pela equipa da casa são os marcados pelo Sporting (que está fora)
-                gsForaFinal = gSofridosPeloSporting; // Golos sofridos pela equipa de fora (Sporting) são os sofridos pelo Sporting
-            } else {
-                // If Sporting is not playing, but clubs are named, goals are 0 for both.
-                // If one club is named and it's not Sporting, assume 0-0 until other club is set.
-                // This part can be adjusted based on desired behavior when Sporting isn't selected.
-                // The current logic correctly sets 0s if neither is Sporting.
-            }
-
+                gsCasaFinal = gMarcadosPeloSporting; 
+                gsForaFinal = gSofridosPeloSporting; 
+            } 
             gmCasaOut.value = gmCasaFinal;
             gmForaOut.value = gmForaFinal;
-            gsCasaOut.value = gsCasaFinal; // These are derived correctly from gmCasaFinal and gmForaFinal
-            gsForaOut.value = gsForaFinal; // If Sporting is casa, gsCasa = gmFora. If Sporting is fora, gsFora = gmCasa.
-
+            gsCasaOut.value = gsCasaFinal; 
+            gsForaOut.value = gsForaFinal; 
             resultadoFinalOut.value = `${gmCasaFinal}-${gmForaFinal}`;
-            
-            if (futuroCb.checked) { // If "Futuro" is checked
-    if (casaNomeInput && foraNomeInput) {
-        nomeJogoOut.value = `${casaNomeInput} vs ${foraNomeInput}`; // e.g., Sporting vs FC Porto
-    } else if (casaNomeInput) {
-        nomeJogoOut.value = `${casaNomeInput} vs ?`;
-    } else if (foraNomeInput) {
-        nomeJogoOut.value = `? vs ${foraNomeInput}`;
-    } else {
-        nomeJogoOut.value = "";
-    }
-} else { // If "Live" or "Terminado" is checked (because futuroCb.checked is false)
-     nomeJogoOut.value = (casaNomeInput && foraNomeInput) 
-        ? `${casaNomeInput} ${gmCasaFinal}-${gmForaFinal} ${foraNomeInput}` // e.g., Sporting 0-0 FC Porto
-        : (casaNomeInput ? `${casaNomeInput} vs ?` : (foraNomeInput ? `? vs ${foraNomeInput}`: ""));
-}
-
+            if (futuroCb.checked) {
+                if (casaNomeInput && foraNomeInput) {
+                    nomeJogoOut.value = `${casaNomeInput} vs ${foraNomeInput}`;
+                } else if (casaNomeInput) {
+                    nomeJogoOut.value = `${casaNomeInput} vs ?`;
+                } else if (foraNomeInput) {
+                    nomeJogoOut.value = `? vs ${foraNomeInput}`;
+                } else {
+                    nomeJogoOut.value = "";
+                }
+            } else { 
+                 nomeJogoOut.value = (casaNomeInput && foraNomeInput) 
+                    ? `${casaNomeInput} ${gmCasaFinal}-${gmForaFinal} ${foraNomeInput}` 
+                    : (casaNomeInput ? `${casaNomeInput} vs ?` : (foraNomeInput ? `? vs ${foraNomeInput}`: ""));
+            }
             marcados1POut.value = minutosMarcadosArr.filter(g => g.minute <= 45).length;
             marcados2POut.value = minutosMarcadosArr.filter(g => g.minute > 45).length;
             sofridos1POut.value = minutosSofridosArr.filter(g => g.minute <= 45).length;
             sofridos2POut.value = minutosSofridosArr.filter(g => g.minute > 45).length;
-
             if (!isSportingCasa && !isSportingFora && (casaNomeInput || foraNomeInput)) {
                  estadoOut.value = "N/A (Sporting não joga)";
             } else if (gMarcadosPeloSporting > gSofridosPeloSporting) {
@@ -2099,7 +2180,6 @@
             } else if (gMarcadosPeloSporting < gSofridosPeloSporting) {
                 estadoOut.value = "D (Derrota)";
             } else if (gMarcadosPeloSporting === 0 && gSofridosPeloSporting === 0 && !(casaNomeInput && foraNomeInput)) {
-                // If no goals and clubs not fully defined, don't show "Empate" yet.
                 estadoOut.value = "";
             }
             else {
@@ -2107,51 +2187,41 @@
             }
         }
 
-        function setupDynamicPlayerInputs(containerId, numPlayers, rolePrefix, context) { // context: 'create' or 'edit'
+        function setupDynamicPlayerInputs(containerId, numPlayers, rolePrefix, context) { 
             const container = document.getElementById(containerId);
-            container.innerHTML = ''; // Clear previous inputs
+            container.innerHTML = ''; 
             for (let i = 1; i <= numPlayers; i++) {
                 const wrapperDiv = document.createElement('div');
                 wrapperDiv.classList.add('player-input-wrapper');
-                // Unique ID incorporating context if needed, though rolePrefix might be enough if unique
-                const inputId = `${rolePrefix}_${i}`; // e.g., create_inicial_1 or edit_suplente_3
-                
+                const inputId = `${rolePrefix}_${i}`; 
                 const input = document.createElement('input');
                 input.type = 'text'; input.id = inputId;
                 input.placeholder = `Jogador ${i}`; input.autocomplete = 'off'; 
-                input.dataset.playerType = rolePrefix; // e.g. 'inicial' or 'suplente'
+                input.dataset.playerType = rolePrefix; 
                 input.dataset.playerIndex = i;
-
                 const suggId = `sugg_${inputId}`;
                 const suggDiv = document.createElement('div');
                 suggDiv.id = suggId; suggDiv.classList.add('suggestions-container'); suggDiv.style.display = 'none';
-                
                 const clearBtn = document.createElement('span');
                 clearBtn.classList.add('player-input-clear-btn'); clearBtn.innerHTML = '×'; clearBtn.style.display = 'none';
-                
                 clearBtn.addEventListener('click', function() {
                     input.value = ''; input.style.backgroundImage = 'none';
                     input.classList.remove('has-image-bg', 'has-clear-btn');
                     this.style.display = 'none';
-                    input.dispatchEvent(new Event('input', { bubbles: true })); // Trigger input event to clear suggestions
+                    input.dispatchEvent(new Event('input', { bubbles: true })); 
                 });
-
-                input.addEventListener('input', function() { // Show/hide clear button
+                input.addEventListener('input', function() { 
                     if (this.value.trim() !== '') {
                         clearBtn.style.display = 'block'; input.classList.add('has-clear-btn');
                     } else {
                         clearBtn.style.display = 'none'; input.classList.remove('has-clear-btn');
-                        // Also clear background image if text is cleared
                         input.style.backgroundImage = 'none'; input.classList.remove('has-image-bg');
                     }
                 });
-
                 wrapperDiv.appendChild(input); wrapperDiv.appendChild(clearBtn);
                 wrapperDiv.appendChild(suggDiv);
                 container.appendChild(wrapperDiv);
-
-                if (allJogadores.length > 0) { // If players are already loaded
-                     // Context for suggestion handler to distinguish player inputs
+                if (allJogadores.length > 0) { 
                     const suggestionContext = `${context}_player_${rolePrefix}_${i}`;
                     setupSuggestionHandler(input, suggDiv, () => allJogadores, 'nome', 'imagem_link', clearBtn, suggestionContext);
                     input.setAttribute('data-suggestions-setup', 'true');
@@ -2159,29 +2229,24 @@
             }
         }
         
-        // === CREATE JOGO FORM SUBMISSION ===
         document.getElementById('formJogo').addEventListener('submit', async (e) => {
             e.preventDefault(); const statusElId = 'statusJogo';
             const temporada = jogoTemporadaSelect.value;
             const jornada = jogoJornadaSelect.value;
             const clubeCasaNome = jogoClubeCasaInput.value.trim();
             const clubeForaNome = jogoClubeForaInput.value.trim();
-
             const isSportingCasa = sportingCanonicoNomesInputCheck.includes(clubeCasaNome.toLowerCase());
             const isSportingFora = sportingCanonicoNomesInputCheck.includes(clubeForaNome.toLowerCase());
-
             if (!temporada || !jornada || !clubeCasaNome || !clubeForaNome) { showStatus(statusElId, 'Temp., Jornada, Clubes obrigatórios.', false); return; }
             if (!isSportingCasa && !isSportingFora) { showStatus(statusElId, `Um dos clubes deve ser '${SPORTING_CP_CANONICAL_NAME}' ou variante.`, false); return; }
             if (clubeCasaNome.toLowerCase() === clubeForaNome.toLowerCase()) { showStatus(statusElId, 'Clubes devem ser diferentes.', false); return; }
-
             const getPlantel = (containerSel) => Array.from(document.querySelectorAll(`${containerSel} input[type="text"]`))
                 .map(inp => {
                     const nome = inp.value.trim();
-                    if (!nome) return null; // Return null for empty slots to filter them out easily
+                    if (!nome) return null; 
                     const jogador = allJogadores.find(j => j.nome === nome);
-                    return { nome, id: jogador ? jogador.id : null }; // Store null ID if not found, or original name if that's preferred
-                }).filter(p => p !== null); // Remove empty slots
-
+                    return { nome, id: jogador ? jogador.id : null }; 
+                }).filter(p => p !== null); 
             const jogoData = {
                 temporada, jornada: parseInt(jornada),
                 nomeJogo: jogoNomeJogo.value, clubeCasaNome, clubeForaNome,
@@ -2191,7 +2256,6 @@
                 resultadoFinal: jogoResultadoFinal.value,
                 resultadoGMCasa: parseInt(jogoGMCasa.value) || 0,
                 resultadoGMFora: parseInt(jogoGMFora.value) || 0,
-                // GS (Golos Sofridos) are implicit by GM, but can be stored if desired for direct query
                 resultadoGSCasa: parseInt(jogoGSCasa.value) || 0, 
                 resultadoGSFora: parseInt(jogoGSFora.value) || 0,
                 sportingGolosMarcados1P: parseInt(jogoMarcados1P.value) || 0,
@@ -2207,20 +2271,15 @@
                 dataCriacao: serverTimestamp(),
                 lastUpdated: serverTimestamp()
             };
-
             try {
                 const docRef = await addDoc(collection(db, "jogos"), jogoData);
                 showStatus(statusElId, `Jogo adicionado ID: ${docRef.id}!`, true);
-                const currentTemporada = jogoTemporadaSelect.value; // Save before reset
-                e.target.reset(); // Reset the form
-
-                // Clear visual cues from inputs
+                const currentTemporada = jogoTemporadaSelect.value; 
+                e.target.reset(); 
                 jogoClubeCasaInput.style.backgroundImage = 'none';
                 jogoClubeCasaInput.classList.remove('has-image-bg', 'has-clear-btn');
                 jogoClubeForaInput.style.backgroundImage = 'none';
                 jogoClubeForaInput.classList.remove('has-image-bg', 'has-clear-btn');
-                
-                // Reset player input fields visually
                 document.querySelectorAll('#jogo11InicialContainer .player-input-wrapper input, #jogoSuplentesContainer .player-input-wrapper input')
                     .forEach(input => {
                         input.style.backgroundImage = 'none';
@@ -2228,40 +2287,25 @@
                         const clearBtn = input.parentElement.querySelector('.player-input-clear-btn');
                         if(clearBtn) clearBtn.style.display = 'none';
                     });
-
                 createMinutosGolosMarcados = []; createMinutosGolosSofridos = [];
                 renderMinuteList(listaMinutosGolosMarcados, createMinutosGolosMarcados, 'marcado', 'create');
                 renderMinuteList(listaMinutosGolosSofridos, createMinutosGolosSofridos, 'sofrido', 'create');
-                
-                // Re-setup dynamic inputs (they are cleared by form.reset())
-                // setupDynamicPlayerInputs('jogo11InicialContainer', 11, 'inicial', 'create');
-                // setupDynamicPlayerInputs('jogoSuplentesContainer', 11, 'suplente', 'create');
-                // No need to re-setup if they were inside the form; form.reset clears their values.
-                // If they were outside, you'd re-setup. The current HTML has them inside.
-
-                syncGameStatusCheckboxes.call(window, jogoLiveCheckbox, jogoTerminadoCheckbox, jogoFuturoCheckbox); // Reset checkboxes to default (Futuro true)
-                updateCalculatedScores('create'); // Recalculate scores which will be 0-0
-
-                if (currentTemporada) jogoTemporadaSelect.value = currentTemporada; // Restore temporada
+                syncGameStatusCheckboxes.call(window, jogoLiveCheckbox, jogoTerminadoCheckbox, jogoFuturoCheckbox); 
+                updateCalculatedScores('create'); 
+                if (currentTemporada) jogoTemporadaSelect.value = currentTemporada; 
                 else jogoTemporadaSelect.value = "";
-                // This will also re-set suggested jornada and game status checkboxes
                 await setSuggestedJornada(jogoTemporadaSelect, jogoJornadaSelect, statusElId, jogoTerminadoCheckbox, jogoLiveCheckbox, jogoFuturoCheckbox); 
-
-
             } catch (error) { showStatus(statusElId, `Erro: ${error.message}`, false); console.error(error); }
         });
 
-        // === EDIT JOGO SPECIFIC LOGIC ===
         async function handleEditTemporadaChange() {
             const selectedTemporada = editJogoTemporadaSelect.value;
             editJogoSearchInput.value = '';
             editJogoSuggestionsContainer.innerHTML = '';
             editJogoSuggestionsContainer.style.display = 'none';
-            editJogoFormContainer.style.display = 'none'; // Hide form
+            editJogoFormContainer.style.display = 'none'; 
             currentEditingGameData = null;
             editJogoDocIdInput.value = '';
-
-
             if (!selectedTemporada) {
                 editJogoSearchInput.disabled = true;
                 loadedGamesForSeason = [];
@@ -2269,7 +2313,6 @@
             }
             editJogoSearchInput.disabled = false;
             editJogoSearchInput.placeholder = "A carregar jogos da temporada...";
-            
             try {
                 const q = query(collection(db, "jogos"), where("temporada", "==", selectedTemporada));
                 const querySnapshot = await getDocs(q);
@@ -2277,20 +2320,12 @@
                 querySnapshot.forEach(doc => {
                     loadedGamesForSeason.push({ id: doc.id, ...doc.data() });
                 });
-                loadedGamesForSeason.sort((a,b) => (a.nomeJogo || "").localeCompare(b.nomeJogo || "")); // Sort by nomeJogo
-                
+                loadedGamesForSeason.sort((a,b) => (a.nomeJogo || "").localeCompare(b.nomeJogo || "")); 
                 editJogoSearchInput.placeholder = "Digite para pesquisar jogos...";
-                // Setup suggestion handler for game search
                  if (!editJogoSearchInput.getAttribute('data-suggestions-setup')) {
                     setupSuggestionHandler(editJogoSearchInput, editJogoSuggestionsContainer, () => loadedGamesForSeason, 'nomeJogo', null, null, 'edit-game-search');
                     editJogoSearchInput.setAttribute('data-suggestions-setup', 'true');
-                } else {
-                    // If already set up, ensure it uses the new `loadedGamesForSeason`
-                    // The setupSuggestionHandler uses a dataProvider function, so it should pick up the new data.
-                    // May need to trigger an input event if we want suggestions to pop immediately, or let user type.
-                }
-
-
+                } 
             } catch (error) {
                 console.error("Erro ao carregar jogos para edição:", error);
                 showStatus('statusEditarJogo', 'Erro ao carregar jogos da temporada.', false);
@@ -2299,24 +2334,19 @@
             }
         }
         
-        function handleEditJogoSearch() {
-            // This is mostly handled by the generic setupSuggestionHandler.
-            // The 'input' event on editJogoSearchInput will trigger it.
-            // It will filter `loadedGamesForSeason` based on `nomeJogo`.
-        }
+        function handleEditJogoSearch() { /* Handled by setupSuggestionHandler */ }
 
         async function loadGameForEditing(gameId) {
             showStatus('statusEditarJogo', 'A carregar dados do jogo...', true);
-            editJogoFormContainer.style.display = 'none'; // Hide while loading
+            editJogoFormContainer.style.display = 'none'; 
             try {
                 const gameDocRef = doc(db, "jogos", gameId);
                 const docSnap = await getDoc(gameDocRef);
-
                 if (docSnap.exists()) {
                     currentEditingGameData = { id: docSnap.id, ...docSnap.data() };
                     populateEditForm(currentEditingGameData);
-                    editJogoFormContainer.style.display = 'block'; // Show form
-                    showStatus('statusEditarJogo', `Jogo "${currentEditingGameData.nomeJogo}" carregado. Pode editar.`, true);
+                    editJogoFormContainer.style.display = 'block'; 
+                    showStatus('statusEditarJogo', `Jogo "${currentEditingGameData.nomeJogo || gameId}" carregado. Pode editar.`, true);
                 } else {
                     showStatus('statusEditarJogo', 'Jogo não encontrado.', false);
                     currentEditingGameData = null;
@@ -2329,14 +2359,11 @@
         }
 
         function populateEditForm(gameData) {
-            formEditarJogo.reset(); // Clear previous values, including hidden inputs
+            formEditarJogo.reset(); 
             editJogoDocIdInput.value = gameData.id;
-
-            // Basic Info
             editJogoTemporadaDisplay.value = gameData.temporada;
-            editJogoJornadaSelect.value = gameData.jornada.toString();
-            
-            editJogoClubeCasaInput.value = gameData.clubeCasaNome;
+            editJogoJornadaSelect.value = gameData.jornada ? gameData.jornada.toString() : "";
+            editJogoClubeCasaInput.value = gameData.clubeCasaNome || "";
             const casaClub = allClubes.find(c => c.nome === gameData.clubeCasaNome);
             if (casaClub && casaClub.logo) {
                 editJogoClubeCasaInput.style.backgroundImage = `url('${casaClub.logo}')`;
@@ -2345,9 +2372,8 @@
                 editJogoClubeCasaInput.style.backgroundImage = 'none';
                 editJogoClubeCasaInput.classList.remove('has-image-bg');
             }
-            editJogoClubeCasaInput.dispatchEvent(new Event('input', {bubbles: true})); // for clear button
-
-            editJogoClubeForaInput.value = gameData.clubeForaNome;
+            editJogoClubeCasaInput.dispatchEvent(new Event('input', {bubbles: true})); 
+            editJogoClubeForaInput.value = gameData.clubeForaNome || "";
             const foraClub = allClubes.find(c => c.nome === gameData.clubeForaNome);
             if (foraClub && foraClub.logo) {
                 editJogoClubeForaInput.style.backgroundImage = `url('${foraClub.logo}')`;
@@ -2356,39 +2382,24 @@
                 editJogoClubeForaInput.style.backgroundImage = 'none';
                 editJogoClubeForaInput.classList.remove('has-image-bg');
             }
-             editJogoClubeForaInput.dispatchEvent(new Event('input', {bubbles: true})); // for clear button
-
-
-            // Goals
+             editJogoClubeForaInput.dispatchEvent(new Event('input', {bubbles: true})); 
             editMinutosGolosMarcados = gameData.golosMarcadosSportingMinutos ? JSON.parse(JSON.stringify(gameData.golosMarcadosSportingMinutos)) : [];
             editMinutosGolosSofridos = gameData.golosSofridosSportingMinutos ? JSON.parse(JSON.stringify(gameData.golosSofridosSportingMinutos)) : [];
             renderMinuteList(editListaMinutosGolosMarcados, editMinutosGolosMarcados, 'marcado', 'edit');
             renderMinuteList(editListaMinutosGolosSofridos, editMinutosGolosSofridos, 'sofrido', 'edit');
-
-            // Status Checkboxes
             editJogoLiveCheckbox.checked = gameData.jogoLive || false;
             editJogoTerminadoCheckbox.checked = gameData.jogoTerminado || false;
             editJogoFuturoCheckbox.checked = gameData.jogoFuturo || false;
-            // Ensure consistency if data is weird (e.g. multiple true)
             syncGameStatusCheckboxes.call(window, editJogoLiveCheckbox, editJogoTerminadoCheckbox, editJogoFuturoCheckbox);
-
-
-            // Plantel - Setup dynamic inputs first, then populate
             setupDynamicPlayerInputs('editJogo11InicialContainer', 11, 'edit_inicial', 'edit');
             setupDynamicPlayerInputs('editJogoSuplentesContainer', 11, 'edit_suplente', 'edit');
-            
             populatePlayerListInputs('#editJogo11InicialContainer input', gameData.onzeInicial || []);
             populatePlayerListInputs('#editJogoSuplentesContainer input', gameData.suplentes || []);
-
-
-            // Calculated fields will be updated by this call
             updateCalculatedScores('edit'); 
-            
-            // Expand placar/stats if it was collapsed, for visibility
             const editPlacarStatsContent = document.querySelector('#editFieldsetPlacarStats .toggle-content');
             const editPlacarStatsIndicator = document.querySelector('#editLegendPlacarStats .toggle-indicator');
             const editPlacarStatsFieldset = document.getElementById('editFieldsetPlacarStats');
-            if (editPlacarStatsContent.style.display === 'none') {
+            if (editPlacarStatsContent && editPlacarStatsContent.style.display === 'none') {
                 editPlacarStatsContent.style.display = 'block';
                 if(editPlacarStatsIndicator) editPlacarStatsIndicator.textContent = '[-]';
                 if(editPlacarStatsFieldset) editPlacarStatsFieldset.classList.add('open');
@@ -2406,7 +2417,6 @@
                         input.style.backgroundImage = `url('${jogadorInfo.imagem_link}')`;
                         input.classList.add('has-image-bg');
                     }
-                    // Trigger input event to show clear button if applicable
                     input.dispatchEvent(new Event('input', { bubbles: true }));
                 } else {
                     input.value = '';
@@ -2417,39 +2427,30 @@
             });
         }
 
-
-        // === EDIT JOGO FORM SUBMISSION ===
         formEditarJogo.addEventListener('submit', async (e) => {
             e.preventDefault();
             const statusElId = 'statusEditarJogo';
             const gameDocId = editJogoDocIdInput.value;
-
             if (!gameDocId) {
                 showStatus(statusElId, 'Nenhum jogo selecionado para atualizar.', false);
                 return;
             }
-
-            const temporada = editJogoTemporadaDisplay.value; // Readonly, from loaded game
+            const temporada = editJogoTemporadaDisplay.value; 
             const jornada = editJogoJornadaSelect.value;
             const clubeCasaNome = editJogoClubeCasaInput.value.trim();
             const clubeForaNome = editJogoClubeForaInput.value.trim();
-
             const isSportingCasa = sportingCanonicoNomesInputCheck.includes(clubeCasaNome.toLowerCase());
             const isSportingFora = sportingCanonicoNomesInputCheck.includes(clubeForaNome.toLowerCase());
-
             if (!temporada || !jornada || !clubeCasaNome || !clubeForaNome) { showStatus(statusElId, 'Temp., Jornada, Clubes obrigatórios.', false); return; }
             if (!isSportingCasa && !isSportingFora) { showStatus(statusElId, `Um dos clubes deve ser '${SPORTING_CP_CANONICAL_NAME}' ou variante.`, false); return; }
             if (clubeCasaNome.toLowerCase() === clubeForaNome.toLowerCase()) { showStatus(statusElId, 'Clubes devem ser diferentes.', false); return; }
-
             const getPlantel = (containerSel) => Array.from(document.querySelectorAll(`${containerSel} input[type="text"]`))
                 .map(inp => {
                     const nome = inp.value.trim();
                     if (!nome) return null;
                     const jogador = allJogadores.find(j => j.nome === nome);
-                    // Ensure ID is stored, if available
                     return { nome, id: jogador ? jogador.id : (currentEditingGameData?.onzeInicial?.find(p=>p.nome===nome)?.id || currentEditingGameData?.suplentes?.find(p=>p.nome===nome)?.id || null) };
                 }).filter(p => p !== null);
-
             const updatedJogoData = {
                 temporada, jornada: parseInt(jornada),
                 nomeJogo: editJogoNomeJogo.value, clubeCasaNome, clubeForaNome,
@@ -2472,25 +2473,23 @@
                 jogoTerminado: editJogoTerminadoCheckbox.checked,
                 jogoFuturo: editJogoFuturoCheckbox.checked,
                 lastUpdated: serverTimestamp()
-                // dataCriacao should remain from original document, not updated here unless intended
             };
-
             try {
                 const gameDocRef = doc(db, "jogos", gameDocId);
-                await updateDoc(gameDocRef, updatedJogoData); // Use updateDoc for existing doc
+                await updateDoc(gameDocRef, updatedJogoData); 
                 showStatus(statusElId, `Jogo "${updatedJogoData.nomeJogo}" atualizado com sucesso!`, true);
-                
-                // Optionally, refresh the loadedGamesForSeason list for the current season
-                // or clear the form to prompt for a new selection.
                 const currentSelectedTemporada = editJogoTemporadaSelect.value;
-                handleEditTemporadaChange(); // This will clear search and re-enable it
-                editJogoTemporadaSelect.value = currentSelectedTemporada; // Re-set season
-                 if(currentSelectedTemporada) editJogoSearchInput.disabled = false;
-
-
+                handleEditTemporadaChange(); 
+                if (currentSelectedTemporada) { // Only re-set temporada if one was selected
+                    editJogoTemporadaSelect.value = currentSelectedTemporada; 
+                    editJogoSearchInput.disabled = false; 
+                    await displayRelevantGames(); // Re-display relevant games after update
+                } else { // If no temporada was initially selected (e.g. user cleared it)
+                    editJogoSearchInput.value = '';
+                    editJogoSearchInput.disabled = true;
+                }
             } catch (error) { showStatus(statusElId, `Erro ao atualizar jogo: ${error.message}`, false); console.error(error); }
         });
-
     </script>
 </body>
 </html>

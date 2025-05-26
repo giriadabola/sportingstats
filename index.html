@@ -59,33 +59,33 @@
             margin-bottom: 10px;
         }
 
-        .column-header > span, /* Antigo estilo */
-        .column-header-title-wrapper { /* Novo estilo para o wrapper do título da coluna 1 */
+        .column-header > span, 
+        .column-header-title-wrapper { 
             font-size: 1.2em;
             font-weight: bold;
             color: #333;
         }
         
         .column-header-title-wrapper {
-            position: relative; /* Necessário para o posicionamento absoluto do logo */
-            padding-left: 36px; /* Cria espaço para o logo (largura do logo + pequena margem) */
+            position: relative; 
+            padding-left: 36px; 
         }
 
-        .column-header-title-wrapper > span { /* O texto "SportingStats" */
+        .column-header-title-wrapper > span { 
             position: relative;
-            z-index: 1; /* Coloca o texto acima do logo */
+            z-index: 1; 
         }
 
         .header-logo-background {
             position: absolute;
-            left: 0px; /* Alinha o logo à esquerda dentro do wrapper */
-            top: 50%; /* Centraliza verticalmente */
-            transform: translateY(-50%); /* Ajuste fino para centralização vertical */
-            width: 28px; /* Largura desejada para o logo */
-            height: 28px; /* Altura desejada para o logo */
-            opacity: 0.8; /* Opcional: para tornar o logo um pouco mais sutil */
-            z-index: 0; /* Coloca o logo atrás do texto */
-            object-fit: contain; /* Garante que o logo não seja distorcido */
+            left: 0px; 
+            top: 50%; 
+            transform: translateY(-50%); 
+            width: 28px; 
+            height: 28px; 
+            opacity: 0.8; 
+            z-index: 0; 
+            object-fit: contain; 
         }
 
         .column-header button {
@@ -124,13 +124,18 @@
             display: block;
         }
 
-        #calendario-list, #equipas-list {
+        #calendario-list, #equipas-list, #jogadores-list {
             list-style: none;
             padding: 0;
         }
-        #calendario-list li, #equipas-list li {
+        #calendario-list li, #equipas-list li, #jogadores-list li {
             padding: 8px 0;
             border-bottom: 1px solid #f0f0f0;
+        }
+        #jogadores-list li:last-child,
+        #equipas-list li:last-child,
+        #calendario-list li:last-child {
+             border-bottom: none;
         }
         #calendario-list li.live-game {
             font-weight: bold;
@@ -138,13 +143,17 @@
             background-color: #e6ffe6;
             padding-left: 5px;
         }
-        #equipas-list li img {
-            width: 20px;
-            height: 20px;
+        #equipas-list li img, #jogadores-list li img {
+            width: 24px; 
+            height: 24px;
             margin-right: 8px;
             vertical-align: middle;
-            object-fit: contain;
+            object-fit: cover; 
         }
+        #jogadores-list li img {
+             border-radius: 50%;
+        }
+
 
         .stats-content {
             padding-top: 10px;
@@ -210,7 +219,7 @@
         .stat-sub-item { display: flex; justify-content: space-between; width: 100%; padding: 4px 0 4px 15px; font-size: 0.9em; border-top: 1px dashed #f0f0f0; }
         .stat-item-group .stat-sub-item:first-of-type { border-top: none; }
         .stat-sub-label { color: #666; }
-        .stat-sub-value { font-weight: normal; color: #444; } /* stat-value class added to make sub-values clickable */
+        .stat-sub-value { font-weight: normal; color: #444; }
         .result-comum-card { text-align: center; }
         .result-comum-card .stat-value { font-size: 1.3em; color: #007bff; }
         .stats-content p { margin-top: 0; margin-bottom: 8px; }
@@ -229,9 +238,9 @@
         .zone-table-cell-value.clickable-stat { cursor: pointer; text-decoration: underline dotted; }
         .zone-table-cell-value.clickable-stat:hover { color: #0056b3; }
         .goals-table td.highlight-max-value,
-        .zone-table td.highlight-max-value { /* .zone-table para especificar mais */
-            background-color: #90EE90 !important; /* lightgreen */
-            font-weight: bold; /* Torna o texto da célula em negrito */
+        .zone-table td.highlight-max-value {
+            background-color: #90EE90 !important;
+            font-weight: bold; 
         }
 
 
@@ -255,19 +264,18 @@
         #column3-content-area {
             display: flex;
             flex-direction: column;
-            flex-grow: 1; /* Changed from height: 100% */
-            min-height: 0; /* Important for flex items that can shrink */
+            flex-grow: 1; 
+            min-height: 0; 
         }
         #column3-details-title {
-             /* margin-top: 0; margin-bottom: 10px; font-size: 1.1em; color: #0056b3; padding-bottom: 5px; border-bottom: 1px solid #eee; */
-             display: none; /* Esconde este título para evitar duplicidade */
+             display: none; 
         }
         .detailed-stats-list {
             list-style: none;
             padding-left: 0;
             overflow-y: auto;
             flex-grow: 1;
-            min-height: 0; /* Added for consistency with flex-grow */
+            min-height: 0; 
         }
         .detailed-stats-list li { padding: 8px 5px; border-bottom: 1px solid #f0f0f0; font-size: 0.9em; }
         .detailed-list-item { margin-bottom: 10px; }
@@ -301,16 +309,21 @@
                 </div>
             </div>
             <div class="tabs">
-                <button class="tab-button active" data-tab="calendario">Calendário</button>
+                <button class="tab-button active" data-tab="next-games">Next</button>
                 <button class="tab-button" data-tab="equipas">Equipas</button>
+                <button class="tab-button" data-tab="jogadores">Jogadores</button>
             </div>
-            <div id="calendario" class="tab-content active">
-                <h3>Calendário</h3>
+            <div id="next-games" class="tab-content active">
+                <h3>Next Games</h3>
                 <ul id="calendario-list"></ul>
             </div>
             <div id="equipas" class="tab-content">
                 <h3>Equipas</h3>
                 <ul id="equipas-list"></ul>
+            </div>
+            <div id="jogadores" class="tab-content">
+                <h3>Jogadores</h3>
+                <ul id="jogadores-list"></ul>
             </div>
         </div>
 
@@ -439,6 +452,7 @@
 
         const calendarioList = document.getElementById('calendario-list');
         const equipasList = document.getElementById('equipas-list');
+        const jogadoresList = document.getElementById('jogadores-list'); // Nova lista
         let seasonDropdown = document.getElementById('season-dropdown');
         const jogosRealizadosSpan = document.getElementById('jogos-realizados');
         const vitoriasSpan = document.getElementById('vitorias');
@@ -488,8 +502,30 @@
         async function fetchAllTeams() { try {const teamsCol=collection(db,'clubes');const teamsSnapshot=await getDocs(teamsCol);allTeams=teamsSnapshot.docs.map(doc=>({id:doc.id,...doc.data()}));return allTeams;}catch(error){console.error("Error fetching teams:",error);equipasList.innerHTML='<li>Erro ao carregar equipas.</li>';return[];}}
         async function fetchAllPlayers() { try {const playersCol=collection(db,'jogadores');const playersSnapshot=await getDocs(playersCol);allPlayers=playersSnapshot.docs.map(doc=>({id:doc.id,...doc.data()}));return allPlayers;}catch(error){console.error("Error fetching players:",error);return[];}}
 
-        function displayCalendar(games) { const futureGames=games.filter(game=>game.jogoFuturo===true).sort((a,b)=>{if(a.jogoLive===true&&b.jogoLive!==true)return-1;if(a.jogoLive!==true&&b.jogoLive===true)return 1;return(a.jornada||0)-(b.jornada||0);});calendarioList.innerHTML='';if(futureGames.length===0){calendarioList.innerHTML='<li>Sem jogos futuros.</li>';return;} futureGames.forEach(game=>{const li=document.createElement('li');li.textContent=`${game.jornada||'N/A'} - ${game.nomeJogo||'Jogo sem nome'}`;if(game.jogoLive===true){li.classList.add('live-game');li.textContent+=' (AO VIVO)';}calendarioList.appendChild(li);});}
+        function displayCalendar(games) { const futureGames=games.filter(game=>game.jogoFuturo===true).sort((a,b)=>{if(a.jogoLive===true&&b.jogoLive!==true)return-1;if(a.jogoLive!==true&&b.jogoLive===true)return 1;const jornadaA = typeof a.jornada === 'string' ? parseInt(a.jornada.match(/\d+/)?.[0], 10) : a.jornada; const jornadaB = typeof b.jornada === 'string' ? parseInt(b.jornada.match(/\d+/)?.[0], 10) : b.jornada; return(jornadaA||0)-(jornadaB||0);});calendarioList.innerHTML='';if(futureGames.length===0){calendarioList.innerHTML='<li>Sem próximos jogos.</li>';return;} futureGames.forEach(game=>{const li=document.createElement('li');li.textContent=`${game.jornada||'N/A'} - ${game.nomeJogo||'Jogo sem nome'}`;if(game.jogoLive===true){li.classList.add('live-game');li.textContent+=' (AO VIVO)';}calendarioList.appendChild(li);});}
         function displayTeams(teams) { equipasList.innerHTML='';if(teams.length===0){equipasList.innerHTML='<li>Sem equipas para mostrar.</li>';return;} teams.forEach(team=>{const li=document.createElement('li');const img=document.createElement('img');img.src=team.logo||DEFAULT_PLACEHOLDER_URL;img.alt=team.nome;img.onerror=()=>{img.src=DEFAULT_PLACEHOLDER_URL;img.alt='Logo indisponível';};li.appendChild(img);li.appendChild(document.createTextNode(team.nome||'Equipa sem nome'));equipasList.appendChild(li);});}
+        function displayPlayers(players) {
+            jogadoresList.innerHTML = ''; 
+            if (!players || players.length === 0) {
+                jogadoresList.innerHTML = '<li>Sem jogadores para mostrar.</li>';
+                return;
+            }
+            players.sort((a, b) => (a.nome_jogador || '').localeCompare(b.nome_jogador || ''));
+            players.forEach(player => {
+                const li = document.createElement('li');
+                const img = document.createElement('img');
+                img.src = player.imagem_link || DEFAULT_PLACEHOLDER_URL;
+                img.alt = player.nome_jogador || 'Jogador sem nome';
+                img.onerror = () => {
+                    img.src = DEFAULT_PLACEHOLDER_URL;
+                    img.alt = 'Imagem indisponível';
+                };
+                li.appendChild(img);
+                li.appendChild(document.createTextNode(player.nome_jogador || 'Jogador sem nome'));
+                jogadoresList.appendChild(li);
+            });
+        }
+
 
         function populateSeasonDropdown(games) { const seasons=[...new Set(games.map(game=>game.temporada).filter(Boolean))];seasons.sort((a,b)=>b.localeCompare(a));seasonDropdown.innerHTML='';const allSeasonsOption=document.createElement('option');allSeasonsOption.value="ALL_SEASONS";allSeasonsOption.textContent="Todas as Temporadas";seasonDropdown.appendChild(allSeasonsOption); if(seasons.length===0&&games.length>0){const noSeasonOption=document.createElement('option');noSeasonOption.value="NO_SEASON_DATA";noSeasonOption.textContent="Jogos sem temporada";seasonDropdown.appendChild(noSeasonOption);loadStatsForSeason("NO_SEASON_DATA");return;}else if(seasons.length===0){seasonDropdown.innerHTML='<option value="">Sem temporadas</option>';loadStatsForSeason(null);return;} seasons.forEach(season=>{const option=document.createElement('option');option.value=season;option.textContent=season;seasonDropdown.appendChild(option);}); seasonDropdown.value="ALL_SEASONS";loadStatsForSeason("ALL_SEASONS"); const newSeasonDropdown=seasonDropdown.cloneNode(true);seasonDropdown.parentNode.replaceChild(newSeasonDropdown,seasonDropdown);seasonDropdown=newSeasonDropdown; seasonDropdown.addEventListener('change',(e)=>loadStatsForSeason(e.target.value));}
         function loadStatsForSeason(seasonValue) { console.log("loadStatsForSeason - seasonValue:", seasonValue); let gamesToAnalyze=[];if(!seasonValue){gamesToAnalyze=[];}else if(seasonValue==="ALL_SEASONS"){gamesToAnalyze=allGames;currentSeasonForDetails="Todas as Temporadas";}else if(seasonValue==="NO_SEASON_DATA"){gamesToAnalyze=allGames.filter(game=>!game.temporada);currentSeasonForDetails="Jogos sem temporada";}else{gamesToAnalyze=allGames.filter(game=>game.temporada===seasonValue);currentSeasonForDetails=seasonValue;} console.log("loadStatsForSeason - gamesToAnalyze count:", gamesToAnalyze.length); calculateAndDisplayStats(gamesToAnalyze);}
@@ -521,7 +557,7 @@
 
         function clearTablesAndCharts() { golosMarcadosTempoTableContainer.innerHTML='<h5>Golos Marcados por Tempo</h5><p>-</p>';golosSofridosTempoTableContainer.innerHTML='<h5>Golos Sofridos por Tempo</h5><p>-</p>';golosMarcadosZonaTableContainer.innerHTML='<h5>Zonas da Baliza - Golos Marcados</h5><p>-</p>';golosSofridosZonaTableContainer.innerHTML='<h5>Zonas da Baliza - Golos Sofridos</h5><p>-</p>'; document.getElementById('equipas-marcou-mais-list').innerHTML='<li>-</li>';document.getElementById('equipas-marcou-mais-toggle').style.display='none';document.getElementById('equipas-sofreu-mais-list').innerHTML='<li>-</li>';document.getElementById('equipas-sofreu-mais-toggle').style.display='none';document.getElementById('top-scorers-list').innerHTML='<li>-</li>';document.getElementById('top-scorers-toggle').style.display='none'; if(performanceChartInstance){performanceChartInstance.destroy();performanceChartInstance=null;}const chartContainer=performanceChartCanvas.parentNode;const existingMessage=chartContainer.querySelector('.chart-message');if(existingMessage)existingMessage.remove();performanceChartCanvas.style.display='none';}
         
-        function getGoalMinuteValue(goalObject) { // FUNÇÃO AUXILIAR
+        function getGoalMinuteValue(goalObject) {
             if (!goalObject) return undefined;
             if (goalObject.details && goalObject.details.minute !== undefined) {
                 return goalObject.details.minute;
@@ -567,8 +603,6 @@
                     }
                 });
             });
-            console.log("aggregateGoalsByTime - Final marcadosPorTempo:", JSON.stringify(marcadosPorTempo));
-            console.log("aggregateGoalsByTime - Final sofridosPorTempo:", JSON.stringify(sofridosPorTempo));
             return { marcadosPorTempo, sofridosPorTempo };
         }
 
@@ -634,19 +668,19 @@
             const sofridosPorZona = Object.fromEntries(globalZoneMappingRules.canonicalZones.map(zone => [zone, 0]));
             gamesInSeason.forEach(game => {
                 (game.golosMarcadosSportingMinutos || []).forEach(goal => {
-                    if (goal && goal.details) { // Mantendo a lógica original de zona que depende de details.zona
-                        const firebaseZone = goal.details.zona;
-                        const targetZone = globalZoneMappingRules[firebaseZone] || firebaseZone;
+                    const zonaValue = goal?.details?.zona || goal?.zona; // Considera ambas estruturas
+                    if (zonaValue) {
+                        const targetZone = globalZoneMappingRules[zonaValue] || zonaValue;
                         if (targetZone && marcadosPorZona.hasOwnProperty(targetZone)) marcadosPorZona[targetZone]++;
-                        else if (firebaseZone) console.warn(`Unmapped/Unknown goal zone (marcado): '${firebaseZone}' -> '${targetZone}'. Game ID: ${game.id || 'N/A'}`);
+                        else console.warn(`Unmapped/Unknown goal zone (marcado): '${zonaValue}' -> '${targetZone}'. Game ID: ${game.id || 'N/A'}`);
                     }
                 });
                 (game.golosSofridosSportingMinutos || []).forEach(goal => {
-                    if (goal && goal.details) { // Mantendo a lógica original de zona que depende de details.zona
-                        const firebaseZone = goal.details.zona;
-                        const targetZone = globalZoneMappingRules[firebaseZone] || firebaseZone;
+                     const zonaValue = goal?.details?.zona || goal?.zona; // Considera ambas estruturas
+                    if (zonaValue) {
+                        const targetZone = globalZoneMappingRules[zonaValue] || zonaValue;
                         if (targetZone && sofridosPorZona.hasOwnProperty(targetZone)) sofridosPorZona[targetZone]++;
-                        else if (firebaseZone) console.warn(`Unmapped/Unknown goal zone (sofrido): '${firebaseZone}' -> '${targetZone}'. Game ID: ${game.id || 'N/A'}`);
+                        else console.warn(`Unmapped/Unknown goal zone (sofrido): '${zonaValue}' -> '${targetZone}'. Game ID: ${game.id || 'N/A'}`);
                     }
                 });
             });
@@ -714,10 +748,10 @@
             container.appendChild(table);
         }
 
-        function getPerformanceByJornada(gamesInSeason) { const performance={};gamesInSeason.forEach(game=>{const jornadaStr=game.jornada?String(game.jornada):null;if(!jornadaStr)return;if(!performance[jornadaStr])performance[jornadaStr]={V:0,E:0,D:0,jornadaNum:parseInt(jornadaStr,10)||jornadaStr};if(game.resultadoEstadoSporting==="V (Vitória)")performance[jornadaStr].V++;else if(game.resultadoEstadoSporting==="E (Empate)")performance[jornadaStr].E++;else if(game.resultadoEstadoSporting==="D (Derrota)")performance[jornadaStr].D++;}); return Object.values(performance).sort((a,b)=>{const aIsNum=Number.isFinite(a.jornadaNum);const bIsNum=Number.isFinite(b.jornadaNum);if(aIsNum&&bIsNum)return a.jornadaNum-b.jornadaNum;if(aIsNum)return-1;if(bIsNum)return 1;return String(a.jornadaNum).localeCompare(String(b.jornadaNum));});}
+        function getPerformanceByJornada(gamesInSeason) { const performance={};gamesInSeason.forEach(game=>{ const jornadaNumValue = typeof game.jornada === 'string' ? parseInt(game.jornada.match(/\d+/)?.[0], 10) : game.jornada; if(jornadaNumValue === null || jornadaNumValue === undefined || isNaN(jornadaNumValue)) return; const jornadaStr = String(jornadaNumValue); if(!performance[jornadaStr])performance[jornadaStr]={V:0,E:0,D:0,jornadaNum:jornadaNumValue};if(game.resultadoEstadoSporting==="V (Vitória)")performance[jornadaStr].V++;else if(game.resultadoEstadoSporting==="E (Empate)")performance[jornadaStr].E++;else if(game.resultadoEstadoSporting==="D (Derrota)")performance[jornadaStr].D++;}); return Object.values(performance).sort((a,b)=> a.jornadaNum - b.jornadaNum );}
         function renderPerformanceGraph(performanceData) { if(performanceChartInstance){performanceChartInstance.destroy();performanceChartInstance=null;}const chartContainer=performanceChartCanvas.parentNode;const existingMessage=chartContainer.querySelector('.chart-message');if(existingMessage)existingMessage.remove(); if(typeof Chart==='undefined'){console.warn("Chart.js not loaded.");performanceChartCanvas.style.display='none';const p=document.createElement('p');p.textContent="Biblioteca de gráficos (Chart.js) não carregada.";p.className='chart-message';chartContainer.insertBefore(p,performanceChartCanvas);return;} if(!performanceData||performanceData.length===0){performanceChartCanvas.style.display='none';const p=document.createElement('p');p.textContent="Sem dados de desempenho para exibir no gráfico.";p.className='chart-message';chartContainer.insertBefore(p,performanceChartCanvas);return;} const labels=performanceData.map(p=>`J${p.jornadaNum}`);const vitoriasData=performanceData.map(p=>p.V);const empatesData=performanceData.map(p=>p.E);const derrotasData=performanceData.map(p=>p.D); performanceChartCanvas.style.display='block';try{performanceChartInstance=new Chart(performanceChartCanvas,{type:'line',data:{labels:labels,datasets:[{label:'Vitórias',data:vitoriasData,borderColor:'green',backgroundColor:'rgba(0,128,0,0.1)',fill:true,tension:0.1,borderWidth:1.5},{label:'Empates',data:empatesData,borderColor:'orange',backgroundColor:'rgba(255,165,0,0.1)',fill:true,tension:0.1,borderWidth:1.5},{label:'Derrotas',data:derrotasData,borderColor:'red',backgroundColor:'rgba(255,0,0,0.1)',fill:true,tension:0.1,borderWidth:1.5}]},options:{responsive:true,maintainAspectRatio:false,scales:{y:{beginAtZero:true,ticks:{stepSize:1,precision:0}},x:{ticks:{autoSkip:true,maxTicksLimit:20}}},plugins:{legend:{display:true,position:'top'},tooltip:{mode:'index',intersect:false}},animation:{duration:400}}});}catch(error){console.error("Erro ao criar o gráfico de desempenho:",error);performanceChartCanvas.style.display='none';const p=document.createElement('p');p.textContent="Ocorreu um erro ao renderizar o gráfico de desempenho.";p.className='chart-message';chartContainer.insertBefore(p,performanceChartCanvas);}}
         function analyzeOpponents(gamesInSeason) { const goalsScoredAgainst={};const goalsConcededTo={};gamesInSeason.forEach(game=>{let opponent=null;if(game.clubeCasaNome&&game.clubeForaNome){if(game.clubeForaNome.toLowerCase().includes('sporting')){opponent=game.clubeCasaNome;}else if(game.clubeCasaNome.toLowerCase().includes('sporting')){opponent=game.clubeForaNome;}} if(!opponent)opponent=game.adversarioNome;if(!opponent)return;const sportingScoredThisGame=(game.sportingGolosMarcados1P||0)+(game.sportingGolosMarcados2P||0);const sportingConcededThisGame=(game.sportingGolosSofridos1P||0)+(game.sportingGolosSofridos2P||0); if(sportingScoredThisGame>0){goalsScoredAgainst[opponent]=(goalsScoredAgainst[opponent]||0)+sportingScoredThisGame;} if(sportingConcededThisGame>0){goalsConcededTo[opponent]=(goalsConcededTo[opponent]||0)+sportingConcededThisGame;}}); const scoredAgainstList=Object.entries(goalsScoredAgainst).map(([team,goals])=>({team,goals})).sort((a,b)=>b.goals-a.goals);const concededToList=Object.entries(goalsConcededTo).map(([team,goals])=>({team,goals})).sort((a,b)=>b.goals-a.goals); return {scoredAgainstList,concededToList};}
-        function analyzeGoalDetails(gamesInSeason) { const playerScores={};const goalTypes={};gamesInSeason.forEach(game=>{(game.golosMarcadosSportingMinutos||[]).forEach(goal=>{if(goal&&goal.details){if(goal.details.jogadorNome){playerScores[goal.details.jogadorNome]=(playerScores[goal.details.jogadorNome]||0)+1;} if(goal.details.tipoGolo){goalTypes[goal.details.tipoGolo]=(goalTypes[goal.details.tipoGolo]||0)+1;}}});}); const allScorers=Object.entries(playerScores).map(([jogadorNome,count])=>({jogadorNome,count})).sort((a,b)=>b.count-a.count);return {topScorers:allScorers,goalTypes};}
+        function analyzeGoalDetails(gamesInSeason) { const playerScores={};const goalTypes={};gamesInSeason.forEach(game=>{(game.golosMarcadosSportingMinutos||[]).forEach(goal=>{const jogadorNome = goal?.details?.jogadorNome || goal?.jogadorNome; const tipoGolo = goal?.details?.tipoGolo || goal?.tipoGolo; if(jogadorNome){playerScores[jogadorNome]=(playerScores[jogadorNome]||0)+1;} if(tipoGolo){goalTypes[tipoGolo]=(goalTypes[tipoGolo]||0)+1;}});}); const allScorers=Object.entries(playerScores).map(([jogadorNome,count])=>({jogadorNome,count})).sort((a,b)=>b.count-a.count);return {topScorers:allScorers,goalTypes};}
 
         function renderTeamItem(item, maps) { const logoUrl=maps.teamLogosMap[item.team]||DEFAULT_PLACEHOLDER_URL;return`<li><img src="${logoUrl}" alt="${item.team||'Equipa'}" class="stats-item-logo" onerror="this.onerror=null;this.src='${DEFAULT_PLACEHOLDER_URL}';"> ${item.team||'N/A'} (${item.goals} golos)</li>`;}
         function renderPlayerItem(item, maps) { const imageUrl=maps.playerImagesMap[item.jogadorNome]||DEFAULT_PLACEHOLDER_URL;return`<li><img src="${imageUrl}" alt="${item.jogadorNome||'Jogador'}" class="stats-item-logo" onerror="this.onerror=null;this.src='${DEFAULT_PLACEHOLDER_URL}';"> ${item.jogadorNome||'N/A'} (${item.count} golos)</li>`;}
@@ -726,7 +760,6 @@
 
         function updateColumn3View(title, items, itemRenderer) {
             column3HeaderTitle.textContent = title || "Detalhes";
-            // column3DetailsTitle.textContent = title || "Detalhes"; // Linha comentada para não duplicar título
             column3DetailsList.innerHTML = '';
             if (!items || items.length === 0) {
                 column3DetailsList.innerHTML = '<li>Sem dados detalhados para exibir.</li>';
@@ -742,19 +775,19 @@
         function renderGameListItem(gameData) { const logoCasa=globalTeamLogosMap[gameData.clubeCasaNome]||DEFAULT_PLACEHOLDER_URL;const logoFora=globalTeamLogosMap[gameData.clubeForaNome]||DEFAULT_PLACEHOLDER_URL;const resultado=gameData.resultadoFinal||'-'; return`<li class="detailed-list-item game-item"><div class="game-item-header">Jornada ${gameData.jornada||'N/A'} (${gameData.temporada||'N/A'})</div><div class="game-item-matchup"><img src="${logoCasa}" class="stats-item-logo" alt="${gameData.clubeCasaNome||''}"> <span>${gameData.clubeCasaNome||'Casa'}</span><span class="game-item-score">${resultado}</span><span>${gameData.clubeForaNome||'Fora'}</span> <img src="${logoFora}" class="stats-item-logo" alt="${gameData.clubeForaNome||''}"></div></li>`;}
         function renderGoalListItem(goalDetail) { const {goal,game}=goalDetail;const jogadorNome=goal.details?.jogadorNome||goal.jogadorNome||'Golo do Sporting';const minuto=getGoalMinuteValue(goal)||'?';const tipoGolo=goal.details?.tipoGolo||goal.tipoGolo||'';const zonaGolo=goal.details?.zona||goal.zona||'';const resultadoDoJogo=game.resultadoFinal||'-'; let playerImgHtml=`<img src="${DEFAULT_PLACEHOLDER_URL}" class="stats-item-logo" alt="${jogadorNome}">`;if(globalPlayerImagesMap[jogadorNome]){playerImgHtml=`<img src="${globalPlayerImagesMap[jogadorNome]}" class="stats-item-logo" alt="${jogadorNome}">`;} const logoCasa=globalTeamLogosMap[game.clubeCasaNome]||DEFAULT_PLACEHOLDER_URL;const logoFora=globalTeamLogosMap[game.clubeForaNome]||DEFAULT_PLACEHOLDER_URL; return`<li class="detailed-list-item goal-item"><div class="goal-item-header">Jornada ${game.jornada||'N/A'} (${game.temporada||'N/A'}) | <img src="${logoCasa}" class="stats-item-logo-small" alt="${game.clubeCasaNome||''}"> ${game.clubeCasaNome||''} <span class="game-item-score">${resultadoDoJogo}</span> ${game.clubeForaNome||''} <img src="${logoFora}" class="stats-item-logo-small" alt="${game.clubeForaNome||''}"></div><div class="goal-item-details">${playerImgHtml} <span class="goal-player-name">${jogadorNome}</span> <span class="goal-minute">(${minuto}')</span> ${tipoGolo?`<span class="goal-type">Tipo: ${tipoGolo}</span>`:''} ${zonaGolo?`<span class="goal-zone">Zona: ${zonaGolo}</span>`:''}</div></li>`;}
         
-        function getAllGoalsFromGames(gamesList, goalTypeStr) { // VERSÃO CORRIGIDA
+        function getAllGoalsFromGames(gamesList, goalTypeStr) {
             const allGoals = [];
             const goalArrayName = goalTypeStr === 'marcado' ? 'golosMarcadosSportingMinutos' : 'golosSofridosSportingMinutos';
             gamesList.forEach(game => {
                 (game[goalArrayName] || []).forEach(goal => {
-                    if (goal) { // Adiciona se o objeto 'goal' existir
+                    if (goal) { 
                         allGoals.push({ goal, game });
                     }
                 });
             });
             return allGoals;
         }
-        function comparadorDeJogosEGolos(itemA,itemB){const gameA=itemA.game?itemA.game:itemA;const gameB=itemB.game?itemB.game:itemB;const temporadaA=gameA.temporada||"";const temporadaB=gameB.temporada||"";if(temporadaA>temporadaB)return -1;if(temporadaA<temporadaB)return 1;const jornadaA=parseInt(gameA.jornada,10);const jornadaB=parseInt(gameB.jornada,10);const numJornadaA=isNaN(jornadaA)?Infinity:jornadaA;const numJornadaB=isNaN(jornadaB)?Infinity:jornadaB;return numJornadaA-numJornadaB;}
+        function comparadorDeJogosEGolos(itemA,itemB){const gameA=itemA.game?itemA.game:itemA;const gameB=itemB.game?itemB.game:itemB;const temporadaA=gameA.temporada||"";const temporadaB=gameB.temporada||"";if(temporadaA>temporadaB)return -1;if(temporadaA<temporadaB)return 1; const jornadaAValue = typeof gameA.jornada === 'string' ? parseInt(gameA.jornada.match(/\d+/)?.[0], 10) : gameA.jornada; const jornadaBValue = typeof gameB.jornada === 'string' ? parseInt(gameB.jornada.match(/\d+/)?.[0], 10) : gameB.jornada; const numJornadaA=isNaN(jornadaAValue)?Infinity:jornadaAValue;const numJornadaB=isNaN(jornadaBValue)?Infinity:jornadaBValue;return numJornadaA-numJornadaB;}
 
         function setupTabs() { const tabButtons=document.querySelectorAll('.tab-button');const tabContents=document.querySelectorAll('.tab-content');tabButtons.forEach(button=>{button.addEventListener('click',()=>{tabButtons.forEach(btn=>btn.classList.remove('active'));button.classList.add('active');tabContents.forEach(content=>content.classList.remove('active'));document.getElementById(button.dataset.tab).classList.add('active');});});}
         function setupColumnControls() { const expandButtons=document.querySelectorAll('.btn-expand');const minimizeButtons=document.querySelectorAll('.btn-minimize');const columns=document.querySelectorAll('.column');expandButtons.forEach(button=>{button.addEventListener('click',()=>{const targetColumnId=button.dataset.target;columns.forEach(col=>{if(col.id===targetColumnId){col.classList.add('fullscreen');col.querySelector('.btn-expand').style.display='none';col.querySelector('.btn-minimize').style.display='inline-block';}else col.classList.add('hidden');});});});minimizeButtons.forEach(button=>{button.addEventListener('click',()=>{const targetColumnId=button.dataset.target;const targetColumn=document.getElementById(targetColumnId);targetColumn.classList.remove('fullscreen');targetColumn.querySelector('.btn-expand').style.display='inline-block';targetColumn.querySelector('.btn-minimize').style.display='none';columns.forEach(col=>{if(col.id!==targetColumnId)col.classList.remove('hidden');});});});}
@@ -814,7 +847,7 @@
                         const minuteValue = getGoalMinuteValue(item.goal);
                         if (minuteValue === undefined) return false;
                         const minute = parseInt(minuteValue, 10);
-                        return !isNaN(minute) && minute > 45 && minute <= 90; // Ajuste para >90 se necessário para prolongamentos
+                        return !isNaN(minute) && minute > 45 && minute <= 90;
                     });
                     detailItems.sort(comparadorDeJogosEGolos);
                     detailItemRenderer = renderGoalListItem;
@@ -844,7 +877,7 @@
                         const minuteValue = getGoalMinuteValue(item.goal);
                         if (minuteValue === undefined) return false;
                         const minute = parseInt(minuteValue, 10);
-                        return !isNaN(minute) && minute > 45 && minute <= 90; // Ajuste para >90 se necessário
+                        return !isNaN(minute) && minute > 45 && minute <= 90;
                     });
                     detailItems.sort(comparadorDeJogosEGolos);
                     detailItemRenderer = renderGoalListItem;
@@ -870,7 +903,7 @@
                     detailTitle = `Golos ${goalKindZone === 'marcado' ? 'Marcados' : 'Sofridos'} na Zona: ${zoneName} (${currentSeasonForDetails})`;
                     const allGoalsForZoneKind = getAllGoalsFromGames(gamesOfCurrentSeason, goalKindZone);
                     detailItems = allGoalsForZoneKind.filter(item => {
-                        const firebaseZone = item.goal.details?.zona || item.goal.zona; // Considerar ambas as estruturas
+                        const firebaseZone = item.goal.details?.zona || item.goal.zona;
                         const targetZone = globalZoneMappingRules[firebaseZone] || firebaseZone;
                         return targetZone === zoneName;
                     });
@@ -890,10 +923,10 @@
                         if (minuteValue === undefined) return false;
                         const minute = parseInt(minuteValue, 10);
                         if (isNaN(minute)) return false;
-                        if (timeInterval === "0-15") { // Especificamente para o primeiro intervalo
+                        if (timeInterval === "0-15") { 
                             return minute >= 0 && minute <= 15;
                         }
-                        return minute > minMinute && minute <= maxMinute; // Para outros intervalos
+                        return minute > minMinute && minute <= maxMinute;
                     });
                     detailItems.sort(comparadorDeJogosEGolos);
                     detailItemRenderer = renderGoalListItem;
@@ -937,13 +970,13 @@
                         if (game.clubeCasaNome && game.clubeForaNome) {
                             if (game.clubeForaNome.toLowerCase().includes('sporting')) opponentName = game.clubeCasaNome;
                             else if (game.clubeCasaNome.toLowerCase().includes('sporting')) opponentName = game.clubeForaNome;
-                        } else if (game.adversarioNome) { // Fallback
+                        } else if (game.adversarioNome) {
                              opponentName = game.adversarioNome;
                         }
                         if (opponentName === teamName) {
                             const goalsArray = goalKind === 'marcado' ? game.golosMarcadosSportingMinutos : game.golosSofridosSportingMinutos;
                             (goalsArray || []).forEach(goal => {
-                                if (goal) allGoalsAgainstOrFromTeam.push({ goal, game }); // Não precisa de details aqui
+                                if (goal) allGoalsAgainstOrFromTeam.push({ goal, game });
                             });
                         }
                     });
@@ -983,17 +1016,26 @@
         document.getElementById('tipos-golo-list').addEventListener('click', handleMiscelaneaListClick);
 
         async function initApp() {
-            setupTabs(); setupColumnControls();
-            calendarioList.innerHTML = '<li>A carregar calendário...</li>';
+            setupTabs();
+            setupColumnControls();
+            calendarioList.innerHTML = '<li>A carregar próximos jogos...</li>';
             equipasList.innerHTML = '<li>A carregar equipas...</li>';
+            jogadoresList.innerHTML = '<li>A carregar jogadores...</li>';
+
             try {
                 await Promise.all([fetchAllGames(), fetchAllTeams(), fetchAllPlayers()]);
+                
                 displayCalendar(allGames);
                 displayTeams(allTeams.filter(team => team.nome && !team.nome.toLowerCase().includes('sporting')));
+                displayPlayers(allPlayers);
+
                 populateSeasonDropdown(allGames);
             } catch (error) {
                 console.error("Initialization error:", error);
                 seasonDropdown.innerHTML = '<option value="">Erro ao carregar dados</option>';
+                calendarioList.innerHTML = '<li>Erro ao carregar próximos jogos.</li>';
+                equipasList.innerHTML = '<li>Erro ao carregar equipas.</li>';
+                jogadoresList.innerHTML = '<li>Erro ao carregar jogadores.</li>';
                 document.getElementById('equipas-marcou-mais-list').innerHTML = '<li>Erro ao carregar.</li>';
                 document.getElementById('equipas-sofreu-mais-list').innerHTML = '<li>Erro ao carregar.</li>';
                 document.getElementById('top-scorers-list').innerHTML = '<li>Erro ao carregar.</li>';

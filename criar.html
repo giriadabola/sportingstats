@@ -2769,44 +2769,48 @@ button.update-button:hover {
             }
             const temporada = editJogoTemporadaDisplay.value; 
             const jornada = editJogoJornadaSelect.value;
-            const clubeCasaNomeForm = editJogoClubeCasaInput.value.trim();
-            const clubeForaNomeForm = editJogoClubeForaInput.value.trim();
-            const isSportingCasa = sportingCanonicoNomesInputCheck.includes(clubeCasaNomeForm.toLowerCase());
-            const isSportingFora = sportingCanonicoNomesInputCheck.includes(clubeForaNomeForm.toLowerCase());
-            if (!temporada || !jornada || !clubeCasaNomeForm || !clubeForaNomeForm) { showStatus(statusElId, 'Temp., Jornada, Clubes obrigatórios.', false); return; }
+            const clubeCasaNome = editJogoClubeCasaInput.value.trim();
+            const clubeForaNome = editJogoClubeForaInput.value.trim();
+            const isSportingCasa = sportingCanonicoNomesInputCheck.includes(clubeCasaNome.toLowerCase());
+            const isSportingFora = sportingCanonicoNomesInputCheck.includes(clubeForaNome.toLowerCase());
+
+            if (!temporada || !jornada || !clubeCasaNome || !clubeForaNome) { showStatus(statusElId, 'Temp., Jornada, Clubes obrigatórios.', false); return; }
             if (!isSportingCasa && !isSportingFora) { showStatus(statusElId, `Um dos clubes deve ser '${SPORTING_CP_CANONICAL_NAME}' ou variante.`, false); return; }
-            if (clubeCasaNomeForm.toLowerCase() === clubeForaNomeForm.toLowerCase()) { showStatus(statusElId, 'Clubes devem ser diferentes.', false); return; }
-            
-            const getPlantel = (containerSel) => Array.from(document.querySelectorAll(`${containerSel} input[type="text"]`))
-                .map(inp => {
-                    const nome = inp.value.trim();
-                    if (!nome) return null;
-                    const jogador = allJogadores.find(j => j.nome === nome);
-                    return { nome, id: jogador ? jogador.id : (currentEditingGameData?.onzeInicial?.find(p=>p.nome===nome)?.id || currentEditingGameData?.suplentes?.find(p=>p.nome===nome)?.id || null) };
-                }).filter(p => p !== null);
-    
+            if (clubeCasaNome.toLowerCase() === clubeForaNome.toLowerCase()) { showStatus(statusElId, 'Clubes devem ser diferentes.', false); return; }
+
+            // *** INÍCIO DA ALTERAÇÃO ***
+            // Função getPlantel mais robusta para evitar valores 'undefined'
+            const getPlantel = (containerSel) => {
+                return Array.from(document.querySelectorAll(`${containerSel} input[type="text"]`))
+                    .map(inp => {
+                        const nome = inp.value.trim();
+                        if (!nome) return null;
+
+                        let id = null;
+                        const jogadorGlobal = allJogadores.find(j => j.nome === nome);
+
+                        if (jogadorGlobal && jogadorGlobal.id) {
+                            id = jogadorGlobal.id;
+                        } else {
+                            // Se não encontrar na lista global, tenta encontrar nos dados originais do jogo
+                            const jogadorOriginal = (currentEditingGameData?.onzeInicial || []).find(p => p.nome === nome) || 
+                                                  (currentEditingGameData?.suplentes || []).find(p => p.nome === nome);
+                            if (jogadorOriginal && jogadorOriginal.id) {
+                                id = jogadorOriginal.id;
+                            }
+                        }
+                        // Garante que o ID é sempre uma string ou null
+                        return { nome, id }; 
+                    }).filter(p => p !== null);
+            };
+            // *** FIM DA ALTERAÇÃO ***
+
             const updatedJogoData = {
                 temporada, jornada: parseInt(jornada),
-                nomeJogo: editJogoNomeJogo.value, clubeCasaNome: clubeCasaNomeForm, clubeForaNome: clubeForaNomeForm,
+                nomeJogo: editJogoNomeJogo.value, clubeCasaNome, clubeForaNome,
                 sportingCasa: isSportingCasa,
-                // Os golos são agora geridos principalmente pela coleção 'golos'.
-                // Podemos optar por guardar uma cópia simplificada no documento do jogo, ou removê-los daqui.
-                // Por agora, vamos manter a estrutura para não quebrar a UI que pode depender dela,
-                // mas a "verdade" dos detalhes do golo vive na coleção 'golos'.
-                golosMarcadosSportingMinutos: editMinutosGolosMarcados.map(g => ({ 
-                    minute: g.minute, 
-                    details: { // Detalhes simplificados ou apenas IDs
-                        goloIdLocal: g.details.goloIdLocal,
-                        goloFirestoreId: g.details.goloFirestoreId 
-                    } 
-                })),
-                golosSofridosSportingMinutos: editMinutosGolosSofridos.map(g => ({ 
-                    minute: g.minute, 
-                    details: {
-                        goloIdLocal: g.details.goloIdLocal,
-                        goloFirestoreId: g.details.goloFirestoreId
-                    }
-                })),
+                golosMarcadosSportingMinutos: editMinutosGolosMarcados.map(g => ({ minute: g.minute, details: g.details || {} })),
+                golosSofridosSportingMinutos: editMinutosGolosSofridos.map(g => ({ minute: g.minute, details: g.details || {} })),
                 resultadoFinal: editJogoResultadoFinal.value,
                 resultadoGMCasa: parseInt(editJogoGMCasa.value) || 0,
                 resultadoGMFora: parseInt(editJogoGMFora.value) || 0,
@@ -2824,25 +2828,17 @@ button.update-button:hover {
                 jogoFuturo: editJogoFuturoCheckbox.checked,
                 lastUpdated: serverTimestamp()
             };
+
             try {
                 const gameDocRef = doc(db, "jogos", gameDocId);
                 await updateDoc(gameDocRef, updatedJogoData); 
                 showStatus(statusElId, `Jogo "${updatedJogoData.nomeJogo}" atualizado com sucesso!`, true);
                 const currentSelectedTemporada = editJogoTemporadaSelect.value;
-                
-                // Reset parcial do formulário de edição, mantendo a temporada
-                editJogoSearchInput.value = '';
-                editJogoSuggestionsContainer.innerHTML = '';
-                editJogoSuggestionsContainer.style.display = 'none';
-                editJogoFormContainer.style.display = 'none';
-                currentEditingGameData = null; 
-                editJogoDocIdInput.value = '';
-                
+                handleEditTemporadaChange(); 
                 if (currentSelectedTemporada) { 
                     editJogoTemporadaSelect.value = currentSelectedTemporada; 
                     editJogoSearchInput.disabled = false; 
                     await displayRelevantGames(); 
-                    await handleEditTemporadaChange(); // Recarrega os jogos para a temporada
                 } else { 
                     editJogoSearchInput.value = '';
                     editJogoSearchInput.disabled = true;

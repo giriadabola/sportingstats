@@ -694,7 +694,7 @@ button.update-button:hover {
 <body>
 
     <div class="container">
-        <h1>Painel de Gestão Firebase</h1>
+        <h1>Sporting Stats Edit</h1>
 
         <div class="tab-navigation">
             <button class="tab-button" onclick="openTab(event, 'tabJogo')">Criar Jogo</button>
@@ -1126,8 +1126,8 @@ button.update-button:hover {
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-        import { getFirestore, doc, setDoc, getDoc, collection, getDocs, serverTimestamp, addDoc, query, where, updateDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
-
+        import { getFirestore, doc, setDoc, getDoc, collection, getDocs, serverTimestamp, addDoc, query, where, updateDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+    
         const firebaseConfig = {
             apiKey: "AIzaSyASIFSwhZj8B4ON6fVGjNixgLW-CL39CnI", // SUBSTITUA COM SUA API KEY REAL
             authDomain: "sporting-stats.firebaseapp.com",
@@ -1136,10 +1136,15 @@ button.update-button:hover {
             messagingSenderId: "584175657940",
             appId: "1:584175657940:web:7e57b0b83f2b22646d6c41"
         };
-
+    
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
-
+    
+        // === UTILITY FUNCTION ===
+        function generateUUID() {
+            return crypto.randomUUID();
+        }
+    
         // === GLOBAL DATA CACHES ===
         let posicoesMap = new Map();
         let allPaises = [];
@@ -1154,17 +1159,17 @@ button.update-button:hover {
         let sportingClubeDetalhes = null;
         const SPORTING_CP_CANONICAL_NAME = "Sporting CP";
         const sportingCanonicoNomesInputCheck = ["sporting cp", "sporting"];
-
+    
         // === STATE VARIABLES FOR CREATE JOGO ===
         let createMinutosGolosMarcados = [];
         let createMinutosGolosSofridos = [];
-
+    
         // === STATE VARIABLES FOR EDIT JOGO ===
         let editMinutosGolosMarcados = [];
         let editMinutosGolosSofridos = [];
         let loadedGamesForSeason = []; 
         let currentEditingGameData = null; 
-
+    
         // === DOM ELEMENTS (CREATE JOGO - general) ===
         const jogoLiveCheckbox = document.getElementById('jogoLive');
         const jogoTerminadoCheckbox = document.getElementById('jogoTerminado');
@@ -1209,7 +1214,7 @@ button.update-button:hover {
         const saveGoalDetailBtn = document.getElementById('saveGoalDetailBtn');
         const createJogo11InicialContainer = document.getElementById('jogo11InicialContainer');
         const createJogoSuplentesContainer = document.getElementById('jogoSuplentesContainer');
-
+    
         // === DOM ELEMENTS (EDIT JOGO - specific) ===
         const editJogoTemporadaSelect = document.getElementById('editJogoTemporadaSelect');
         const editJogoSearchInput = document.getElementById('editJogoSearchInput');
@@ -1270,7 +1275,7 @@ button.update-button:hover {
             statusEl.className = 'status-message ' + (isSuccess ? 'success' : 'error');
             setTimeout(() => { statusEl.textContent = ''; statusEl.className = 'status-message'; }, 5000);
         }
-
+    
         function syncGameStatusCheckboxes(liveCb, termCb, futCb) {
             const source = this; 
             if (source === termCb && termCb.checked) {
@@ -1300,7 +1305,7 @@ button.update-button:hover {
         editJogoLiveCheckbox.addEventListener('change', function() { syncGameStatusCheckboxes.call(this, editJogoLiveCheckbox, editJogoTerminadoCheckbox, editJogoFuturoCheckbox); updateCalculatedScores('edit'); });
         editJogoTerminadoCheckbox.addEventListener('change', function() { syncGameStatusCheckboxes.call(this, editJogoLiveCheckbox, editJogoTerminadoCheckbox, editJogoFuturoCheckbox); updateCalculatedScores('edit'); });
         editJogoFuturoCheckbox.addEventListener('change', function() { syncGameStatusCheckboxes.call(this, editJogoLiveCheckbox, editJogoTerminadoCheckbox, editJogoFuturoCheckbox); updateCalculatedScores('edit');});
-
+    
         async function displayRelevantGames() {
             if (!relevantGamesSection || !relevantGamesListDisplay) {
                 console.warn("Relevant games display elements not found. Check IDs in HTML and JS.");
@@ -1400,7 +1405,7 @@ button.update-button:hover {
                 relevantGamesSection.style.display = 'block';
             }
         }
-
+    
         window.openTab = async function(evt, tabName) {
             var i, tabcontent, tabbuttons;
             tabcontent = document.getElementsByClassName("tab-content");
@@ -1472,7 +1477,7 @@ button.update-button:hover {
                 await displayRelevantGames(); 
             }
         }
-
+    
         document.addEventListener('DOMContentLoaded', () => {
             const defaultTabButton = document.querySelector('.tab-button[onclick*="tabJogo"]');
             if (defaultTabButton) {
@@ -1520,7 +1525,7 @@ button.update-button:hover {
             editJogoTerminadoCheckbox.addEventListener('change', () => updateCalculatedScores('edit'));
             editJogoFuturoCheckbox.addEventListener('change', () => updateCalculatedScores('edit'));
         });
-
+    
         document.getElementById('formClube').addEventListener('submit', async (e) => {
             e.preventDefault();
             const nome = document.getElementById('clubeNome').value.trim();
@@ -1538,7 +1543,7 @@ button.update-button:hover {
                 }
             } catch (error) { showStatus('statusClube', `Erro: ${error.message}`, false); console.error(error); }
         });
-
+    
         document.getElementById('formPosicao').addEventListener('submit', async (e) => {
             e.preventDefault();
             const abreviacao = document.getElementById('posicaoAbreviacao').value.trim().toUpperCase();
@@ -1586,12 +1591,12 @@ button.update-button:hover {
                 loadContinentesParaDropdown(); 
             } catch (error) { showStatus('statusPais', `Erro: ${error.message}`, false); console.error(error); }
         });
-
+    
         const posEspecificaDropdown = document.getElementById('jogadorPosEspecifica');
         const posGenericaInput = document.getElementById('jogadorPosGenerica');
         const jogadorPaisNomeInput = document.getElementById('jogadorPaisNome');
         const paisSuggestionsContainer = document.getElementById('paisSuggestions');
-
+    
         async function loadPosicoesParaDropdown() {
             if (posicoesMap.size > 0 && posEspecificaDropdown.options.length > 1 && posEspecificaDropdown.options[0].value !== "") return;
             posEspecificaDropdown.innerHTML = '<option value="">A carregar posições...</option>';
@@ -1656,7 +1661,7 @@ button.update-button:hover {
                 }
             } catch (error) { showStatus('statusJogador', `Erro: ${error.message}`, false); console.error(error); }
         });
-
+    
         function setupSuggestionHandler(inputElement, suggestionsContainer, dataProvider, displayField, imageField = null, clearBtnElement = null, context = 'default') {
             inputElement.addEventListener('input', async function() {
                 const currentDataArray = typeof dataProvider === 'function' ? await dataProvider() : dataProvider;
@@ -1730,7 +1735,7 @@ button.update-button:hover {
                 }
             });
         }
-
+    
         function populateTemporadaDropdown(selectElement) {
             if (selectElement.options.length > 1 && selectElement.options[0].value !== "") return; 
             const previouslySelected = selectElement.value; 
@@ -1747,7 +1752,7 @@ button.update-button:hover {
                 selectElement.options[0].textContent = "Selecione a Temporada";
             }
         }
-
+    
         async function setSuggestedJornada(temporadaSelect, jornadaSelect, statusElementId, termCb, liveCb, futCb) {
             const selectedTemporadaValue = temporadaSelect.value;
             if (!selectedTemporadaValue) {
@@ -1822,7 +1827,7 @@ button.update-button:hover {
                 }
             }
         }
-
+    
         async function loadClubesParaJogo() {
             if (allClubes.length > 0 && sportingClubeDetalhes) {
                 if (!jogoClubeCasaInput.getAttribute('data-suggestions-setup')) {
@@ -1870,7 +1875,7 @@ button.update-button:hover {
                 showStatus('statusEditarJogo', 'Erro lista de clubes.', false);
             }
         }
-
+    
         function handleClubeChange(context, side) { 
             if (!sportingClubeDetalhes) return;
             const casaInput = context === 'create' ? jogoClubeCasaInput : editJogoClubeCasaInput;
@@ -1915,7 +1920,7 @@ button.update-button:hover {
             }
             updateCalculatedScores(context);
         }
-
+    
         async function loadJogadoresParaJogo() {
              if (allJogadores.length > 0) {
                 if (!goalDetailJogadorInput.getAttribute('data-suggestions-setup')) {
@@ -1971,13 +1976,13 @@ button.update-button:hover {
                 showStatus('statusEditarJogo', 'Erro lista de jogadores.', false);
             }
         }
-
+    
         function getGoalDetailStatus(details, type) { 
             if (!details || Object.keys(details).length === 0) return 'status-pending';
             
             const tipoGolo = details.tipoGolo || 'Normal';
             const hasZone = !!details.zona;
-
+    
             if (type === 'marcado') {
                 const hasScorer = !!details.jogadorNome;
                 if (tipoGolo === 'AutoGolo') {
@@ -1995,7 +2000,7 @@ button.update-button:hover {
             }
             return 'status-pending'; 
         }
-
+    
         function renderMinuteList(listElement, minutesArray, type, context) { 
             listElement.innerHTML = '';
             minutesArray.forEach((entry, index) => {
@@ -2015,9 +2020,9 @@ button.update-button:hover {
                 minuteSpan.addEventListener('click', openGoalDetailModalHandler); 
                 textAndScorerContainer.appendChild(minuteSpan);
                 
-                const tipoGolo = entry.details?.tipoGolo || 'Normal';
-
-                if (type === 'marcado' && entry.details && entry.details.jogadorNome && tipoGolo !== 'AutoGolo') {
+                const tipoGoloDetalhe = entry.details?.tipoGolo || 'Normal';
+    
+                if (type === 'marcado' && entry.details && entry.details.jogadorNome && tipoGoloDetalhe !== 'AutoGolo') {
                     const separatorSpan = document.createElement('span');
                     separatorSpan.classList.add('minute-list-separator');
                     separatorSpan.textContent = " | ";
@@ -2034,7 +2039,7 @@ button.update-button:hover {
                     scorerSpan.classList.add('scorer-name');
                     scorerSpan.textContent = entry.details.jogadorNome;
                     textAndScorerContainer.appendChild(scorerSpan);
-                } else if (type === 'marcado' && tipoGolo === 'AutoGolo') {
+                } else if (type === 'marcado' && tipoGoloDetalhe === 'AutoGolo') {
                      const separatorSpan = document.createElement('span');
                     separatorSpan.classList.add('minute-list-separator');
                     separatorSpan.textContent = " | ";
@@ -2045,17 +2050,36 @@ button.update-button:hover {
                     agSpan.style.fontStyle = "italic";
                     textAndScorerContainer.appendChild(agSpan);
                 }
-
-
+                listItem.appendChild(textAndScorerContainer);
+    
                 const removeBtn = document.createElement('button');
                 removeBtn.classList.add('remove-minute-btn');
                 removeBtn.innerHTML = '×';
-                removeBtn.addEventListener('click', () => {
+                removeBtn.addEventListener('click', async () => { 
+                    const goloRemovido = minutesArray[index]; 
                     minutesArray.splice(index, 1);
                     renderMinuteList(listElement, minutesArray, type, context);
                     updateCalculatedScores(context);
+    
+                    if (context === 'edit' && goloRemovido.details && goloRemovido.details.goloFirestoreId) {
+                        try {
+                            await deleteDoc(doc(db, "golos", goloRemovido.details.goloFirestoreId));
+                            showStatus('statusEditarJogo', `Golo do minuto ${goloRemovido.minute} removido também da coleção 'golos'.`, true);
+                        } catch (error) {
+                            console.error("Erro ao remover golo da coleção 'golos':", error);
+                            showStatus('statusEditarJogo', `Erro ao remover da coleção 'golos': ${error.message}`, false);
+                        }
+                    } else if (context === 'create' && goloRemovido.details && goloRemovido.details.goloFirestoreId) {
+                        // Se implementarmos a criação imediata em 'golos' para o modo 'create'
+                        try {
+                            await deleteDoc(doc(db, "golos", goloRemovido.details.goloFirestoreId));
+                            showStatus('statusJogo', `Golo do minuto ${goloRemovido.minute} removido também da coleção 'golos'.`, true);
+                        } catch (error) {
+                            console.error("Erro ao remover golo da coleção 'golos' (modo criar):", error);
+                            showStatus('statusJogo', `Erro ao remover da coleção 'golos': ${error.message}`, false);
+                        }
+                    }
                 });
-                listItem.appendChild(textAndScorerContainer);
                 listItem.appendChild(removeBtn);
                 listElement.appendChild(listItem);
             });
@@ -2064,11 +2088,25 @@ button.update-button:hover {
         function addMinuteEntry(type, listElement, minutesArray, minuteInputEl, context) { 
             const minute = parseInt(minuteInputEl.value);
             const statusElId = context === 'create' ? 'statusJogo' : 'statusEditarJogo';
-            if (!minute || minute <= 0) { showStatus(statusElId, 'Minuto inválido.', false); return; }
-            if (minutesArray.some(entry => entry.minute === minute)) {
-                showStatus(statusElId, `Golo no minuto ${minute} já foi adicionado. Edite o existente se necessário.`, false);
+
+            if (!minute || minute <= 0) { 
+                showStatus(statusElId, 'Minuto inválido.', false); 
+                return; 
+            }
+
+            // *** INÍCIO DA ALTERAÇÃO ***
+            // Verifica se o minuto é especial (45 ou 90)
+            const isSpecialMinute = minute === 45 || minute === 90;
+            // Verifica se o minuto já existe na lista
+            const minuteExists = minutesArray.some(entry => entry.minute === minute);
+
+            // A nova condição: Bloqueia apenas se o minuto já existir E NÃO for um minuto especial.
+            if (minuteExists && !isSpecialMinute) {
+                showStatus(statusElId, `O minuto ${minute} já foi adicionado. Para adicionar múltiplos golos no mesmo minuto (descontos), use os minutos 45 ou 90.`, false);
                 return;
             }
+            // *** FIM DA ALTERAÇÃO ***
+
             minutesArray.push({ minute, details: { tipoGolo: 'Normal' } }); // Padrão tipoGolo: 'Normal'
             minutesArray.sort((a, b) => a.minute - b.minute);
             renderMinuteList(listElement, minutesArray, type, context);
@@ -2080,7 +2118,7 @@ button.update-button:hover {
         addMinutoGoloSofridoBtn.addEventListener('click', () => addMinuteEntry('sofrido', listaMinutosGolosSofridos, createMinutosGolosSofridos, jogoMinutoGoloSofridoInput, 'create'));
         editAddMinutoGoloMarcadoBtn.addEventListener('click', () => addMinuteEntry('marcado', editListaMinutosGolosMarcados, editMinutosGolosMarcados, editJogoMinutoGoloMarcadoInput, 'edit'));
         editAddMinutoGoloSofridoBtn.addEventListener('click', () => addMinuteEntry('sofrido', editListaMinutosGolosSofridos, editMinutosGolosSofridos, editJogoMinutoGoloSofridoInput, 'edit'));
-
+    
         function populateGoalZoneGrid(gridContainer, context) { 
             if (gridContainer.children.length > 0 && gridContainer.getAttribute('data-populated') === 'true') return;
             gridContainer.innerHTML = ''; 
@@ -2092,7 +2130,7 @@ button.update-button:hover {
             });
             gridContainer.setAttribute('data-populated', 'true');
         }
-
+    
         function handleZoneSelection(event, context) {
             const selectedCell = event.target;
             const currentGridContainer = context === 'create' ? goalZoneGridContainer : editGoalZoneGridContainer;
@@ -2101,20 +2139,20 @@ button.update-button:hover {
             selectedCell.classList.add('selected'); 
             currentHiddenInput.value = selectedCell.dataset.zone;
         }
-
+    
         function openGoalDetailModalHandler(event) {
-            const type = event.target.dataset.type; // 'marcado' ou 'sofrido'
+            const type = event.target.dataset.type; 
             const index = parseInt(event.target.dataset.index);
-            const context = event.target.dataset.context; // 'create' ou 'edit'
+            const context = event.target.dataset.context; 
             const minutesArray = context === 'create' 
                 ? (type === 'marcado' ? createMinutosGolosMarcados : createMinutosGolosSofridos)
                 : (type === 'marcado' ? editMinutosGolosMarcados : editMinutosGolosSofridos);
             const minuteEntry = minutesArray[index];
-
+    
             const currentModal = context === 'create' ? goalDetailModal : editGoalDetailModal;
             const currentTitle = context === 'create' ? goalDetailModalTitle : editGoalDetailModalTitle;
             const currentForm = context === 'create' ? formGoalDetail : document.getElementById('editFormGoalDetail'); 
-            const currentTypeInput = context === 'create' ? goalDetailTypeInput : editGoalDetailTypeInput; // Para 'marcado'/'sofrido'
+            const currentTypeInput = context === 'create' ? goalDetailTypeInput : editGoalDetailTypeInput; 
             const currentMinuteInput = context === 'create' ? goalDetailMinuteInput : editGoalDetailMinuteInput;
             const currentScorerSection = context === 'create' ? goalDetailScorerSection : editGoalDetailScorerSection;
             const currentJogadorInput = context === 'create' ? goalDetailJogadorInput : editGoalDetailJogadorInput;
@@ -2123,8 +2161,7 @@ button.update-button:hover {
             const currentGrid = context === 'create' ? goalZoneGridContainer : editGoalZoneGridContainer;
             const currentHiddenZone = context === 'create' ? selectedGoalZoneHidden : editSelectedGoalZoneHidden;
             const currentTipoGoloSection = context === 'create' ? document.getElementById('goalDetailTipoGoloSection') : document.getElementById('editGoalDetailTipoGoloSection');
-
-
+    
             currentTypeInput.value = type; 
             currentMinuteInput.value = minuteEntry.minute;
             currentTitle.textContent = `Detalhes do Golo - Minuto ${minuteEntry.minute} (${type === 'marcado' ? 'Marcado' : 'Sofrido'}) ${context === 'edit' ? '(Editar)' : ''}`;
@@ -2138,7 +2175,7 @@ button.update-button:hover {
                 const clearBtn = input.parentElement.querySelector('.player-input-clear-btn');
                 if(clearBtn) clearBtn.style.display = 'none';
             });
-
+    
             currentJogadorInput.value = minuteEntry.details?.jogadorNome || '';
             if (minuteEntry.details?.jogadorNome && allJogadores.length > 0) {
                 const scorerDetails = allJogadores.find(j => j.nome === minuteEntry.details.jogadorNome);
@@ -2149,7 +2186,7 @@ button.update-button:hover {
                 const jogadorClearBtn = currentJogadorInput.parentElement.querySelector('.player-input-clear-btn');
                 if(jogadorClearBtn) { jogadorClearBtn.style.display = 'block'; currentJogadorInput.classList.add('has-clear-btn'); }
             }
-
+    
             currentAssistenciaInput.value = minuteEntry.details?.assistenciaNome || '';
             if (minuteEntry.details?.assistenciaNome && allJogadores.length > 0) {
                 const assisterDetails = allJogadores.find(j => j.nome === minuteEntry.details.assistenciaNome);
@@ -2160,31 +2197,30 @@ button.update-button:hover {
                 const assistClearBtn = currentAssistenciaInput.parentElement.querySelector('.player-input-clear-btn');
                 if(assistClearBtn) { assistClearBtn.style.display = 'block'; currentAssistenciaInput.classList.add('has-clear-btn');}
             }
-
+    
             if (minuteEntry.details?.zona) {
                 currentHiddenZone.value = minuteEntry.details.zona;
                 const preSelected = currentGrid.querySelector(`.goal-zone-cell[data-zone="${minuteEntry.details.zona}"]`);
                 if (preSelected) preSelected.classList.add('selected');
             }
-
+    
             const tipoGoloSelecionado = minuteEntry.details?.tipoGolo || 'Normal';
             const radioGroupName = context === 'create' ? 'tipoGoloCreate' : 'tipoGoloEdit';
             const radioButtonsTipoGolo = currentForm.querySelectorAll(`input[name="${radioGroupName}"]`);
-
+    
             function handleTipoGoloChangeDisplay() {
-                const modalGoalType = currentTypeInput.value; // 'marcado' ou 'sofrido'
+                const modalGoalType = currentTypeInput.value; 
                 const selectedTipoGoloRadio = currentForm.querySelector(`input[name="${radioGroupName}"]:checked`);
                 const tipoDeGoloEfetivo = selectedTipoGoloRadio ? selectedTipoGoloRadio.value : 'Normal';
-
+    
                 if (modalGoalType === 'marcado') {
                     const isAutoGolo = tipoDeGoloEfetivo === 'AutoGolo';
                     const isPenalty = tipoDeGoloEfetivo === 'Penalty';
-
+    
                     currentScorerSection.style.display = isAutoGolo ? 'none' : 'flex';
                     currentAssistenciaSection.style.display = (isAutoGolo || isPenalty) ? 'none' : 'flex';
                     currentTipoGoloSection.style.display = 'flex';
-
-
+    
                     if (isAutoGolo) {
                         currentJogadorInput.value = ''; 
                         currentJogadorInput.style.backgroundImage = 'none';
@@ -2199,10 +2235,10 @@ button.update-button:hover {
                         const assistClearBtn = currentAssistenciaInput.parentElement.querySelector('.player-input-clear-btn');
                         if(assistClearBtn) assistClearBtn.style.display = 'none';
                     }
-                } else { // Golo sofrido
+                } else { 
                     currentScorerSection.style.display = 'none';
                     currentAssistenciaSection.style.display = 'none';
-                    currentTipoGoloSection.style.display = 'flex'; // Ou 'none' se não aplicável a sofridos
+                    currentTipoGoloSection.style.display = 'flex'; 
                 }
             }
             
@@ -2218,8 +2254,8 @@ button.update-button:hover {
         
         closeGoalDetailModalBtn.onclick = () => goalDetailModal.style.display = 'none';
         editCloseGoalDetailModalBtn.onclick = () => editGoalDetailModal.style.display = 'none';
-
-        function saveGoalDetailHandler(context) {
+    
+        async function saveGoalDetailHandler(context) {
             const type = (context === 'create' ? goalDetailTypeInput : editGoalDetailTypeInput).value;
             const minute = parseInt((context === 'create' ? goalDetailMinuteInput : editGoalDetailMinuteInput).value);
             let targetArray = context === 'create' 
@@ -2227,42 +2263,100 @@ button.update-button:hover {
                 : (type === 'marcado' ? editMinutosGolosMarcados : editMinutosGolosSofridos);
             const entry = targetArray.find(e => e.minute === minute);
             const statusElId = context === 'create' ? 'statusJogo' : 'statusEditarJogo';
-
+    
             if (!entry) { showStatus(statusElId, 'Erro ao encontrar golo para guardar detalhes.', false); return; }
-
+    
             const currentForm = context === 'create' ? formGoalDetail : document.getElementById('editFormGoalDetail');
             const radioGroupName = context === 'create' ? 'tipoGoloCreate' : 'tipoGoloEdit';
             const selectedTipoGoloRadio = currentForm.querySelector(`input[name="${radioGroupName}"]:checked`);
-            const tipoGoloValue = selectedTipoGoloRadio ? selectedTipoGoloRadio.value : 'Normal';
-
-            entry.details = {
-                jogadorNome: (context === 'create' ? goalDetailJogadorInput : editGoalDetailJogadorInput).value.trim() || null,
-                zona: (context === 'create' ? selectedGoalZoneHidden : editSelectedGoalZoneHidden).value || null,
-                assistenciaNome: (context === 'create' ? goalDetailAssistenciaInput : editGoalDetailAssistenciaInput).value.trim() || null,
-                tipoGolo: tipoGoloValue
-            };
-
+            const tipoGoloClassificacaoValue = selectedTipoGoloRadio ? selectedTipoGoloRadio.value : 'Normal';
+    
+            entry.details.jogadorNome = (context === 'create' ? goalDetailJogadorInput : editGoalDetailJogadorInput).value.trim() || null;
+            entry.details.zona = (context === 'create' ? selectedGoalZoneHidden : editSelectedGoalZoneHidden).value || null;
+            entry.details.assistenciaNome = (context === 'create' ? goalDetailAssistenciaInput : editGoalDetailAssistenciaInput).value.trim() || null;
+            entry.details.tipoGolo = tipoGoloClassificacaoValue; 
+            if (!entry.details.goloIdLocal) { // Garante que tem um goloIdLocal
+                entry.details.goloIdLocal = generateUUID();
+            }
+    
             if (type === 'marcado') {
-                if (tipoGoloValue === 'AutoGolo') {
+                if (tipoGoloClassificacaoValue === 'AutoGolo') {
                     entry.details.jogadorNome = null;
                     entry.details.assistenciaNome = null;
-                } else if (tipoGoloValue === 'Penalty') {
+                } else if (tipoGoloClassificacaoValue === 'Penalty') {
                     entry.details.assistenciaNome = null;
                 }
             }
-
-
+    
             if (entry.details.jogadorNome) {
                 const scorer = allJogadores.find(j => j.nome === entry.details.jogadorNome);
-                if(scorer) entry.details.jogadorId = scorer.id; else entry.details.jogadorId = null; 
+                entry.details.jogadorId = scorer ? scorer.id : null; 
             } else { entry.details.jogadorId = null; }
-
+    
             if (entry.details.assistenciaNome) {
                 const assister = allJogadores.find(j => j.nome === entry.details.assistenciaNome);
-                if(assister) entry.details.assistenciaId = assister.id; else entry.details.assistenciaId = null;
+                entry.details.assistenciaId = assister ? assister.id : null;
             } else { entry.details.assistenciaId = null; }
-
-            showStatus(statusElId, `Detalhes para golo aos ${minute}' guardados.`, true);
+    
+            if (context === 'edit') {
+                const jogoId = editJogoDocIdInput.value;
+                if (!jogoId) {
+                    showStatus(statusElId, 'ID do Jogo não encontrado. Salve o jogo antes de modificar detalhes de golos na coleção "golos".', false);
+                } else {
+                    const temporada = editJogoTemporadaDisplay.value;
+                    const jornada = parseInt(editJogoJornadaSelect.value);
+                    const clubeCasaNomeForm = editJogoClubeCasaInput.value.trim();
+                    const clubeForaNomeForm = editJogoClubeForaInput.value.trim();
+                    const isSportingCasa = sportingCanonicoNomesInputCheck.includes(clubeCasaNomeForm.toLowerCase());
+    
+                    let clubeMarcadorNome, clubeSofridoNome;
+                    if (type === 'marcado') { 
+                        clubeMarcadorNome = SPORTING_CP_CANONICAL_NAME;
+                        clubeSofridoNome = isSportingCasa ? clubeForaNomeForm : clubeCasaNomeForm;
+                    } else { 
+                        clubeMarcadorNome = isSportingCasa ? clubeForaNomeForm : clubeCasaNomeForm;
+                        clubeSofridoNome = SPORTING_CP_CANONICAL_NAME;
+                    }
+    
+                    const goloDataParaFirestore = {
+                        jogoId: jogoId,
+                        goloIdLocal: entry.details.goloIdLocal, 
+                        minuto: minute,
+                        tipoGoloEvento: type, 
+                        clubeMarcadorNome: clubeMarcadorNome,
+                        clubeSofridoNome: clubeSofridoNome,
+                        temporada: temporada,
+                        jornada: jornada,
+                        detalhes: { 
+                            jogadorNome: entry.details.jogadorNome,
+                            jogadorId: entry.details.jogadorId,
+                            assistenciaNome: entry.details.assistenciaNome,
+                            assistenciaId: entry.details.assistenciaId,
+                            zona: entry.details.zona,
+                            tipoGolo: entry.details.tipoGolo 
+                        },
+                        lastUpdated: serverTimestamp() // Use lastUpdated para consistência
+                    };
+    
+                    try {
+                        if (!entry.details.goloFirestoreId) { 
+                            goloDataParaFirestore.timestamp = serverTimestamp(); // Adiciona timestamp de criação
+                            const docRef = await addDoc(collection(db, "golos"), goloDataParaFirestore);
+                            entry.details.goloFirestoreId = docRef.id; 
+                            showStatus(statusElId, `Detalhes do golo aos ${minute}' guardados e registo criado em 'golos'.`, true);
+                        } else { 
+                            await updateDoc(doc(db, "golos", entry.details.goloFirestoreId), goloDataParaFirestore);
+                            showStatus(statusElId, `Detalhes do golo aos ${minute}' atualizados em 'golos'.`, true);
+                        }
+                    } catch (error) {
+                        console.error("Erro ao salvar/atualizar golo na coleção 'golos':", error);
+                        showStatus(statusElId, `Erro ao interagir com a coleção 'golos': ${error.message}`, false);
+                    }
+                }
+            } else {
+                 showStatus(statusElId, `Detalhes para golo aos ${minute}' guardados localmente.`, true);
+            }
+    
             (context === 'create' ? goalDetailModal : editGoalDetailModal).style.display = 'none';
             const listEl = context === 'create' 
                 ? (type === 'marcado' ? listaMinutosGolosMarcados : listaMinutosGolosSofridos)
@@ -2270,10 +2364,10 @@ button.update-button:hover {
             renderMinuteList(listEl, targetArray, type, context);
             updateCalculatedScores(context); 
         }
-
+    
         saveGoalDetailBtn.addEventListener('click', () => saveGoalDetailHandler('create'));
         editSaveGoalDetailBtn.addEventListener('click', () => saveGoalDetailHandler('edit'));
-
+    
         function updateCalculatedScores(context) { 
             const clubeCasaIn = context === 'create' ? jogoClubeCasaInput : editJogoClubeCasaInput;
             const clubeForaIn = context === 'create' ? jogoClubeForaInput : editJogoClubeForaInput;
@@ -2348,7 +2442,7 @@ button.update-button:hover {
                 estadoOut.value = "E (Empate)";
             }
         }
-
+    
         function setupDynamicPlayerInputs(containerId, numPlayers, rolePrefix, context) { 
             const container = document.getElementById(containerId);
             container.innerHTML = ''; 
@@ -2395,13 +2489,14 @@ button.update-button:hover {
             e.preventDefault(); const statusElId = 'statusJogo';
             const temporada = jogoTemporadaSelect.value;
             const jornada = jogoJornadaSelect.value;
-            const clubeCasaNome = jogoClubeCasaInput.value.trim();
-            const clubeForaNome = jogoClubeForaInput.value.trim();
-            const isSportingCasa = sportingCanonicoNomesInputCheck.includes(clubeCasaNome.toLowerCase());
-            const isSportingFora = sportingCanonicoNomesInputCheck.includes(clubeForaNome.toLowerCase());
-            if (!temporada || !jornada || !clubeCasaNome || !clubeForaNome) { showStatus(statusElId, 'Temp., Jornada, Clubes obrigatórios.', false); return; }
+            const clubeCasaNomeForm = jogoClubeCasaInput.value.trim();
+            const clubeForaNomeForm = jogoClubeForaInput.value.trim();
+            const isSportingCasa = sportingCanonicoNomesInputCheck.includes(clubeCasaNomeForm.toLowerCase());
+            const isSportingFora = sportingCanonicoNomesInputCheck.includes(clubeForaNomeForm.toLowerCase());
+            if (!temporada || !jornada || !clubeCasaNomeForm || !clubeForaNomeForm) { showStatus(statusElId, 'Temp., Jornada, Clubes obrigatórios.', false); return; }
             if (!isSportingCasa && !isSportingFora) { showStatus(statusElId, `Um dos clubes deve ser '${SPORTING_CP_CANONICAL_NAME}' ou variante.`, false); return; }
-            if (clubeCasaNome.toLowerCase() === clubeForaNome.toLowerCase()) { showStatus(statusElId, 'Clubes devem ser diferentes.', false); return; }
+            if (clubeCasaNomeForm.toLowerCase() === clubeForaNomeForm.toLowerCase()) { showStatus(statusElId, 'Clubes devem ser diferentes.', false); return; }
+            
             const getPlantel = (containerSel) => Array.from(document.querySelectorAll(`${containerSel} input[type="text"]`))
                 .map(inp => {
                     const nome = inp.value.trim();
@@ -2409,12 +2504,19 @@ button.update-button:hover {
                     const jogador = allJogadores.find(j => j.nome === nome);
                     return { nome, id: jogador ? jogador.id : null }; 
                 }).filter(p => p !== null); 
+    
             const jogoData = {
                 temporada, jornada: parseInt(jornada),
-                nomeJogo: jogoNomeJogo.value, clubeCasaNome, clubeForaNome,
+                nomeJogo: jogoNomeJogo.value, clubeCasaNome: clubeCasaNomeForm, clubeForaNome: clubeForaNomeForm,
                 sportingCasa: isSportingCasa,
-                golosMarcadosSportingMinutos: createMinutosGolosMarcados.map(g => ({ minute: g.minute, details: g.details || {} })),
-                golosSofridosSportingMinutos: createMinutosGolosSofridos.map(g => ({ minute: g.minute, details: g.details || {} })),
+                golosMarcadosSportingMinutos: createMinutosGolosMarcados.map(g => ({ 
+                    minute: g.minute, 
+                    details: { ...g.details, goloIdLocal: g.details.goloIdLocal || generateUUID() } // Garante goloIdLocal
+                })),
+                golosSofridosSportingMinutos: createMinutosGolosSofridos.map(g => ({ 
+                    minute: g.minute, 
+                    details: { ...g.details, goloIdLocal: g.details.goloIdLocal || generateUUID() } // Garante goloIdLocal
+                })),
                 resultadoFinal: jogoResultadoFinal.value,
                 resultadoGMCasa: parseInt(jogoGMCasa.value) || 0,
                 resultadoGMFora: parseInt(jogoGMFora.value) || 0,
@@ -2435,7 +2537,70 @@ button.update-button:hover {
             };
             try {
                 const docRef = await addDoc(collection(db, "jogos"), jogoData);
-                showStatus(statusElId, `Jogo adicionado ID: ${docRef.id}!`, true);
+                const novoJogoId = docRef.id;
+                showStatus(statusElId, `Jogo adicionado ID: ${novoJogoId}! A processar golos...`, true);
+    
+                // Processar golos marcados para a coleção 'golos'
+                for (const golo of jogoData.golosMarcadosSportingMinutos) {
+                    let clubeMarcadorNomeCriacao, clubeSofridoNomeCriacao;
+                    clubeMarcadorNomeCriacao = SPORTING_CP_CANONICAL_NAME;
+                    clubeSofridoNomeCriacao = isSportingCasa ? jogoData.clubeForaNome : jogoData.clubeCasaNome;
+    
+                    const goloParaFirestoreCriacao = {
+                        jogoId: novoJogoId,
+                        goloIdLocal: golo.details.goloIdLocal,
+                        minuto: golo.minute,
+                        tipoGoloEvento: "marcado",
+                        clubeMarcadorNome: clubeMarcadorNomeCriacao,
+                        clubeSofridoNome: clubeSofridoNomeCriacao,
+                        temporada: jogoData.temporada,
+                        jornada: jogoData.jornada,
+                        detalhes: golo.details,
+                        timestamp: serverTimestamp()
+                    };
+                    try {
+                        const goloDocRef = await addDoc(collection(db, "golos"), goloParaFirestoreCriacao);
+                        // Atualizar o golo no array local com o goloFirestoreId (opcional, mas bom para consistência)
+                        const goloLocalOriginal = createMinutosGolosMarcados.find(gl => gl.details.goloIdLocal === golo.details.goloIdLocal);
+                        if (goloLocalOriginal) {
+                            goloLocalOriginal.details.goloFirestoreId = goloDocRef.id;
+                        }
+                    } catch (error) {
+                        console.error("Erro ao criar registo de golo marcado em 'golos' para novo jogo:", error);
+                    }
+                }
+    
+                // Processar golos sofridos para a coleção 'golos'
+                for (const golo of jogoData.golosSofridosSportingMinutos) {
+                    let clubeMarcadorNomeCriacao, clubeSofridoNomeCriacao;
+                    clubeMarcadorNomeCriacao = isSportingCasa ? jogoData.clubeForaNome : jogoData.clubeCasaNome;
+                    clubeSofridoNomeCriacao = SPORTING_CP_CANONICAL_NAME;
+                    
+                    const goloParaFirestoreCriacao = {
+                        jogoId: novoJogoId,
+                        goloIdLocal: golo.details.goloIdLocal,
+                        minuto: golo.minute,
+                        tipoGoloEvento: "sofrido",
+                        clubeMarcadorNome: clubeMarcadorNomeCriacao,
+                        clubeSofridoNome: clubeSofridoNomeCriacao,
+                        temporada: jogoData.temporada,
+                        jornada: jogoData.jornada,
+                        detalhes: golo.details,
+                        timestamp: serverTimestamp()
+                    };
+                     try {
+                        const goloDocRef = await addDoc(collection(db, "golos"), goloParaFirestoreCriacao);
+                        const goloLocalOriginal = createMinutosGolosSofridos.find(gl => gl.details.goloIdLocal === golo.details.goloIdLocal);
+                        if (goloLocalOriginal) {
+                            goloLocalOriginal.details.goloFirestoreId = goloDocRef.id;
+                        }
+                    } catch (error) {
+                        console.error("Erro ao criar registo de golo sofrido em 'golos' para novo jogo:", error);
+                    }
+                }
+                showStatus(statusElId, `Jogo ID: ${novoJogoId} e golos associados criados!`, true);
+    
+    
                 const currentTemporada = jogoTemporadaSelect.value; 
                 e.target.reset(); 
                 jogoClubeCasaInput.style.backgroundImage = 'none';
@@ -2457,9 +2622,9 @@ button.update-button:hover {
                 if (currentTemporada) jogoTemporadaSelect.value = currentTemporada; 
                 else jogoTemporadaSelect.value = "";
                 await setSuggestedJornada(jogoTemporadaSelect, jogoJornadaSelect, statusElId, jogoTerminadoCheckbox, jogoLiveCheckbox, jogoFuturoCheckbox); 
-            } catch (error) { showStatus(statusElId, `Erro: ${error.message}`, false); console.error(error); }
+            } catch (error) { showStatus(statusElId, `Erro ao criar jogo: ${error.message}`, false); console.error(error); }
         });
-
+    
         async function handleEditTemporadaChange() {
             const selectedTemporada = editJogoTemporadaSelect.value;
             editJogoSearchInput.value = '';
@@ -2497,7 +2662,7 @@ button.update-button:hover {
         }
         
         function handleEditJogoSearch() { /* Handled by setupSuggestionHandler */ }
-
+    
         async function loadGameForEditing(gameId) {
             showStatus('statusEditarJogo', 'A carregar dados do jogo...', true);
             editJogoFormContainer.style.display = 'none'; 
@@ -2506,7 +2671,43 @@ button.update-button:hover {
                 const docSnap = await getDoc(gameDocRef);
                 if (docSnap.exists()) {
                     currentEditingGameData = { id: docSnap.id, ...docSnap.data() };
-                    populateEditForm(currentEditingGameData);
+                    
+                    // Carregar golos da coleção 'golos' associados a este jogo
+                    const golosQuery = query(collection(db, "golos"), where("jogoId", "==", gameId));
+                    const golosSnapshot = await getDocs(golosQuery);
+                    
+                    // Limpar listas de golos atuais antes de popular com dados do jogo e da coleção 'golos'
+                    editMinutosGolosMarcados = [];
+                    editMinutosGolosSofridos = [];
+    
+                    // Popular com base nos dados da coleção 'golos' primeiro (mais autoritário)
+                    golosSnapshot.forEach(goloDoc => {
+                        const goloData = goloDoc.data();
+                        const goloParaArray = {
+                            minute: goloData.minuto,
+                            details: {
+                                ...goloData.detalhes,
+                                goloFirestoreId: goloDoc.id, // Importante para saber que já existe
+                                goloIdLocal: goloData.goloIdLocal || generateUUID() // Usa o local ou gera um novo
+                            }
+                        };
+                        if (goloData.tipoGoloEvento === 'marcado') {
+                            editMinutosGolosMarcados.push(goloParaArray);
+                        } else if (goloData.tipoGoloEvento === 'sofrido') {
+                            editMinutosGolosSofridos.push(goloParaArray);
+                        }
+                    });
+    
+                    // Se houver golos no documento do jogo que não estão na coleção 'golos' (migração/backup)
+                    // Poderíamos adicionar uma lógica aqui para sincronizá-los, mas por agora focamos na coleção 'golos' como fonte principal
+                    // quando os dados são carregados para edição.
+    
+                    // Ordenar
+                    editMinutosGolosMarcados.sort((a,b) => a.minute - b.minute);
+                    editMinutosGolosSofridos.sort((a,b) => a.minute - b.minute);
+    
+    
+                    populateEditForm(currentEditingGameData); // populateEditForm usará as listas agora preenchidas
                     editJogoFormContainer.style.display = 'block'; 
                     showStatus('statusEditarJogo', `Jogo "${currentEditingGameData.nomeJogo || gameId}" carregado. Pode editar.`, true);
                 } else {
@@ -2519,7 +2720,7 @@ button.update-button:hover {
                 currentEditingGameData = null;
             }
         }
-
+    
         function populateEditForm(gameData) {
             formEditarJogo.reset(); 
             editJogoDocIdInput.value = gameData.id;
@@ -2545,10 +2746,11 @@ button.update-button:hover {
                 editJogoClubeForaInput.classList.remove('has-image-bg');
             }
              editJogoClubeForaInput.dispatchEvent(new Event('input', {bubbles: true})); 
-            editMinutosGolosMarcados = gameData.golosMarcadosSportingMinutos ? JSON.parse(JSON.stringify(gameData.golosMarcadosSportingMinutos)) : [];
-            editMinutosGolosSofridos = gameData.golosSofridosSportingMinutos ? JSON.parse(JSON.stringify(gameData.golosSofridosSportingMinutos)) : [];
+            
+            // As listas editMinutosGolosMarcados/Sofridos já devem estar populadas por loadGameForEditing
             renderMinuteList(editListaMinutosGolosMarcados, editMinutosGolosMarcados, 'marcado', 'edit');
             renderMinuteList(editListaMinutosGolosSofridos, editMinutosGolosSofridos, 'sofrido', 'edit');
+    
             editJogoLiveCheckbox.checked = gameData.jogoLive || false;
             editJogoTerminadoCheckbox.checked = gameData.jogoTerminado || false;
             editJogoFuturoCheckbox.checked = gameData.jogoFuturo || false;
@@ -2588,7 +2790,7 @@ button.update-button:hover {
                 }
             });
         }
-
+    
         formEditarJogo.addEventListener('submit', async (e) => {
             e.preventDefault();
             const statusElId = 'statusEditarJogo';
@@ -2599,13 +2801,14 @@ button.update-button:hover {
             }
             const temporada = editJogoTemporadaDisplay.value; 
             const jornada = editJogoJornadaSelect.value;
-            const clubeCasaNome = editJogoClubeCasaInput.value.trim();
-            const clubeForaNome = editJogoClubeForaInput.value.trim();
-            const isSportingCasa = sportingCanonicoNomesInputCheck.includes(clubeCasaNome.toLowerCase());
-            const isSportingFora = sportingCanonicoNomesInputCheck.includes(clubeForaNome.toLowerCase());
-            if (!temporada || !jornada || !clubeCasaNome || !clubeForaNome) { showStatus(statusElId, 'Temp., Jornada, Clubes obrigatórios.', false); return; }
+            const clubeCasaNomeForm = editJogoClubeCasaInput.value.trim();
+            const clubeForaNomeForm = editJogoClubeForaInput.value.trim();
+            const isSportingCasa = sportingCanonicoNomesInputCheck.includes(clubeCasaNomeForm.toLowerCase());
+            const isSportingFora = sportingCanonicoNomesInputCheck.includes(clubeForaNomeForm.toLowerCase());
+            if (!temporada || !jornada || !clubeCasaNomeForm || !clubeForaNomeForm) { showStatus(statusElId, 'Temp., Jornada, Clubes obrigatórios.', false); return; }
             if (!isSportingCasa && !isSportingFora) { showStatus(statusElId, `Um dos clubes deve ser '${SPORTING_CP_CANONICAL_NAME}' ou variante.`, false); return; }
-            if (clubeCasaNome.toLowerCase() === clubeForaNome.toLowerCase()) { showStatus(statusElId, 'Clubes devem ser diferentes.', false); return; }
+            if (clubeCasaNomeForm.toLowerCase() === clubeForaNomeForm.toLowerCase()) { showStatus(statusElId, 'Clubes devem ser diferentes.', false); return; }
+            
             const getPlantel = (containerSel) => Array.from(document.querySelectorAll(`${containerSel} input[type="text"]`))
                 .map(inp => {
                     const nome = inp.value.trim();
@@ -2613,12 +2816,29 @@ button.update-button:hover {
                     const jogador = allJogadores.find(j => j.nome === nome);
                     return { nome, id: jogador ? jogador.id : (currentEditingGameData?.onzeInicial?.find(p=>p.nome===nome)?.id || currentEditingGameData?.suplentes?.find(p=>p.nome===nome)?.id || null) };
                 }).filter(p => p !== null);
+    
             const updatedJogoData = {
                 temporada, jornada: parseInt(jornada),
-                nomeJogo: editJogoNomeJogo.value, clubeCasaNome, clubeForaNome,
+                nomeJogo: editJogoNomeJogo.value, clubeCasaNome: clubeCasaNomeForm, clubeForaNome: clubeForaNomeForm,
                 sportingCasa: isSportingCasa,
-                golosMarcadosSportingMinutos: editMinutosGolosMarcados.map(g => ({ minute: g.minute, details: g.details || {} })),
-                golosSofridosSportingMinutos: editMinutosGolosSofridos.map(g => ({ minute: g.minute, details: g.details || {} })),
+                // Os golos são agora geridos principalmente pela coleção 'golos'.
+                // Podemos optar por guardar uma cópia simplificada no documento do jogo, ou removê-los daqui.
+                // Por agora, vamos manter a estrutura para não quebrar a UI que pode depender dela,
+                // mas a "verdade" dos detalhes do golo vive na coleção 'golos'.
+                golosMarcadosSportingMinutos: editMinutosGolosMarcados.map(g => ({ 
+                    minute: g.minute, 
+                    details: { // Detalhes simplificados ou apenas IDs
+                        goloIdLocal: g.details.goloIdLocal,
+                        goloFirestoreId: g.details.goloFirestoreId 
+                    } 
+                })),
+                golosSofridosSportingMinutos: editMinutosGolosSofridos.map(g => ({ 
+                    minute: g.minute, 
+                    details: {
+                        goloIdLocal: g.details.goloIdLocal,
+                        goloFirestoreId: g.details.goloFirestoreId
+                    }
+                })),
                 resultadoFinal: editJogoResultadoFinal.value,
                 resultadoGMCasa: parseInt(editJogoGMCasa.value) || 0,
                 resultadoGMFora: parseInt(editJogoGMFora.value) || 0,
@@ -2641,11 +2861,20 @@ button.update-button:hover {
                 await updateDoc(gameDocRef, updatedJogoData); 
                 showStatus(statusElId, `Jogo "${updatedJogoData.nomeJogo}" atualizado com sucesso!`, true);
                 const currentSelectedTemporada = editJogoTemporadaSelect.value;
-                handleEditTemporadaChange(); 
+                
+                // Reset parcial do formulário de edição, mantendo a temporada
+                editJogoSearchInput.value = '';
+                editJogoSuggestionsContainer.innerHTML = '';
+                editJogoSuggestionsContainer.style.display = 'none';
+                editJogoFormContainer.style.display = 'none';
+                currentEditingGameData = null; 
+                editJogoDocIdInput.value = '';
+                
                 if (currentSelectedTemporada) { 
                     editJogoTemporadaSelect.value = currentSelectedTemporada; 
                     editJogoSearchInput.disabled = false; 
                     await displayRelevantGames(); 
+                    await handleEditTemporadaChange(); // Recarrega os jogos para a temporada
                 } else { 
                     editJogoSearchInput.value = '';
                     editJogoSearchInput.disabled = true;

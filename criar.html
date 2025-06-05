@@ -1082,6 +1082,7 @@ button.update-button:hover {
             <form id="editFormGoalDetail">
                 <input type="hidden" id="editGoalDetailType">
                 <input type="hidden" id="editGoalDetailMinute">
+                <input type="hidden" id="editGoalDetailIndex">
                 
                 <div id="editGoalDetailScorerSection">
                     <label for="editGoalDetailJogador">Marcador (Jogador do Sporting):</label>
@@ -2141,19 +2142,22 @@ button.update-button:hover {
         }
     
         function openGoalDetailModalHandler(event) {
-            const type = event.target.dataset.type; 
+            const type = event.target.dataset.type; // 'marcado' ou 'sofrido'
             const index = parseInt(event.target.dataset.index);
-            const context = event.target.dataset.context; 
+            const context = event.target.dataset.context; // 'create' ou 'edit'
             const minutesArray = context === 'create' 
                 ? (type === 'marcado' ? createMinutosGolosMarcados : createMinutosGolosSofridos)
                 : (type === 'marcado' ? editMinutosGolosMarcados : editMinutosGolosSofridos);
             const minuteEntry = minutesArray[index];
-    
+
             const currentModal = context === 'create' ? goalDetailModal : editGoalDetailModal;
             const currentTitle = context === 'create' ? goalDetailModalTitle : editGoalDetailModalTitle;
             const currentForm = context === 'create' ? formGoalDetail : document.getElementById('editFormGoalDetail'); 
-            const currentTypeInput = context === 'create' ? goalDetailTypeInput : editGoalDetailTypeInput; 
+            const currentTypeInput = context === 'create' ? goalDetailTypeInput : editGoalDetailTypeInput;
             const currentMinuteInput = context === 'create' ? goalDetailMinuteInput : editGoalDetailMinuteInput;
+            // *** INÍCIO DA ALTERAÇÃO ***
+            const currentIndexInput = context === 'create' ? document.getElementById('goalDetailIndex') : document.getElementById('editGoalDetailIndex');
+            // *** FIM DA ALTERAÇÃO ***
             const currentScorerSection = context === 'create' ? goalDetailScorerSection : editGoalDetailScorerSection;
             const currentJogadorInput = context === 'create' ? goalDetailJogadorInput : editGoalDetailJogadorInput;
             const currentAssistenciaSection = context === 'create' ? goalDetailAssistenciaSection : editGoalDetailAssistenciaSection;
@@ -2161,10 +2165,16 @@ button.update-button:hover {
             const currentGrid = context === 'create' ? goalZoneGridContainer : editGoalZoneGridContainer;
             const currentHiddenZone = context === 'create' ? selectedGoalZoneHidden : editSelectedGoalZoneHidden;
             const currentTipoGoloSection = context === 'create' ? document.getElementById('goalDetailTipoGoloSection') : document.getElementById('editGoalDetailTipoGoloSection');
-    
+
             currentTypeInput.value = type; 
             currentMinuteInput.value = minuteEntry.minute;
+            // *** INÍCIO DA ALTERAÇÃO ***
+            currentIndexInput.value = index; // Guarda o índice do golo no modal
+            // *** FIM DA ALTERAÇÃO ***
             currentTitle.textContent = `Detalhes do Golo - Minuto ${minuteEntry.minute} (${type === 'marcado' ? 'Marcado' : 'Sofrido'}) ${context === 'edit' ? '(Editar)' : ''}`;
+            
+            // ... (o resto da função permanece exatamente igual)
+            // ... (rest of the function remains exactly the same)
             currentForm.reset(); 
             currentHiddenZone.value = '';
             currentGrid.querySelectorAll('.goal-zone-cell').forEach(cell => cell.classList.remove('selected'));
@@ -2175,7 +2185,7 @@ button.update-button:hover {
                 const clearBtn = input.parentElement.querySelector('.player-input-clear-btn');
                 if(clearBtn) clearBtn.style.display = 'none';
             });
-    
+
             currentJogadorInput.value = minuteEntry.details?.jogadorNome || '';
             if (minuteEntry.details?.jogadorNome && allJogadores.length > 0) {
                 const scorerDetails = allJogadores.find(j => j.nome === minuteEntry.details.jogadorNome);
@@ -2186,7 +2196,7 @@ button.update-button:hover {
                 const jogadorClearBtn = currentJogadorInput.parentElement.querySelector('.player-input-clear-btn');
                 if(jogadorClearBtn) { jogadorClearBtn.style.display = 'block'; currentJogadorInput.classList.add('has-clear-btn'); }
             }
-    
+
             currentAssistenciaInput.value = minuteEntry.details?.assistenciaNome || '';
             if (minuteEntry.details?.assistenciaNome && allJogadores.length > 0) {
                 const assisterDetails = allJogadores.find(j => j.nome === minuteEntry.details.assistenciaNome);
@@ -2197,30 +2207,31 @@ button.update-button:hover {
                 const assistClearBtn = currentAssistenciaInput.parentElement.querySelector('.player-input-clear-btn');
                 if(assistClearBtn) { assistClearBtn.style.display = 'block'; currentAssistenciaInput.classList.add('has-clear-btn');}
             }
-    
+
             if (minuteEntry.details?.zona) {
                 currentHiddenZone.value = minuteEntry.details.zona;
                 const preSelected = currentGrid.querySelector(`.goal-zone-cell[data-zone="${minuteEntry.details.zona}"]`);
                 if (preSelected) preSelected.classList.add('selected');
             }
-    
+
             const tipoGoloSelecionado = minuteEntry.details?.tipoGolo || 'Normal';
             const radioGroupName = context === 'create' ? 'tipoGoloCreate' : 'tipoGoloEdit';
             const radioButtonsTipoGolo = currentForm.querySelectorAll(`input[name="${radioGroupName}"]`);
-    
+
             function handleTipoGoloChangeDisplay() {
-                const modalGoalType = currentTypeInput.value; 
+                const modalGoalType = currentTypeInput.value; // 'marcado' ou 'sofrido'
                 const selectedTipoGoloRadio = currentForm.querySelector(`input[name="${radioGroupName}"]:checked`);
                 const tipoDeGoloEfetivo = selectedTipoGoloRadio ? selectedTipoGoloRadio.value : 'Normal';
-    
+
                 if (modalGoalType === 'marcado') {
                     const isAutoGolo = tipoDeGoloEfetivo === 'AutoGolo';
                     const isPenalty = tipoDeGoloEfetivo === 'Penalty';
-    
+
                     currentScorerSection.style.display = isAutoGolo ? 'none' : 'flex';
                     currentAssistenciaSection.style.display = (isAutoGolo || isPenalty) ? 'none' : 'flex';
                     currentTipoGoloSection.style.display = 'flex';
-    
+
+
                     if (isAutoGolo) {
                         currentJogadorInput.value = ''; 
                         currentJogadorInput.style.backgroundImage = 'none';
@@ -2235,10 +2246,10 @@ button.update-button:hover {
                         const assistClearBtn = currentAssistenciaInput.parentElement.querySelector('.player-input-clear-btn');
                         if(assistClearBtn) assistClearBtn.style.display = 'none';
                     }
-                } else { 
+                } else { // Golo sofrido
                     currentScorerSection.style.display = 'none';
                     currentAssistenciaSection.style.display = 'none';
-                    currentTipoGoloSection.style.display = 'flex'; 
+                    currentTipoGoloSection.style.display = 'flex'; // Ou 'none' se não aplicável a sofridos
                 }
             }
             
@@ -2251,112 +2262,69 @@ button.update-button:hover {
             handleTipoGoloChangeDisplay(); 
             currentModal.style.display = 'block';
         }
+
+
         
         closeGoalDetailModalBtn.onclick = () => goalDetailModal.style.display = 'none';
         editCloseGoalDetailModalBtn.onclick = () => editGoalDetailModal.style.display = 'none';
     
-        async function saveGoalDetailHandler(context) {
+        function saveGoalDetailHandler(context) {
             const type = (context === 'create' ? goalDetailTypeInput : editGoalDetailTypeInput).value;
-            const minute = parseInt((context === 'create' ? goalDetailMinuteInput : editGoalDetailMinuteInput).value);
+            // Removido: const minute = ...
             let targetArray = context === 'create' 
                 ? (type === 'marcado' ? createMinutosGolosMarcados : createMinutosGolosSofridos)
                 : (type === 'marcado' ? editMinutosGolosMarcados : editMinutosGolosSofridos);
-            const entry = targetArray.find(e => e.minute === minute);
             const statusElId = context === 'create' ? 'statusJogo' : 'statusEditarJogo';
-    
-            if (!entry) { showStatus(statusElId, 'Erro ao encontrar golo para guardar detalhes.', false); return; }
-    
+
+            // *** INÍCIO DA ALTERAÇÃO ***
+            // Em vez de procurar pelo minuto, obtemos o índice guardado e acedemos diretamente ao elemento do array
+            const indexToSave = parseInt((context === 'create' ? document.getElementById('goalDetailIndex') : document.getElementById('editGoalDetailIndex')).value);
+
+            if (isNaN(indexToSave) || indexToSave < 0 || indexToSave >= targetArray.length) {
+                showStatus(statusElId, 'Erro: referência do golo inválida.', false); 
+                return;
+            }
+            const entry = targetArray[indexToSave];
+            const minute = entry.minute; // Obtemos o minuto a partir do registo para a mensagem de status
+            // *** FIM DA ALTERAÇÃO ***
+
+            if (!entry) { 
+                showStatus(statusElId, 'Erro ao encontrar golo para guardar detalhes.', false); 
+                return; 
+            }
+
             const currentForm = context === 'create' ? formGoalDetail : document.getElementById('editFormGoalDetail');
             const radioGroupName = context === 'create' ? 'tipoGoloCreate' : 'tipoGoloEdit';
             const selectedTipoGoloRadio = currentForm.querySelector(`input[name="${radioGroupName}"]:checked`);
-            const tipoGoloClassificacaoValue = selectedTipoGoloRadio ? selectedTipoGoloRadio.value : 'Normal';
-    
-            entry.details.jogadorNome = (context === 'create' ? goalDetailJogadorInput : editGoalDetailJogadorInput).value.trim() || null;
-            entry.details.zona = (context === 'create' ? selectedGoalZoneHidden : editSelectedGoalZoneHidden).value || null;
-            entry.details.assistenciaNome = (context === 'create' ? goalDetailAssistenciaInput : editGoalDetailAssistenciaInput).value.trim() || null;
-            entry.details.tipoGolo = tipoGoloClassificacaoValue; 
-            if (!entry.details.goloIdLocal) { // Garante que tem um goloIdLocal
-                entry.details.goloIdLocal = generateUUID();
-            }
-    
+            const tipoGoloValue = selectedTipoGoloRadio ? selectedTipoGoloRadio.value : 'Normal';
+
+            entry.details = {
+                jogadorNome: (context === 'create' ? goalDetailJogadorInput : editGoalDetailJogadorInput).value.trim() || null,
+                zona: (context === 'create' ? selectedGoalZoneHidden : editSelectedGoalZoneHidden).value || null,
+                assistenciaNome: (context === 'create' ? goalDetailAssistenciaInput : editGoalDetailAssistenciaInput).value.trim() || null,
+                tipoGolo: tipoGoloValue
+            };
+
             if (type === 'marcado') {
-                if (tipoGoloClassificacaoValue === 'AutoGolo') {
+                if (tipoGoloValue === 'AutoGolo') {
                     entry.details.jogadorNome = null;
                     entry.details.assistenciaNome = null;
-                } else if (tipoGoloClassificacaoValue === 'Penalty') {
+                } else if (tipoGoloValue === 'Penalty') {
                     entry.details.assistenciaNome = null;
                 }
             }
-    
+
             if (entry.details.jogadorNome) {
                 const scorer = allJogadores.find(j => j.nome === entry.details.jogadorNome);
-                entry.details.jogadorId = scorer ? scorer.id : null; 
+                if(scorer) entry.details.jogadorId = scorer.id; else entry.details.jogadorId = null; 
             } else { entry.details.jogadorId = null; }
-    
+
             if (entry.details.assistenciaNome) {
                 const assister = allJogadores.find(j => j.nome === entry.details.assistenciaNome);
-                entry.details.assistenciaId = assister ? assister.id : null;
+                if(assister) entry.details.assistenciaId = assister.id; else entry.details.assistenciaId = null;
             } else { entry.details.assistenciaId = null; }
-    
-            if (context === 'edit') {
-                const jogoId = editJogoDocIdInput.value;
-                if (!jogoId) {
-                    showStatus(statusElId, 'ID do Jogo não encontrado. Salve o jogo antes de modificar detalhes de golos na coleção "golos".', false);
-                } else {
-                    const temporada = editJogoTemporadaDisplay.value;
-                    const jornada = parseInt(editJogoJornadaSelect.value);
-                    const clubeCasaNomeForm = editJogoClubeCasaInput.value.trim();
-                    const clubeForaNomeForm = editJogoClubeForaInput.value.trim();
-                    const isSportingCasa = sportingCanonicoNomesInputCheck.includes(clubeCasaNomeForm.toLowerCase());
-    
-                    let clubeMarcadorNome, clubeSofridoNome;
-                    if (type === 'marcado') { 
-                        clubeMarcadorNome = SPORTING_CP_CANONICAL_NAME;
-                        clubeSofridoNome = isSportingCasa ? clubeForaNomeForm : clubeCasaNomeForm;
-                    } else { 
-                        clubeMarcadorNome = isSportingCasa ? clubeForaNomeForm : clubeCasaNomeForm;
-                        clubeSofridoNome = SPORTING_CP_CANONICAL_NAME;
-                    }
-    
-                    const goloDataParaFirestore = {
-                        jogoId: jogoId,
-                        goloIdLocal: entry.details.goloIdLocal, 
-                        minuto: minute,
-                        tipoGoloEvento: type, 
-                        clubeMarcadorNome: clubeMarcadorNome,
-                        clubeSofridoNome: clubeSofridoNome,
-                        temporada: temporada,
-                        jornada: jornada,
-                        detalhes: { 
-                            jogadorNome: entry.details.jogadorNome,
-                            jogadorId: entry.details.jogadorId,
-                            assistenciaNome: entry.details.assistenciaNome,
-                            assistenciaId: entry.details.assistenciaId,
-                            zona: entry.details.zona,
-                            tipoGolo: entry.details.tipoGolo 
-                        },
-                        lastUpdated: serverTimestamp() // Use lastUpdated para consistência
-                    };
-    
-                    try {
-                        if (!entry.details.goloFirestoreId) { 
-                            goloDataParaFirestore.timestamp = serverTimestamp(); // Adiciona timestamp de criação
-                            const docRef = await addDoc(collection(db, "golos"), goloDataParaFirestore);
-                            entry.details.goloFirestoreId = docRef.id; 
-                            showStatus(statusElId, `Detalhes do golo aos ${minute}' guardados e registo criado em 'golos'.`, true);
-                        } else { 
-                            await updateDoc(doc(db, "golos", entry.details.goloFirestoreId), goloDataParaFirestore);
-                            showStatus(statusElId, `Detalhes do golo aos ${minute}' atualizados em 'golos'.`, true);
-                        }
-                    } catch (error) {
-                        console.error("Erro ao salvar/atualizar golo na coleção 'golos':", error);
-                        showStatus(statusElId, `Erro ao interagir com a coleção 'golos': ${error.message}`, false);
-                    }
-                }
-            } else {
-                 showStatus(statusElId, `Detalhes para golo aos ${minute}' guardados localmente.`, true);
-            }
-    
+
+            showStatus(statusElId, `Detalhes para golo aos ${minute}' guardados.`, true);
             (context === 'create' ? goalDetailModal : editGoalDetailModal).style.display = 'none';
             const listEl = context === 'create' 
                 ? (type === 'marcado' ? listaMinutosGolosMarcados : listaMinutosGolosSofridos)

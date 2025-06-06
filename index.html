@@ -214,10 +214,10 @@
             color: #0056b3;
         }
         .stat-item-group { flex-direction: column; align-items: flex-start; }
-        .stat-item-group .stat-label { margin-bottom: 5px; width: 100%; }
+        .stat-item-group .stat-label { margin-bottom: 5px; width: 100%; font-weight: bold; color: #333; }
         .stat-item-group .main-stat-value { font-size: 1.2em; color: #28a745; margin-bottom: 8px; align-self: flex-start; }
         .stat-sub-item { display: flex; justify-content: space-between; width: 100%; padding: 4px 0 4px 15px; font-size: 0.9em; border-top: 1px dashed #f0f0f0; }
-        .stat-item-group .stat-sub-item:first-of-type { border-top: none; }
+        .stat-item-group .stat-sub-item:first-of-type { border-top: none; padding-top: 0; }
         .stat-sub-label { color: #666; }
         .stat-sub-value { font-weight: normal; color: #444; }
         .result-comum-card { text-align: center; }
@@ -278,6 +278,10 @@
             min-height: 0; 
         }
         .detailed-stats-list li { padding: 8px 5px; border-bottom: 1px solid #f0f0f0; font-size: 0.9em; }
+        .detailed-stats-list li.game-item { cursor: pointer; } /* Make game items look clickable */
+        .detailed-stats-list li.game-item:hover { background-color: #f0f8ff; }
+
+
         .detailed-list-item { margin-bottom: 10px; }
         .game-item-header, .goal-item-header { font-size: 0.8em; color: #666; margin-bottom: 4px; }
         .game-item-matchup, .goal-item-details { display: flex; align-items: center; gap: 8px; }
@@ -287,11 +291,189 @@
         .goal-minute, .goal-type, .goal-zone { font-size: 0.9em; color: #444; margin-left: 5px; }
 
 
+        /* Popup Styles */
+        .popup-modal {
+            display: none; 
+            position: fixed; 
+            z-index: 1000; 
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto; 
+            background-color: rgba(0,0,0,0.6); 
+            padding-top: 50px;
+        }
+        .popup-content {
+            background-color: #fefefe;
+            margin: 5% auto;
+            padding: 20px;
+            border: 1px solid #888;
+            width: 80%;
+            max-width: 700px;
+            border-radius: 8px;
+            position: relative;
+        }
+        .popup-close-button {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+        }
+        .popup-close-button:hover,
+        .popup-close-button:focus {
+            color: black;
+            text-decoration: none;
+            cursor: pointer;
+        }
+        #popup-game-info {
+            font-size: 1.1em;
+            font-weight: bold;
+            margin-bottom: 15px;
+            text-align: center;
+            color: #333;
+        }
+        #popup-match-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-around;
+            font-size: 1.2em;
+            margin-bottom: 25px;
+        }
+        #popup-match-header img {
+            width: 40px;
+            height: 40px;
+            object-fit: contain;
+        }
+        #popup-match-header .team-name {
+            font-weight: bold;
+            margin: 0 10px;
+        }
+        #popup-match-header .score {
+            font-weight: bold;
+            font-size: 1.3em;
+            color: #007bff;
+        }
+
+        /* Timeline Styles */
+        #popup-timeline-container {
+            position: relative;
+            width: 100%;
+            height: 220px; /* Increased height for better spacing */
+            margin-top: 30px;
+            padding: 10px 0;
+        }
+        .timeline-axis {
+            position: absolute;
+            left: 5%; /* Margin for labels */
+            right: 5%; /* Margin for labels */
+            width: 90%;
+            top: 50%; /* Vertically center the axis */
+            height: 3px;
+            background-color: #555;
+            border-radius: 2px;
+        }
+        .timeline-static-marker {
+            position: absolute;
+            top: calc(50% + 10px); /* Below the axis */
+            transform: translateX(-50%);
+            font-size: 0.8em;
+            color: #666;
+        }
+        .timeline-static-marker::before { /* Tick on the axis */
+            content: '';
+            position: absolute;
+            width: 2px;
+            height: 8px;
+            background-color: #555;
+            bottom: 15px; /* From text up to axis */
+            left: 50%;
+            transform: translateX(-50%);
+        }
+
+        .timeline-event {
+            position: absolute;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            z-index: 10;
+            min-width: 60px; /* To prevent extreme narrowness */
+        }
+        .timeline-event-line {
+            width: 2px;
+            background-color: #333;
+        }
+        .timeline-event-details {
+            font-size: 0.8em;
+            text-align: center;
+            padding: 3px;
+            border-radius: 3px;
+            background-color: rgba(255, 255, 255, 0.8);
+            white-space: nowrap;
+        }
+        .timeline-event-details img.player-icon {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            display: block;
+            margin: 0 auto 3px auto;
+            border: 1px solid #ddd;
+        }
+        .timeline-event-details .goal-minute-text {
+            font-weight: bold;
+            display: block;
+        }
+        .timeline-event-details .player-name-text {
+            font-size: 0.9em;
+        }
+        .timeline-event-icon-ball {
+            width: 12px;
+            height: 12px;
+            background-color: red;
+            border-radius: 50%;
+            display: inline-block;
+            margin-right: 4px;
+        }
+
+        /* Scored Goal (Above Line) */
+        .timeline-event.scored {
+            bottom: calc(50% + 5px); /* Start above the axis */
+        }
+        .timeline-event.scored .timeline-event-line {
+            height: 40px; /* Length of line upwards */
+            background-color: green;
+        }
+        .timeline-event.scored .timeline-event-details {
+            position: absolute;
+            bottom: 45px; /* Above the line */
+            transform: translateX(-50%); /* Centering the details box */
+            left: 50%;
+        }
+
+        /* Conceded Goal (Below Line) */
+        .timeline-event.conceded {
+            top: calc(50% + 5px); /* Start below the axis */
+        }
+        .timeline-event.conceded .timeline-event-line {
+            height: 40px; /* Length of line downwards */
+            background-color: red;
+        }
+        .timeline-event.conceded .timeline-event-details {
+            position: absolute;
+            top: 45px; /* Below the line */
+            transform: translateX(-50%); /* Centering the details box */
+            left: 50%;
+        }
+
+
         @media (max-width: 768px) {
             .container { flex-direction: column; height: auto; }
             .column { flex-basis: auto !important; margin-bottom: 10px; height: auto; }
             .column.fullscreen { height: calc(100vh - 20px); }
             .stats-card-grid { grid-template-columns: 1fr; }
+            .popup-content { width: 95%; margin-top: 20px; }
+            #popup-match-header { flex-direction: column; gap: 10px; }
+            #popup-timeline-container { height: 250px; } /* More height on mobile */
         }
     </style>
 </head>
@@ -377,10 +559,46 @@
                         </div>
                     </div>
                 </div>
-                <div class="stat-category-card result-comum-card">
-                     <h4>Resultado Comum</h4>
-                     <div class="stat-item"><span class="stat-value" id="resultado-comum">-</span></div>
-                 </div>
+                
+                <!-- NEW/MODIFIED SECTION for Results and Extremes -->
+                <div class="stats-card-grid" style="grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));">
+                    <div class="stat-category-card" id="resultados-comuns-card">
+                        <h4>Resultados Comuns</h4>
+                        <div class="stat-item">
+                            <span class="stat-label">Geral:</span>
+                            <span class="stat-value" id="resultado-comum">-</span>
+                        </div>
+                        <div class="stat-item stat-item-group">
+                            <span class="stat-label">CASA:</span>
+                            <div class="stat-sub-item"><span class="stat-sub-label">Resultado Final:</span><span class="stat-sub-value stat-value" id="resultado-comum-casa-ft">-</span></div>
+                            <div class="stat-sub-item"><span class="stat-sub-label">Ao Intervalo:</span><span class="stat-sub-value stat-value" id="resultado-comum-casa-ht">-</span></div>
+                            <div class="stat-sub-item"><span class="stat-sub-label">Na 2ª Parte:</span><span class="stat-sub-value stat-value" id="resultado-comum-casa-2p">-</span></div>
+                        </div>
+                        <div class="stat-item stat-item-group">
+                            <span class="stat-label">FORA:</span>
+                            <div class="stat-sub-item"><span class="stat-sub-label">Resultado Final:</span><span class="stat-sub-value stat-value" id="resultado-comum-fora-ft">-</span></div>
+                            <div class="stat-sub-item"><span class="stat-sub-label">Ao Intervalo:</span><span class="stat-sub-value stat-value" id="resultado-comum-fora-ht">-</span></div>
+                            <div class="stat-sub-item"><span class="stat-sub-label">Na 2ª Parte:</span><span class="stat-sub-value stat-value" id="resultado-comum-fora-2p">-</span></div>
+                        </div>
+                    </div>
+                    <div class="stat-category-card" id="extremos-card">
+                        <h4>Extremos e Reviravoltas</h4>
+                        <div class="stat-item"><span class="stat-label">Melhor Resultado:</span><span class="stat-value" id="melhor-resultado">-</span></div>
+                        <div class="stat-item"><span class="stat-label">Pior Resultado:</span><span class="stat-value" id="pior-resultado">-</span></div>
+                        <div class="stat-item"><span class="stat-label">Maior Margem:</span><span class="stat-value" id="maior-margem">-</span></div>
+                        <div class="stat-item stat-item-group">
+                            <span class="stat-label">Reviravoltas a Favor:</span>
+                            <div class="stat-sub-item"><span class="stat-sub-label">Na 1ª Parte:</span><span class="stat-sub-value stat-value" id="reviravoltas-favor-1p">-</span></div>
+                            <div class="stat-sub-item"><span class="stat-sub-label">No Jogo:</span><span class="stat-sub-value stat-value" id="reviravoltas-favor-2p">-</span></div>
+                        </div>
+                        <div class="stat-item stat-item-group">
+                            <span class="stat-label">Reviravoltas Contra:</span>
+                            <div class="stat-sub-item"><span class="stat-sub-label">Na 1ª Parte:</span><span class="stat-sub-value stat-value" id="reviravoltas-contra-1p">-</span></div>
+                            <div class="stat-sub-item"><span class="stat-sub-label">No Jogo:</span><span class="stat-sub-value stat-value" id="reviravoltas-contra-2p">-</span></div>
+                        </div>
+                    </div>
+                </div>
+                <!-- END of NEW/MODIFIED SECTION -->
 
                 <h4>Golos por Minuto (Sporting)</h4>
                 <div id="golos-marcados-tempo-table-container"><h5>Golos Marcados por Tempo</h5></div>
@@ -433,6 +651,36 @@
         </div>
     </div>
 
+    <!-- Popup Modal Structure -->
+    <div id="game-details-popup" class="popup-modal">
+        <div class="popup-content">
+            <span class="popup-close-button">×</span>
+            <div id="popup-game-info"></div>
+            <div id="popup-match-header">
+                <span id="popup-home-team">
+                    <img id="popup-home-logo" src="" alt="Home Team Logo">
+                    <span class="team-name" id="popup-home-name"></span>
+                </span>
+                <span class="score" id="popup-score"></span>
+                <span id="popup-away-team">
+                    <span class="team-name" id="popup-away-name"></span>
+                    <img id="popup-away-logo" src="" alt="Away Team Logo">
+                </span>
+            </div>
+            <div id="popup-timeline-container">
+                <div class="timeline-axis"></div>
+                <!-- Static markers for reference -->
+                <span class="timeline-static-marker" style="left: calc(5% + (1/90 * 90%));">1'</span>
+                <span class="timeline-static-marker" style="left: calc(5% + (45/90 * 90%));">45'</span>
+                <span class="timeline-static-marker" style="left: calc(5% + (90/90 * 90%));">90'</span>
+                <div id="popup-timeline-events">
+                    <!-- Goal events will be dynamically added here -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js";
@@ -452,7 +700,7 @@
 
         const calendarioList = document.getElementById('calendario-list');
         const equipasList = document.getElementById('equipas-list');
-        const jogadoresList = document.getElementById('jogadores-list'); // Nova lista
+        const jogadoresList = document.getElementById('jogadores-list'); 
         let seasonDropdown = document.getElementById('season-dropdown');
         const jogosRealizadosSpan = document.getElementById('jogos-realizados');
         const vitoriasSpan = document.getElementById('vitorias');
@@ -490,13 +738,26 @@
         const DEFAULT_PLACEHOLDER_URL = 'https://via.placeholder.com/24x24.png?text=?';
 
         const column3HeaderTitle = document.getElementById('column3-header-title');
-        const column3DetailsTitle = document.getElementById('column3-details-title');
         const column3DetailsList = document.getElementById('column3-details-list');
         let currentSeasonForDetails = '';
 
         let globalTeamLogosMap = {};
         let globalPlayerImagesMap = {};
         let globalZoneMappingRules = {};
+
+        // Popup elements
+        const gameDetailsPopup = document.getElementById('game-details-popup');
+        const popupCloseButton = gameDetailsPopup.querySelector('.popup-close-button');
+        const popupGameInfo = document.getElementById('popup-game-info');
+        const popupHomeLogo = document.getElementById('popup-home-logo');
+        const popupHomeName = document.getElementById('popup-home-name');
+        const popupScore = document.getElementById('popup-score');
+        const popupAwayName = document.getElementById('popup-away-name');
+        const popupAwayLogo = document.getElementById('popup-away-logo');
+        const popupTimelineEventsContainer = document.getElementById('popup-timeline-events');
+
+        const TIMELINE_MAX_MINUTE = 100; // Max minutes for timeline scaling (e.g., 90 + 10 for stoppage)
+
 
         async function fetchAllGames() { try {const gamesCol=collection(db,'jogos');const gamesSnapshot=await getDocs(gamesCol);allGames=gamesSnapshot.docs.map(doc=>({id:doc.id,...doc.data()})); console.log("Fetched all games:", allGames.length); return allGames;}catch(error){console.error("Error fetching games:",error);calendarioList.innerHTML='<li>Erro ao carregar jogos.</li>';return[];}}
         async function fetchAllTeams() { try {const teamsCol=collection(db,'clubes');const teamsSnapshot=await getDocs(teamsCol);allTeams=teamsSnapshot.docs.map(doc=>({id:doc.id,...doc.data()}));return allTeams;}catch(error){console.error("Error fetching teams:",error);equipasList.innerHTML='<li>Erro ao carregar equipas.</li>';return[];}}
@@ -530,6 +791,23 @@
         function populateSeasonDropdown(games) { const seasons=[...new Set(games.map(game=>game.temporada).filter(Boolean))];seasons.sort((a,b)=>b.localeCompare(a));seasonDropdown.innerHTML='';const allSeasonsOption=document.createElement('option');allSeasonsOption.value="ALL_SEASONS";allSeasonsOption.textContent="Todas as Temporadas";seasonDropdown.appendChild(allSeasonsOption); if(seasons.length===0&&games.length>0){const noSeasonOption=document.createElement('option');noSeasonOption.value="NO_SEASON_DATA";noSeasonOption.textContent="Jogos sem temporada";seasonDropdown.appendChild(noSeasonOption);loadStatsForSeason("NO_SEASON_DATA");return;}else if(seasons.length===0){seasonDropdown.innerHTML='<option value="">Sem temporadas</option>';loadStatsForSeason(null);return;} seasons.forEach(season=>{const option=document.createElement('option');option.value=season;option.textContent=season;seasonDropdown.appendChild(option);}); seasonDropdown.value="ALL_SEASONS";loadStatsForSeason("ALL_SEASONS"); const newSeasonDropdown=seasonDropdown.cloneNode(true);seasonDropdown.parentNode.replaceChild(newSeasonDropdown,seasonDropdown);seasonDropdown=newSeasonDropdown; seasonDropdown.addEventListener('change',(e)=>loadStatsForSeason(e.target.value));}
         function loadStatsForSeason(seasonValue) { console.log("loadStatsForSeason - seasonValue:", seasonValue); let gamesToAnalyze=[];if(!seasonValue){gamesToAnalyze=[];}else if(seasonValue==="ALL_SEASONS"){gamesToAnalyze=allGames;currentSeasonForDetails="Todas as Temporadas";}else if(seasonValue==="NO_SEASON_DATA"){gamesToAnalyze=allGames.filter(game=>!game.temporada);currentSeasonForDetails="Jogos sem temporada";}else{gamesToAnalyze=allGames.filter(game=>game.temporada===seasonValue);currentSeasonForDetails=seasonValue;} console.log("loadStatsForSeason - gamesToAnalyze count:", gamesToAnalyze.length); calculateAndDisplayStats(gamesToAnalyze);}
 
+        function getMode(arr) {
+            if (arr.length === 0) return '-';
+            const freqMap = {};
+            let maxFreq = 0;
+            let modes = [];
+            arr.forEach(item => {
+                freqMap[item] = (freqMap[item] || 0) + 1;
+                if (freqMap[item] > maxFreq) {
+                    maxFreq = freqMap[item];
+                    modes = [item];
+                } else if (freqMap[item] === maxFreq && !modes.includes(item)) {
+                    modes.push(item);
+                }
+            });
+            return maxFreq > 1 ? modes.join(', ') : '-';
+        }
+
         function calculateAndDisplayStats(gamesInSeason) {
             console.log("calculateAndDisplayStats - gamesInSeason count:", gamesInSeason.length);
             globalTeamLogosMap=Object.fromEntries(allTeams.map(team=>[team.nome,team.logo]));globalPlayerImagesMap=Object.fromEntries(allPlayers.map(player=>[player.nome_jogador,player.imagem_link]));
@@ -542,11 +820,101 @@
             let jogosAMarcar=0,jogosSemMarcar=0,jogosASofrer=0,jogosSemSofrer=0;gamesInSeason.forEach(game=>{const sportingScored=(game.sportingGolosMarcados1P||0)+(game.sportingGolosMarcados2P||0)>0;const sportingConceded=(game.sportingGolosSofridos1P||0)+(game.sportingGolosSofridos2P||0)>0;if(sportingScored)jogosAMarcar++;else jogosSemMarcar++;if(sportingConceded)jogosASofrer++;else jogosSemSofrer++;});jogosAMarcarSpan.textContent=jogosAMarcar;jogosSemMarcarSpan.textContent=jogosSemMarcar;jogosASofrerSpan.textContent=jogosASofrer;jogosSemSofrerSpan.textContent=jogosSemSofrer;
             let totalGolosMarcados1P=0,totalGolosMarcados2P=0,totalGolosSofridos1P=0,totalGolosSofridos2P=0;gamesInSeason.forEach(game=>{totalGolosMarcados1P+=game.sportingGolosMarcados1P||0;totalGolosMarcados2P+=game.sportingGolosMarcados2P||0;totalGolosSofridos1P+=game.sportingGolosSofridos1P||0;totalGolosSofridos2P+=game.sportingGolosSofridos2P||0;});const totalGolosMarcados=totalGolosMarcados1P+totalGolosMarcados2P;const totalGolosSofridos=totalGolosSofridos1P+totalGolosSofridos2P;golosMarcadosTotalSpan.textContent=totalGolosMarcados;golosMarcados1PSpan.textContent=totalGolosMarcados1P;golosMarcados2PSpan.textContent=totalGolosMarcados2P;golosSofridosTotalSpan.textContent=totalGolosSofridos;golosSofridos1PSpan.textContent=totalGolosSofridos1P;golosSofridos2PSpan.textContent=totalGolosSofridos2P;
             mediaGolosMarcadosSpan.textContent=numGames>0?(totalGolosMarcados/numGames).toFixed(2):'0.00';mediaGolosMarcados1PSpan.textContent=numGames>0?(totalGolosMarcados1P/numGames).toFixed(2):'0.00';mediaGolosMarcados2PSpan.textContent=numGames>0?(totalGolosMarcados2P/numGames).toFixed(2):'0.00';mediaGolosSofridosSpan.textContent=numGames>0?(totalGolosSofridos/numGames).toFixed(2):'0.00';mediaGolosSofridos1PSpan.textContent=numGames>0?(totalGolosSofridos1P/numGames).toFixed(2):'0.00';mediaGolosSofridos2PSpan.textContent=numGames>0?(totalGolosSofridos2P/numGames).toFixed(2):'0.00';
-            const freqMap={};let maxFreq=0;let modo="-";gamesInSeason.forEach(game=>{if(game.resultadoFinal){freqMap[game.resultadoFinal]=(freqMap[game.resultadoFinal]||0)+1;if(freqMap[game.resultadoFinal]>maxFreq){maxFreq=freqMap[game.resultadoFinal];modo=game.resultadoFinal;}else if(freqMap[game.resultadoFinal]===maxFreq&&!modo.includes(game.resultadoFinal)){modo+=`, ${game.resultadoFinal}`;}}});resultadoComumSpan.textContent=maxFreq>0?modo:'-';
-            document.querySelectorAll('.stat-value').forEach(span=>{if(span.id){const statId=span.id;if(!span.closest('.stat-item-group .stat-sub-item')&&!span.classList.contains('main-stat-value')){if(document.getElementById(statId)&&!statId.includes('1p')&&!statId.includes('2p')){span.classList.add('clickable-stat');span.dataset.statType=statId;}}
-            if(span.classList.contains('main-stat-value')){span.classList.add('clickable-stat');span.dataset.statType=statId;}
-            if(span.id.endsWith('-1p')||span.id.endsWith('-2p')){span.classList.add('clickable-stat');span.dataset.statType=statId;}}});
-            if(resultadoComumSpan){resultadoComumSpan.classList.add('clickable-stat');resultadoComumSpan.dataset.statType='resultado-comum';}
+            
+            // --- START of New Calculations ---
+            const freqMap={};let maxFreq=0;let modo="-";gamesInSeason.forEach(game=>{if(game.resultadoFinal){freqMap[game.resultadoFinal]=(freqMap[game.resultadoFinal]||0)+1;if(freqMap[game.resultadoFinal]>maxFreq){maxFreq=freqMap[game.resultadoFinal];modo=game.resultadoFinal;}else if(freqMap[game.resultadoFinal]===maxFreq&&!modo.includes(game.resultadoFinal)){modo+=`, ${game.resultadoFinal}`;}}});resultadoComumSpan.textContent=maxFreq>1?modo:'-';
+            const homeGames = gamesInSeason.filter(g => g.clubeCasaNome && g.clubeCasaNome.toLowerCase().includes('sporting'));
+            const awayGames = gamesInSeason.filter(g => g.clubeForaNome && g.clubeForaNome.toLowerCase().includes('sporting'));
+            const homeFTResults = homeGames.map(g => g.resultadoFinal).filter(Boolean);
+            const awayFTResults = awayGames.map(g => g.resultadoFinal).filter(Boolean);
+            document.getElementById('resultado-comum-casa-ft').textContent = getMode(homeFTResults);
+            document.getElementById('resultado-comum-fora-ft').textContent = getMode(awayFTResults);
+            const getHTResult = g => `${g.sportingGolosMarcados1P || 0}-${g.sportingGolosSofridos1P || 0}`;
+            const homeHTResults = homeGames.map(getHTResult);
+            const awayHTResults = awayGames.map(getHTResult);
+            document.getElementById('resultado-comum-casa-ht').textContent = getMode(homeHTResults);
+            document.getElementById('resultado-comum-fora-ht').textContent = getMode(awayHTResults);
+            const get2PResult = g => `${g.sportingGolosMarcados2P || 0}-${g.sportingGolosSofridos2P || 0}`;
+            const home2PResults = homeGames.map(get2PResult);
+            const away2PResults = awayGames.map(get2PResult);
+            document.getElementById('resultado-comum-casa-2p').textContent = getMode(home2PResults);
+            document.getElementById('resultado-comum-fora-2p').textContent = getMode(away2PResults);
+
+            let melhorResultado = '-', piorResultado = '-', maiorMargem = 0, menorMargem = 0;
+            let jogosMaiorMargem = [], jogosPiorResultado = [];
+            let reviravoltasFavor1P = 0, reviravoltasFavor2P = 0, reviravoltasContra1P = 0, reviravoltasContra2P = 0;
+            let gamesReviravoltaFavor1P = [], gamesReviravoltaFavor2P = [], gamesReviravoltaContra1P = [], gamesReviravoltaContra2P = [];
+
+            if (gamesInSeason.length > 0) {
+                gamesInSeason.forEach(game => {
+                    const totalMarcados = (game.sportingGolosMarcados1P || 0) + (game.sportingGolosMarcados2P || 0);
+                    const totalSofridos = (game.sportingGolosSofridos1P || 0) + (game.sportingGolosSofridos2P || 0);
+                    const margem = totalMarcados - totalSofridos;
+                    if (jogosMaiorMargem.length === 0) { maiorMargem = margem; menorMargem = margem; }
+                    if (margem > maiorMargem) { maiorMargem = margem; jogosMaiorMargem = [game.id]; } else if (margem === maiorMargem) { jogosMaiorMargem.push(game.id); }
+                    if (margem < menorMargem) { menorMargem = margem; jogosPiorResultado = [game.id]; } else if (margem === menorMargem) { jogosPiorResultado.push(game.id); }
+
+                    const htMarcados = game.sportingGolosMarcados1P || 0;
+                    const htSofridos = game.sportingGolosSofridos1P || 0;
+                    const ftEstado = game.resultadoEstadoSporting;
+                    if (htMarcados < htSofridos && (ftEstado === "V (Vitória)" || ftEstado === "E (Empate)")) { reviravoltasFavor2P++; gamesReviravoltaFavor2P.push(game.id); }
+                    if (htMarcados > htSofridos && (ftEstado === "D (Derrota)" || ftEstado === "E (Empate)")) { reviravoltasContra2P++; gamesReviravoltaContra2P.push(game.id); }
+                    const goals1P = [];
+                    (game.golosMarcadosSportingMinutos || []).forEach(g => { const minute = getCleanMinute(g); if (minute !== null && minute <= 45) goals1P.push({ minute, type: 'scored' }); });
+                    (game.golosSofridosSportingMinutos || []).forEach(g => { const minute = getCleanMinute(g); if (minute !== null && minute <= 45) goals1P.push({ minute, type: 'conceded' }); });
+                    goals1P.sort((a, b) => a.minute - b.minute);
+                    let wasLosing1P = false, wasWinning1P = false, scoreSporting = 0, scoreOpponent = 0;
+                    for (const goal of goals1P) {
+                        if (goal.type === 'scored') scoreSporting++; else scoreOpponent++;
+                        if (scoreSporting < scoreOpponent) wasLosing1P = true;
+                        if (scoreSporting > scoreOpponent) wasWinning1P = true;
+                    }
+                    if (wasLosing1P && htMarcados >= htSofridos && goals1P.length > 0) { reviravoltasFavor1P++; gamesReviravoltaFavor1P.push(game.id); }
+                    if (wasWinning1P && htMarcados <= htSofridos && goals1P.length > 0) { reviravoltasContra1P++; gamesReviravoltaContra1P.push(game.id); }
+                });
+                const melhorJogo = allGames.find(g => g.id === jogosMaiorMargem[0]);
+                const piorJogo = allGames.find(g => g.id === jogosPiorResultado[0]);
+                document.getElementById('melhor-resultado').textContent = melhorJogo ? melhorJogo.resultadoFinal : '-';
+                document.getElementById('pior-resultado').textContent = piorJogo ? piorJogo.resultadoFinal : '-';
+                document.getElementById('maior-margem').textContent = maiorMargem > 0 ? `+${maiorMargem}` : maiorMargem;
+            } else {
+                document.getElementById('melhor-resultado').textContent = '-';
+                document.getElementById('pior-resultado').textContent = '-';
+                document.getElementById('maior-margem').textContent = '-';
+            }
+            document.getElementById('reviravoltas-favor-1p').textContent = reviravoltasFavor1P;
+            document.getElementById('reviravoltas-favor-2p').textContent = reviravoltasFavor2P;
+            document.getElementById('reviravoltas-contra-1p').textContent = reviravoltasContra1P;
+            document.getElementById('reviravoltas-contra-2p').textContent = reviravoltasContra2P;
+            document.getElementById('melhor-resultado').dataset.gameIds = jogosMaiorMargem.join(',');
+            document.getElementById('pior-resultado').dataset.gameIds = jogosPiorResultado.join(',');
+            document.getElementById('maior-margem').dataset.gameIds = jogosMaiorMargem.join(',');
+            document.getElementById('reviravoltas-favor-1p').dataset.gameIds = gamesReviravoltaFavor1P.join(',');
+            document.getElementById('reviravoltas-favor-2p').dataset.gameIds = gamesReviravoltaFavor2P.join(',');
+            document.getElementById('reviravoltas-contra-1p').dataset.gameIds = gamesReviravoltaContra1P.join(',');
+            document.getElementById('reviravoltas-contra-2p').dataset.gameIds = gamesReviravoltaContra2P.join(',');
+            // --- END of New Calculations ---
+
+            document.querySelectorAll('.stat-value').forEach(span=>{
+                const clickableIds = [
+                    'jogos-realizados', 'vitorias', 'empates', 'derrotas', 'jogos-a-marcar',
+                    'jogos-sem-marcar', 'jogos-a-sofrer', 'jogos-sem-sofrer', 'resultado-comum',
+                    'golos-marcados-total', 'golos-marcados-1p', 'golos-marcados-2p',
+                    'golos-sofridos-total', 'golos-sofridos-1p', 'golos-sofridos-2p',
+                    'media-golos-marcados', 'media-golos-marcados-1p', 'media-golos-marcados-2p',
+                    'media-golos-sofridos', 'media-golos-sofridos-1p', 'media-golos-sofridos-2p',
+                    'resultado-comum-casa-ft', 'resultado-comum-casa-ht', 'resultado-comum-casa-2p',
+                    'resultado-comum-fora-ft', 'resultado-comum-fora-ht', 'resultado-comum-fora-2p',
+                    'melhor-resultado', 'pior-resultado', 'maior-margem',
+                    'reviravoltas-favor-1p', 'reviravoltas-favor-2p',
+                    'reviravoltas-contra-1p', 'reviravoltas-contra-2p'
+                ];
+                if(span.id && clickableIds.includes(span.id)){
+                    span.classList.add('clickable-stat');
+                    span.dataset.statType=span.id;
+                }
+            });
+            
             const {marcadosPorTempo,sofridosPorTempo}=aggregateGoalsByTime(gamesInSeason);displayGoalsByTimeTable(marcadosPorTempo,golosMarcadosTempoTableContainer,"Golos Marcados por Tempo");displayGoalsByTimeTable(sofridosPorTempo,golosSofridosTempoTableContainer,"Golos Sofridos por Tempo");
             const {marcadosPorZona,sofridosPorZona}=aggregateGoalsByZone(gamesInSeason);displayGoalsByZoneTable(marcadosPorZona,golosMarcadosZonaTableContainer,"Zonas da Baliza - Golos Marcados");displayGoalsByZoneTable(sofridosPorZona,golosSofridosZonaTableContainer,"Zonas da Baliza - Golos Sofridos");
             if(seasonDropdown.value==="ALL_SEASONS"){if(performanceChartInstance){performanceChartInstance.destroy();performanceChartInstance=null;}performanceChartCanvas.style.display='none';const chartContainer=performanceChartCanvas.parentNode;let msgElement=chartContainer.querySelector('.chart-message');if(!msgElement){msgElement=document.createElement('p');msgElement.className='chart-message';chartContainer.insertBefore(msgElement,performanceChartCanvas);}msgElement.textContent="Gráfico de desempenho por jornada é mais relevante para uma única temporada.";msgElement.style.display='block';}else{const chartContainer=performanceChartCanvas.parentNode;const msgElement=chartContainer.querySelector('.chart-message');if(msgElement)msgElement.style.display='none';performanceChartCanvas.style.display='block';const performanceData=getPerformanceByJornada(gamesInSeason);renderPerformanceGraph(performanceData);}
@@ -559,14 +927,26 @@
         
         function getGoalMinuteValue(goalObject) {
             if (!goalObject) return undefined;
-            if (goalObject.details && goalObject.details.minute !== undefined) {
-                return goalObject.details.minute;
-            }
-            if (goalObject.minute !== undefined) {
-                return goalObject.minute;
-            }
+            if (goalObject.details && goalObject.details.minute !== undefined) { return goalObject.details.minute; }
+            if (goalObject.minute !== undefined) { return goalObject.minute; }
             return undefined;
         }
+
+        function getCleanMinute(goal) {
+            const minuteStr = getGoalMinuteValue(goal);
+            if (minuteStr === undefined || minuteStr === null) return null;
+            const minuteVal = String(minuteStr); 
+            if (minuteVal.includes('+')) {
+                const parts = minuteVal.split('+');
+                const baseMinute = parseInt(parts[0], 10);
+                const additionalMinute = parseInt(parts[1] || '0', 10);
+                if (!isNaN(baseMinute) && !isNaN(additionalMinute)) { return baseMinute + additionalMinute; }
+                return isNaN(baseMinute) ? null : baseMinute;
+            }
+            const parsedMin = parseInt(minuteVal, 10);
+            return isNaN(parsedMin) ? null : parsedMin;
+        }
+
 
         function aggregateGoalsByTime(gamesInSeason) {
             const timeIntervals = ["0-15", "15-30", "30-45", "45-60", "60-75", "75-90"];
@@ -575,31 +955,25 @@
 
             gamesInSeason.forEach(game => {
                 (game.golosMarcadosSportingMinutos || []).forEach(goal => {
-                    const minuteValue = getGoalMinuteValue(goal);
-                    if (minuteValue !== undefined) {
-                        const minute = parseInt(minuteValue, 10);
-                        if (!isNaN(minute)) {
-                            if (minute >= 0 && minute <= 15) marcadosPorTempo["0-15"]++;
-                            else if (minute > 15 && minute <= 30) marcadosPorTempo["15-30"]++;
-                            else if (minute > 30 && minute <= 45) marcadosPorTempo["30-45"]++;
-                            else if (minute > 45 && minute <= 60) marcadosPorTempo["45-60"]++;
-                            else if (minute > 60 && minute <= 75) marcadosPorTempo["60-75"]++;
-                            else if (minute > 75 && minute <= 90) marcadosPorTempo["75-90"]++;
-                        }
+                    const minute = getCleanMinute(goal);
+                    if (minute !== null) {
+                        if (minute >= 0 && minute <= 15) marcadosPorTempo["0-15"]++;
+                        else if (minute > 15 && minute <= 30) marcadosPorTempo["15-30"]++;
+                        else if (minute > 30 && minute <= 45) marcadosPorTempo["30-45"]++;
+                        else if (minute > 45 && minute <= 60) marcadosPorTempo["45-60"]++; 
+                        else if (minute > 60 && minute <= 75) marcadosPorTempo["60-75"]++;
+                        else if (minute > 75) marcadosPorTempo["75-90"]++;
                     }
                 });
                 (game.golosSofridosSportingMinutos || []).forEach(goal => {
-                    const minuteValue = getGoalMinuteValue(goal);
-                    if (minuteValue !== undefined) {
-                        const minute = parseInt(minuteValue, 10);
-                        if (!isNaN(minute)) {
-                            if (minute >= 0 && minute <= 15) sofridosPorTempo["0-15"]++;
-                            else if (minute > 15 && minute <= 30) sofridosPorTempo["15-30"]++;
-                            else if (minute > 30 && minute <= 45) sofridosPorTempo["30-45"]++;
-                            else if (minute > 45 && minute <= 60) sofridosPorTempo["45-60"]++;
-                            else if (minute > 60 && minute <= 75) sofridosPorTempo["60-75"]++;
-                            else if (minute > 75 && minute <= 90) sofridosPorTempo["75-90"]++;
-                        }
+                    const minute = getCleanMinute(goal);
+                    if (minute !== null) {
+                        if (minute >= 0 && minute <= 15) sofridosPorTempo["0-15"]++;
+                        else if (minute > 15 && minute <= 30) sofridosPorTempo["15-30"]++;
+                        else if (minute > 30 && minute <= 45) sofridosPorTempo["30-45"]++;
+                        else if (minute > 45 && minute <= 60) sofridosPorTempo["45-60"]++;
+                        else if (minute > 60 && minute <= 75) sofridosPorTempo["60-75"]++;
+                        else if (minute > 75) sofridosPorTempo["75-90"]++;
                     }
                 });
             });
@@ -668,7 +1042,7 @@
             const sofridosPorZona = Object.fromEntries(globalZoneMappingRules.canonicalZones.map(zone => [zone, 0]));
             gamesInSeason.forEach(game => {
                 (game.golosMarcadosSportingMinutos || []).forEach(goal => {
-                    const zonaValue = goal?.details?.zona || goal?.zona; // Considera ambas estruturas
+                    const zonaValue = goal?.details?.zona || goal?.zona; 
                     if (zonaValue) {
                         const targetZone = globalZoneMappingRules[zonaValue] || zonaValue;
                         if (targetZone && marcadosPorZona.hasOwnProperty(targetZone)) marcadosPorZona[targetZone]++;
@@ -676,7 +1050,7 @@
                     }
                 });
                 (game.golosSofridosSportingMinutos || []).forEach(goal => {
-                     const zonaValue = goal?.details?.zona || goal?.zona; // Considera ambas estruturas
+                     const zonaValue = goal?.details?.zona || goal?.zona; 
                     if (zonaValue) {
                         const targetZone = globalZoneMappingRules[zonaValue] || zonaValue;
                         if (targetZone && sofridosPorZona.hasOwnProperty(targetZone)) sofridosPorZona[targetZone]++;
@@ -766,14 +1140,30 @@
                 return;
             }
             items.forEach(item => {
-                const listItemHtml = itemRenderer(item);
+                const listItemHtml = itemRenderer(item); 
                 if (listItemHtml) {
-                    column3DetailsList.insertAdjacentHTML('beforeend', listItemHtml);
+                     column3DetailsList.insertAdjacentHTML('beforeend', listItemHtml);
                 }
             });
         }
-        function renderGameListItem(gameData) { const logoCasa=globalTeamLogosMap[gameData.clubeCasaNome]||DEFAULT_PLACEHOLDER_URL;const logoFora=globalTeamLogosMap[gameData.clubeForaNome]||DEFAULT_PLACEHOLDER_URL;const resultado=gameData.resultadoFinal||'-'; return`<li class="detailed-list-item game-item"><div class="game-item-header">Jornada ${gameData.jornada||'N/A'} (${gameData.temporada||'N/A'})</div><div class="game-item-matchup"><img src="${logoCasa}" class="stats-item-logo" alt="${gameData.clubeCasaNome||''}"> <span>${gameData.clubeCasaNome||'Casa'}</span><span class="game-item-score">${resultado}</span><span>${gameData.clubeForaNome||'Fora'}</span> <img src="${logoFora}" class="stats-item-logo" alt="${gameData.clubeForaNome||''}"></div></li>`;}
-        function renderGoalListItem(goalDetail) { const {goal,game}=goalDetail;const jogadorNome=goal.details?.jogadorNome||goal.jogadorNome||'Golo do Sporting';const minuto=getGoalMinuteValue(goal)||'?';const tipoGolo=goal.details?.tipoGolo||goal.tipoGolo||'';const zonaGolo=goal.details?.zona||goal.zona||'';const resultadoDoJogo=game.resultadoFinal||'-'; let playerImgHtml=`<img src="${DEFAULT_PLACEHOLDER_URL}" class="stats-item-logo" alt="${jogadorNome}">`;if(globalPlayerImagesMap[jogadorNome]){playerImgHtml=`<img src="${globalPlayerImagesMap[jogadorNome]}" class="stats-item-logo" alt="${jogadorNome}">`;} const logoCasa=globalTeamLogosMap[game.clubeCasaNome]||DEFAULT_PLACEHOLDER_URL;const logoFora=globalTeamLogosMap[game.clubeForaNome]||DEFAULT_PLACEHOLDER_URL; return`<li class="detailed-list-item goal-item"><div class="goal-item-header">Jornada ${game.jornada||'N/A'} (${game.temporada||'N/A'}) | <img src="${logoCasa}" class="stats-item-logo-small" alt="${game.clubeCasaNome||''}"> ${game.clubeCasaNome||''} <span class="game-item-score">${resultadoDoJogo}</span> ${game.clubeForaNome||''} <img src="${logoFora}" class="stats-item-logo-small" alt="${game.clubeForaNome||''}"></div><div class="goal-item-details">${playerImgHtml} <span class="goal-player-name">${jogadorNome}</span> <span class="goal-minute">(${minuto}')</span> ${tipoGolo?`<span class="goal-type">Tipo: ${tipoGolo}</span>`:''} ${zonaGolo?`<span class="goal-zone">Zona: ${zonaGolo}</span>`:''}</div></li>`;}
+        
+        function renderGameListItem(gameData) {
+            const logoCasa = globalTeamLogosMap[gameData.clubeCasaNome] || DEFAULT_PLACEHOLDER_URL;
+            const logoFora = globalTeamLogosMap[gameData.clubeForaNome] || DEFAULT_PLACEHOLDER_URL;
+            const resultado = gameData.resultadoFinal || '-';
+            return `<li class="detailed-list-item game-item" data-game-id="${gameData.id}">
+                        <div class="game-item-header">Jornada ${gameData.jornada || 'N/A'} (${gameData.temporada || 'N/A'})</div>
+                        <div class="game-item-matchup">
+                            <img src="${logoCasa}" class="stats-item-logo" alt="${gameData.clubeCasaNome || ''}" onerror="this.onerror=null;this.src='${DEFAULT_PLACEHOLDER_URL}';"> 
+                            <span>${gameData.clubeCasaNome || 'Casa'}</span>
+                            <span class="game-item-score">${resultado}</span>
+                            <span>${gameData.clubeForaNome || 'Fora'}</span> 
+                            <img src="${logoFora}" class="stats-item-logo" alt="${gameData.clubeForaNome || ''}" onerror="this.onerror=null;this.src='${DEFAULT_PLACEHOLDER_URL}';">
+                        </div>
+                    </li>`;
+        }
+
+        function renderGoalListItem(goalDetail) { const {goal,game}=goalDetail;const jogadorNome=goal.details?.jogadorNome||goal.jogadorNome||'Golo do Sporting';const minuto=getGoalMinuteValue(goal)||'?';const tipoGolo=goal.details?.tipoGolo||goal.tipoGolo||'';const zonaGolo=goal.details?.zona||goal.zona||'';const resultadoDoJogo=game.resultadoFinal||'-'; let playerImgHtml=`<img src="${DEFAULT_PLACEHOLDER_URL}" class="stats-item-logo" alt="${jogadorNome}" onerror="this.onerror=null;this.src='${DEFAULT_PLACEHOLDER_URL}';">`;if(globalPlayerImagesMap[jogadorNome]){playerImgHtml=`<img src="${globalPlayerImagesMap[jogadorNome]}" class="stats-item-logo" alt="${jogadorNome}" onerror="this.onerror=null;this.src='${DEFAULT_PLACEHOLDER_URL}';">`;} const logoCasa=globalTeamLogosMap[game.clubeCasaNome]||DEFAULT_PLACEHOLDER_URL;const logoFora=globalTeamLogosMap[game.clubeForaNome]||DEFAULT_PLACEHOLDER_URL; return`<li class="detailed-list-item goal-item"><div class="goal-item-header">Jornada ${game.jornada||'N/A'} (${game.temporada||'N/A'}) | <img src="${logoCasa}" class="stats-item-logo-small" alt="${game.clubeCasaNome||''}" onerror="this.onerror=null;this.src='${DEFAULT_PLACEHOLDER_URL}';"> ${game.clubeCasaNome||''} <span class="game-item-score">${resultadoDoJogo}</span> ${game.clubeForaNome||''} <img src="${logoFora}" class="stats-item-logo-small" alt="${game.clubeForaNome||''}" onerror="this.onerror=null;this.src='${DEFAULT_PLACEHOLDER_URL}';"></div><div class="goal-item-details">${playerImgHtml} <span class="goal-player-name">${jogadorNome}</span> <span class="goal-minute">(${minuto}')</span> ${tipoGolo?`<span class="goal-type">Tipo: ${tipoGolo}</span>`:''} ${zonaGolo?`<span class="goal-zone">Zona: ${zonaGolo}</span>`:''}</div></li>`;}
         
         function getAllGoalsFromGames(gamesList, goalTypeStr) {
             const allGoals = [];
@@ -792,6 +1182,44 @@
         function setupTabs() { const tabButtons=document.querySelectorAll('.tab-button');const tabContents=document.querySelectorAll('.tab-content');tabButtons.forEach(button=>{button.addEventListener('click',()=>{tabButtons.forEach(btn=>btn.classList.remove('active'));button.classList.add('active');tabContents.forEach(content=>content.classList.remove('active'));document.getElementById(button.dataset.tab).classList.add('active');});});}
         function setupColumnControls() { const expandButtons=document.querySelectorAll('.btn-expand');const minimizeButtons=document.querySelectorAll('.btn-minimize');const columns=document.querySelectorAll('.column');expandButtons.forEach(button=>{button.addEventListener('click',()=>{const targetColumnId=button.dataset.target;columns.forEach(col=>{if(col.id===targetColumnId){col.classList.add('fullscreen');col.querySelector('.btn-expand').style.display='none';col.querySelector('.btn-minimize').style.display='inline-block';}else col.classList.add('hidden');});});});minimizeButtons.forEach(button=>{button.addEventListener('click',()=>{const targetColumnId=button.dataset.target;const targetColumn=document.getElementById(targetColumnId);targetColumn.classList.remove('fullscreen');targetColumn.querySelector('.btn-expand').style.display='inline-block';targetColumn.querySelector('.btn-minimize').style.display='none';columns.forEach(col=>{if(col.id!==targetColumnId)col.classList.remove('hidden');});});});}
 
+        function showGameDetailsPopup(gameData) {
+            popupGameInfo.textContent = `Temporada ${gameData.temporada || 'N/A'} - Jornada ${gameData.jornada || 'N/A'}`;
+            popupHomeLogo.src = globalTeamLogosMap[gameData.clubeCasaNome] || DEFAULT_PLACEHOLDER_URL;
+            popupHomeLogo.alt = gameData.clubeCasaNome || 'Casa';
+            popupHomeName.textContent = gameData.clubeCasaNome || 'Casa';
+            popupScore.textContent = gameData.resultadoFinal || '-';
+            popupAwayLogo.src = globalTeamLogosMap[gameData.clubeForaNome] || DEFAULT_PLACEHOLDER_URL;
+            popupAwayLogo.alt = gameData.clubeForaNome || 'Fora';
+            popupAwayName.textContent = gameData.clubeForaNome || 'Fora';
+            popupTimelineEventsContainer.innerHTML = '';
+            (gameData.golosMarcadosSportingMinutos || []).forEach(goal => {
+                const minute = getCleanMinute(goal);
+                const originalMinuteStr = getGoalMinuteValue(goal) || '?';
+                if (minute === null) return;
+                const playerNome = goal.details?.jogadorNome || goal.jogadorNome || 'Sporting';
+                const playerImgSrc = globalPlayerImagesMap[playerNome] || DEFAULT_PLACEHOLDER_URL;
+                const eventDiv = document.createElement('div');
+                eventDiv.className = 'timeline-event scored';
+                const positionPercent = (Math.min(minute, TIMELINE_MAX_MINUTE) / TIMELINE_MAX_MINUTE) * 100;
+                eventDiv.style.left = `calc(5% + ${positionPercent / 100 * 90}% - 1px)`;
+                eventDiv.innerHTML = `<div class="timeline-event-details"><img src="${playerImgSrc}" alt="${playerNome}" class="player-icon" onerror="this.onerror=null;this.src='${DEFAULT_PLACEHOLDER_URL}';"><span class="player-name-text">${playerNome}</span><span class="goal-minute-text">${originalMinuteStr}'</span></div><div class="timeline-event-line"></div>`;
+                popupTimelineEventsContainer.appendChild(eventDiv);
+            });
+            (gameData.golosSofridosSportingMinutos || []).forEach(goal => {
+                const minute = getCleanMinute(goal);
+                const originalMinuteStr = getGoalMinuteValue(goal) || '?';
+                if (minute === null) return;
+                const eventDiv = document.createElement('div');
+                eventDiv.className = 'timeline-event conceded';
+                const positionPercent = (Math.min(minute, TIMELINE_MAX_MINUTE) / TIMELINE_MAX_MINUTE) * 100;
+                eventDiv.style.left = `calc(5% + ${positionPercent / 100 * 90}% - 1px)`;
+                eventDiv.innerHTML = `<div class="timeline-event-line"></div><div class="timeline-event-details"><span class="timeline-event-icon-ball"></span><span class="goal-minute-text">${originalMinuteStr}'</span></div>`;
+                popupTimelineEventsContainer.appendChild(eventDiv);
+            });
+            gameDetailsPopup.style.display = 'block';
+        }
+
+
         document.getElementById('column2').addEventListener('click', function(event) {
             const statElement = event.target.closest('.clickable-stat');
             if (!statElement) return;
@@ -805,6 +1233,8 @@
             } else {
                 gamesOfCurrentSeason = allGames.filter(g => g.temporada === seasonDropdown.value);
             }
+            const homeGames = gamesOfCurrentSeason.filter(g => g.clubeCasaNome && g.clubeCasaNome.toLowerCase().includes('sporting'));
+            const awayGames = gamesOfCurrentSeason.filter(g => g.clubeForaNome && g.clubeForaNome.toLowerCase().includes('sporting'));
 
             const statType = statElement.dataset.statType;
             let detailTitle = "";
@@ -822,115 +1252,38 @@
                 case 'jogos-a-sofrer': detailTitle = `Jogos a Sofrer (${currentSeasonForDetails})`; detailItems = gamesOfCurrentSeason.filter(g => (g.sportingGolosSofridos1P || 0) + (g.sportingGolosSofridos2P || 0) > 0); detailItems.sort(comparadorDeJogosEGolos); detailItemRenderer = renderGameListItem; break;
                 case 'jogos-sem-sofrer': detailTitle = `Jogos sem Sofrer (${currentSeasonForDetails})`; detailItems = gamesOfCurrentSeason.filter(g => (g.sportingGolosSofridos1P || 0) + (g.sportingGolosSofridos2P || 0) === 0); detailItems.sort(comparadorDeJogosEGolos); detailItemRenderer = renderGameListItem; break;
                 
-                case 'golos-marcados-total':
-                    detailTitle = `Todos Golos Marcados (${currentSeasonForDetails})`;
-                    detailItems = getAllGoalsFromGames(gamesOfCurrentSeason, 'marcado');
-                    detailItems.sort(comparadorDeJogosEGolos);
-                    detailItemRenderer = renderGoalListItem;
-                    break;
-                case 'golos-marcados-1p':
-                    detailTitle = `Golos Marcados na 1ª Parte (${currentSeasonForDetails})`;
-                    const goalsM1P = getAllGoalsFromGames(gamesOfCurrentSeason, 'marcado');
-                    detailItems = goalsM1P.filter(item => {
-                        const minuteValue = getGoalMinuteValue(item.goal);
-                        if (minuteValue === undefined) return false;
-                        const minute = parseInt(minuteValue, 10);
-                        return !isNaN(minute) && minute >= 0 && minute <= 45;
-                    });
-                    detailItems.sort(comparadorDeJogosEGolos);
-                    detailItemRenderer = renderGoalListItem;
-                    break;
-                case 'golos-marcados-2p':
-                    detailTitle = `Golos Marcados na 2ª Parte (${currentSeasonForDetails})`;
-                    const goalsM2P = getAllGoalsFromGames(gamesOfCurrentSeason, 'marcado');
-                    detailItems = goalsM2P.filter(item => {
-                        const minuteValue = getGoalMinuteValue(item.goal);
-                        if (minuteValue === undefined) return false;
-                        const minute = parseInt(minuteValue, 10);
-                        return !isNaN(minute) && minute > 45 && minute <= 90;
-                    });
-                    detailItems.sort(comparadorDeJogosEGolos);
-                    detailItemRenderer = renderGoalListItem;
-                    break;
-                case 'golos-sofridos-total':
-                    detailTitle = `Todos Golos Sofridos (${currentSeasonForDetails})`;
-                    detailItems = getAllGoalsFromGames(gamesOfCurrentSeason, 'sofrido');
-                    detailItems.sort(comparadorDeJogosEGolos);
-                    detailItemRenderer = renderGoalListItem;
-                    break;
-                case 'golos-sofridos-1p':
-                    detailTitle = `Golos Sofridos na 1ª Parte (${currentSeasonForDetails})`;
-                    const goalsS1P = getAllGoalsFromGames(gamesOfCurrentSeason, 'sofrido');
-                    detailItems = goalsS1P.filter(item => {
-                        const minuteValue = getGoalMinuteValue(item.goal);
-                        if (minuteValue === undefined) return false;
-                        const minute = parseInt(minuteValue, 10);
-                        return !isNaN(minute) && minute >= 0 && minute <= 45;
-                    });
-                    detailItems.sort(comparadorDeJogosEGolos);
-                    detailItemRenderer = renderGoalListItem;
-                    break;
-                case 'golos-sofridos-2p':
-                    detailTitle = `Golos Sofridos na 2ª Parte (${currentSeasonForDetails})`;
-                    const goalsS2P = getAllGoalsFromGames(gamesOfCurrentSeason, 'sofrido');
-                    detailItems = goalsS2P.filter(item => {
-                        const minuteValue = getGoalMinuteValue(item.goal);
-                        if (minuteValue === undefined) return false;
-                        const minute = parseInt(minuteValue, 10);
-                        return !isNaN(minute) && minute > 45 && minute <= 90;
-                    });
-                    detailItems.sort(comparadorDeJogosEGolos);
-                    detailItemRenderer = renderGoalListItem;
-                    break;
+                case 'golos-marcados-total': detailTitle = `Todos Golos Marcados (${currentSeasonForDetails})`; detailItems = getAllGoalsFromGames(gamesOfCurrentSeason, 'marcado'); detailItems.sort(comparadorDeJogosEGolos); detailItemRenderer = renderGoalListItem; break;
+                case 'golos-marcados-1p': detailTitle = `Golos Marcados na 1ª Parte (${currentSeasonForDetails})`; detailItems = getAllGoalsFromGames(gamesOfCurrentSeason, 'marcado').filter(item => { const minute = getCleanMinute(item.goal); return minute !== null && minute >= 0 && minute <= 45; }); detailItems.sort(comparadorDeJogosEGolos); detailItemRenderer = renderGoalListItem; break;
+                case 'golos-marcados-2p': detailTitle = `Golos Marcados na 2ª Parte (${currentSeasonForDetails})`; detailItems = getAllGoalsFromGames(gamesOfCurrentSeason, 'marcado').filter(item => { const minute = getCleanMinute(item.goal); return minute !== null && minute > 45; }); detailItems.sort(comparadorDeJogosEGolos); detailItemRenderer = renderGoalListItem; break;
+                case 'golos-sofridos-total': detailTitle = `Todos Golos Sofridos (${currentSeasonForDetails})`; detailItems = getAllGoalsFromGames(gamesOfCurrentSeason, 'sofrido'); detailItems.sort(comparadorDeJogosEGolos); detailItemRenderer = renderGoalListItem; break;
+                case 'golos-sofridos-1p': detailTitle = `Golos Sofridos na 1ª Parte (${currentSeasonForDetails})`; detailItems = getAllGoalsFromGames(gamesOfCurrentSeason, 'sofrido').filter(item => { const minute = getCleanMinute(item.goal); return minute !== null && minute >= 0 && minute <= 45; }); detailItems.sort(comparadorDeJogosEGolos); detailItemRenderer = renderGoalListItem; break;
+                case 'golos-sofridos-2p': detailTitle = `Golos Sofridos na 2ª Parte (${currentSeasonForDetails})`; detailItems = getAllGoalsFromGames(gamesOfCurrentSeason, 'sofrido').filter(item => { const minute = getCleanMinute(item.goal); return minute !== null && minute > 45; }); detailItems.sort(comparadorDeJogosEGolos); detailItemRenderer = renderGoalListItem; break;
 
-                case 'media-golos-marcados': case 'media-golos-marcados-1p': case 'media-golos-marcados-2p':
-                case 'media-golos-sofridos': case 'media-golos-sofridos-1p': case 'media-golos-sofridos-2p':
-                    detailTitle = `Jogos Considerados para ${statElement.closest('.stat-item-group, .stat-item').querySelector('.stat-label').textContent.replace(':', '')} (${currentSeasonForDetails})`;
-                    detailItems = [...gamesOfCurrentSeason];
+                case 'media-golos-marcados': case 'media-golos-marcados-1p': case 'media-golos-marcados-2p': case 'media-golos-sofridos': case 'media-golos-sofridos-1p': case 'media-golos-sofridos-2p':
+                    detailTitle = `Jogos Considerados para ${statElement.closest('.stat-item-group, .stat-item').querySelector('.stat-label').textContent.replace(':', '')} (${currentSeasonForDetails})`; detailItems = [...gamesOfCurrentSeason]; detailItems.sort(comparadorDeJogosEGolos); detailItemRenderer = renderGameListItem; break;
+                case 'resultado-comum': const commonResultText = resultadoComumSpan.textContent; detailTitle = `Jogos com Resultado(s): ${commonResultText} (${currentSeasonForDetails})`; detailItems = gamesOfCurrentSeason.filter(g => commonResultText.includes(g.resultadoFinal)); detailItems.sort(comparadorDeJogosEGolos); detailItemRenderer = renderGameListItem; break;
+                
+                // New cases for Resultados Comuns
+                case 'resultado-comum-casa-ft': detailTitle = `Resultado Comum (Casa/Final): ${statElement.textContent}`; detailItems = homeGames.filter(g => statElement.textContent.includes(g.resultadoFinal)); detailItemRenderer = renderGameListItem; break;
+                case 'resultado-comum-fora-ft': detailTitle = `Resultado Comum (Fora/Final): ${statElement.textContent}`; detailItems = awayGames.filter(g => statElement.textContent.includes(g.resultadoFinal)); detailItemRenderer = renderGameListItem; break;
+                case 'resultado-comum-casa-ht': detailTitle = `Resultado Comum (Casa/Intervalo): ${statElement.textContent}`; detailItems = homeGames.filter(g => statElement.textContent.includes(`${g.sportingGolosMarcados1P || 0}-${g.sportingGolosSofridos1P || 0}`)); detailItemRenderer = renderGameListItem; break;
+                case 'resultado-comum-fora-ht': detailTitle = `Resultado Comum (Fora/Intervalo): ${statElement.textContent}`; detailItems = awayGames.filter(g => statElement.textContent.includes(`${g.sportingGolosMarcados1P || 0}-${g.sportingGolosSofridos1P || 0}`)); detailItemRenderer = renderGameListItem; break;
+                case 'resultado-comum-casa-2p': detailTitle = `Resultado Comum (Casa/2ª Parte): ${statElement.textContent}`; detailItems = homeGames.filter(g => statElement.textContent.includes(`${g.sportingGolosMarcados2P || 0}-${g.sportingGolosSofridos2P || 0}`)); detailItemRenderer = renderGameListItem; break;
+                case 'resultado-comum-fora-2p': detailTitle = `Resultado Comum (Fora/2ª Parte): ${statElement.textContent}`; detailItems = awayGames.filter(g => statElement.textContent.includes(`${g.sportingGolosMarcados2P || 0}-${g.sportingGolosSofridos2P || 0}`)); detailItemRenderer = renderGameListItem; break;
+                
+                // New cases for Extremos e Reviravoltas
+                case 'melhor-resultado': case 'pior-resultado': case 'maior-margem': case 'reviravoltas-favor-1p': case 'reviravoltas-favor-2p': case 'reviravoltas-contra-1p': case 'reviravoltas-contra-2p':
+                    const gameIds = statElement.dataset.gameIds ? statElement.dataset.gameIds.split(',') : [];
+                    const labelElement = statElement.closest('.stat-item, .stat-sub-item');
+                    const labelText = labelElement ? (labelElement.querySelector('.stat-label, .stat-sub-label')?.textContent || statType) : statType;
+                    detailTitle = `Jogos: ${labelText.replace(':', '')} (${currentSeasonForDetails})`;
+                    detailItems = gamesOfCurrentSeason.filter(g => gameIds.includes(g.id));
                     detailItems.sort(comparadorDeJogosEGolos);
                     detailItemRenderer = renderGameListItem;
                     break;
-                case 'resultado-comum':
-                    const commonResultText = resultadoComumSpan.textContent;
-                    detailTitle = `Jogos com Resultado(s): ${commonResultText} (${currentSeasonForDetails})`;
-                    detailItems = gamesOfCurrentSeason.filter(g => commonResultText.includes(g.resultadoFinal));
-                    detailItems.sort(comparadorDeJogosEGolos);
-                    detailItemRenderer = renderGameListItem;
-                    break;
-                case 'goal-zone':
-                    const zoneName = statElement.dataset.zoneName;
-                    const goalKindZone = statElement.dataset.goalKind;
-                    detailTitle = `Golos ${goalKindZone === 'marcado' ? 'Marcados' : 'Sofridos'} na Zona: ${zoneName} (${currentSeasonForDetails})`;
-                    const allGoalsForZoneKind = getAllGoalsFromGames(gamesOfCurrentSeason, goalKindZone);
-                    detailItems = allGoalsForZoneKind.filter(item => {
-                        const firebaseZone = item.goal.details?.zona || item.goal.zona;
-                        const targetZone = globalZoneMappingRules[firebaseZone] || firebaseZone;
-                        return targetZone === zoneName;
-                    });
-                    detailItems.sort(comparadorDeJogosEGolos);
-                    detailItemRenderer = renderGoalListItem;
-                    break;
-                case 'goal-time-interval':
-                    const timeInterval = statElement.dataset.timeInterval;
-                    const timeGoalKind = statElement.dataset.goalKind;
-                    const [minMinuteStr, maxMinuteStr] = timeInterval.split('-');
-                    const minMinute = parseInt(minMinuteStr, 10);
-                    const maxMinute = parseInt(maxMinuteStr, 10);
-                    detailTitle = `Golos ${timeGoalKind === 'marcado' ? 'Marcados' : 'Sofridos'} no Intervalo: ${timeInterval}' (${currentSeasonForDetails})`;
-                    const allGoalsForTimeKind = getAllGoalsFromGames(gamesOfCurrentSeason, timeGoalKind);
-                    detailItems = allGoalsForTimeKind.filter(item => {
-                        const minuteValue = getGoalMinuteValue(item.goal);
-                        if (minuteValue === undefined) return false;
-                        const minute = parseInt(minuteValue, 10);
-                        if (isNaN(minute)) return false;
-                        if (timeInterval === "0-15") { 
-                            return minute >= 0 && minute <= 15;
-                        }
-                        return minute > minMinute && minute <= maxMinute;
-                    });
-                    detailItems.sort(comparadorDeJogosEGolos);
-                    detailItemRenderer = renderGoalListItem;
-                    break;
+                
+                case 'goal-zone': const zoneName = statElement.dataset.zoneName; const goalKindZone = statElement.dataset.goalKind; detailTitle = `Golos ${goalKindZone === 'marcado' ? 'Marcados' : 'Sofridos'} na Zona: ${zoneName} (${currentSeasonForDetails})`; const allGoalsForZoneKind = getAllGoalsFromGames(gamesOfCurrentSeason, goalKindZone); detailItems = allGoalsForZoneKind.filter(item => { const firebaseZone = item.goal.details?.zona || item.goal.zona; const targetZone = globalZoneMappingRules[firebaseZone] || firebaseZone; return targetZone === zoneName; }); detailItems.sort(comparadorDeJogosEGolos); detailItemRenderer = renderGoalListItem; break;
+                case 'goal-time-interval': const timeInterval = statElement.dataset.timeInterval; const timeGoalKind = statElement.dataset.goalKind; const [minMinuteStr, maxMinuteStr] = timeInterval.split('-'); const minMinuteRange = parseInt(minMinuteStr, 10); const maxMinuteRange = parseInt(maxMinuteStr, 10); detailTitle = `Golos ${timeGoalKind === 'marcado' ? 'Marcados' : 'Sofridos'} no Intervalo: ${timeInterval}' (${currentSeasonForDetails})`; const allGoalsForTimeKind = getAllGoalsFromGames(gamesOfCurrentSeason, timeGoalKind); detailItems = allGoalsForTimeKind.filter(item => { const minute = getCleanMinute(item.goal); if (minute === null) return false; if (timeInterval === "0-15") return minute >= 0 && minute <= 15; if (timeInterval === "15-30") return minute > 15 && minute <= 30; if (timeInterval === "30-45") return minute > 30 && minute <= 45; if (timeInterval === "45-60") return minute > 45 && minute <= 60; if (timeInterval === "60-75") return minute > 60 && minute <= 75; if (timeInterval === "75-90") return minute > 75; return false; }); detailItems.sort(comparadorDeJogosEGolos); detailItemRenderer = renderGoalListItem; break;
                 default: updateColumn3View("Detalhes Indisponíveis", [], null); return;
             }
             if (detailItemRenderer) { updateColumn3View(detailTitle, detailItems, detailItemRenderer); }
@@ -1022,13 +1375,36 @@
             equipasList.innerHTML = '<li>A carregar equipas...</li>';
             jogadoresList.innerHTML = '<li>A carregar jogadores...</li>';
 
+            if (popupCloseButton) { popupCloseButton.onclick = function() { gameDetailsPopup.style.display = "none"; } }
+            if (gameDetailsPopup) { window.onclick = function(event) { if (event.target == gameDetailsPopup) { gameDetailsPopup.style.display = "none"; } } }
+            
+            const column3DetailsListEl = document.getElementById('column3-details-list');
+            if (column3DetailsListEl) {
+                column3DetailsListEl.addEventListener('click', function(event) {
+                    const gameItemElement = event.target.closest('.detailed-list-item.game-item');
+                    if (gameItemElement) {
+                        const gameId = gameItemElement.dataset.gameId;
+                        if (gameId) {
+                            const gameData = allGames.find(g => g.id === gameId);
+                            if (gameData) {
+                                showGameDetailsPopup(gameData);
+                            } else {
+                                console.error('Popup: Game data not found for ID:', gameId);
+                                popupGameInfo.textContent = "Erro: Jogo não encontrado.";
+                                popupMatchHeader.style.display = 'none';
+                                popupTimelineEventsContainer.innerHTML = '';
+                                gameDetailsPopup.style.display = 'block';
+                            }
+                        }
+                    }
+                });
+            }
+
             try {
                 await Promise.all([fetchAllGames(), fetchAllTeams(), fetchAllPlayers()]);
-                
                 displayCalendar(allGames);
                 displayTeams(allTeams.filter(team => team.nome && !team.nome.toLowerCase().includes('sporting')));
                 displayPlayers(allPlayers);
-
                 populateSeasonDropdown(allGames);
             } catch (error) {
                 console.error("Initialization error:", error);
